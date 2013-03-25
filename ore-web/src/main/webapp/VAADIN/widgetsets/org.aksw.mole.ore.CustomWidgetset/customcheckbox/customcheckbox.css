@@ -1,0 +1,63 @@
+/* Off styles */
+
+.v-customcheckbox {
+	background: transparent url(img/off.png) no-repeat 1px 1px;
+	white-space: nowrap;
+	}
+
+.v-customcheckbox .v-icon {
+	vertical-align: middle;
+	}
+
+.v-customcheckbox-caption {
+	vertical-align: middle;
+	}
+
+.v-customcheckbox-wrap {
+	display: block;
+	padding-left: 21px;
+	line-height: 18px;
+	}
+
+.v-customcheckbox:focus {
+	background-image: url(img/off-focus.png);
+	background-position: 0 0;
+	outline: none;
+	}
+
+.v-customcheckbox:active,
+.v-pressed.v-customcheckbox {
+	background-image: url(img/off-down.png);
+	background-position: 1px 1px;
+	}
+
+
+/* On styles */
+.v-customcheckbox-checked,
+.v-customcheckbox-indeterminate {
+	background-image: url(img/on.png);
+	}
+	
+.v-customcheckbox-checked:focus,
+.v-customcheckbox-indeterminate:focus {
+	background-image: url(img/on-focus.png);
+	background-position: 0 0;
+	}
+
+.v-customcheckbox-checked:active,
+.v-pressed.v-customcheckbox-checked,
+.v-customcheckbox-indeterminate:active,
+.v-pressed.v-customcheckbox-indeterminate {
+	background-image: url(img/on-down.png);
+	background-position: 1px 1px;
+	}
+
+
+/* Indicators */
+.v-customcheckbox-checked .v-customcheckbox-wrap {
+	background: transparent url(img/checkmark.png) no-repeat 3px 1px;
+	}
+
+.v-customcheckbox-indeterminate .v-customcheckbox-wrap {
+	background: transparent url(img/indeterminate-mark.png) no-repeat 4px 7px;
+	}

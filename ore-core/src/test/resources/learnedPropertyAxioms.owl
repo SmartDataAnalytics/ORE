@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://dl-learner.org/enrichment/properties#"
+     xml:base="http://dl-learner.org/enrichment/properties"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://dl-learner.org/enrichment/properties"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/authority -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/authority">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Agent"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/EducationalInstitution"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Organisation"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/School"/>
+        <rdfs:domain rdf:resource="http://schema.org/EducationalOrganization"/>
+        <rdfs:domain rdf:resource="http://schema.org/Organization"/>
+        <rdfs:domain rdf:resource="http://schema.org/School"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/language -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/language">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/leaderFunction -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/leaderFunction">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Agent"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Organisation"/>
+        <rdfs:range rdf:resource="http://dbpedia.org/ontology/PersonFunction"/>
+        <rdfs:domain rdf:resource="http://schema.org/Organization"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/location -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/location">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/locationCity -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/locationCity">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/superintendent -->
+
+    <owl:ObjectProperty rdf:about="http://dbpedia.org/ontology/superintendent">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#IrreflexiveProperty"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Agent"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/EducationalInstitution"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Organisation"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/School"/>
+        <rdfs:domain rdf:resource="http://schema.org/EducationalOrganization"/>
+        <rdfs:domain rdf:resource="http://schema.org/Organization"/>
+        <rdfs:domain rdf:resource="http://schema.org/School"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/formationYear -->
+
+    <owl:DatatypeProperty rdf:about="http://dbpedia.org/ontology/formationYear">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/numberOfEmployees -->
+
+    <owl:DatatypeProperty rdf:about="http://dbpedia.org/ontology/numberOfEmployees">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Agent"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Company"/>
+        <rdfs:domain rdf:resource="http://dbpedia.org/ontology/Organisation"/>
+        <rdfs:domain rdf:resource="http://schema.org/Organization"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/Agent -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/Agent"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Company -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/Company"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/EducationalInstitution -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/EducationalInstitution"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Organisation -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/Organisation"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/PersonFunction -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/PersonFunction"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/School -->
+
+    <owl:Class rdf:about="http://dbpedia.org/ontology/School"/>
+    
+
+
+    <!-- http://schema.org/EducationalOrganization -->
+
+    <owl:Class rdf:about="http://schema.org/EducationalOrganization"/>
+    
+
+
+    <!-- http://schema.org/Organization -->
+
+    <owl:Class rdf:about="http://schema.org/Organization"/>
+    
+
+
+    <!-- http://schema.org/School -->
+
+    <owl:Class rdf:about="http://schema.org/School"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version [Not Released]) http://owlapi.sourceforge.net -->
+

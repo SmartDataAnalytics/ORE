@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1288824721253 "http://www.example.org/iswc/Ontology1288824721253.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.example.org/iswc/Ontology1288824721253.owl#"
+     xml:base="http://www.example.org/iswc/Ontology1288824721253.owl"
+     xmlns:Ontology1288824721253="http://www.example.org/iswc/Ontology1288824721253.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.example.org/iswc/Ontology1288824721253.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#hasTopic -->
+
+    <owl:ObjectProperty rdf:about="&Ontology1288824721253;hasTopic">
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#locatedIn -->
+
+    <owl:ObjectProperty rdf:about="&Ontology1288824721253;locatedIn">
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#City -->
+
+    <owl:Class rdf:about="&Ontology1288824721253;City"/>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#Conference -->
+
+    <owl:Class rdf:about="&Ontology1288824721253;Conference"/>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#Country -->
+
+    <owl:Class rdf:about="&Ontology1288824721253;Country"/>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC -->
+
+    <owl:Class rdf:about="&Ontology1288824721253;ISWC">
+        <rdfs:subClassOf rdf:resource="&Ontology1288824721253;Conference"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#Topic -->
+
+    <owl:Class rdf:about="&Ontology1288824721253;Topic"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ATHENS -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ATHENS">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;USA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#BUSAN -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;BUSAN">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;SOUTH_KOREA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#CHANTILLY -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;CHANTILLY">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;USA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#CHINA -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;CHINA">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#GALWAY -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;GALWAY">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;IRELAND"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#GERMANY -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;GERMANY">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#HIROSHIMA -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;HIROSHIMA">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;JAPAN"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#IRELAND -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;IRELAND">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2002 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2002">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2003 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2003">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2004 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2004">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2005 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2005">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2006 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2006">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2007 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2007">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2008 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2008">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2009 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2009">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ISWC2010 -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ISWC2010">
+        <rdf:type rdf:resource="&Ontology1288824721253;ISWC"/>
+        <hasTopic rdf:resource="&Ontology1288824721253;SEMANTIC_WEB"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#ITALY -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;ITALY">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#JAPAN -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;JAPAN">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#KARLSRUHE -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;KARLSRUHE">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;GERMANY"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#SANIBEL_ISLAND -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;SANIBEL_ISLAND">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;USA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#SARDINIA -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;SARDINIA">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;ITALY"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#SEMANTIC_WEB -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;SEMANTIC_WEB">
+        <rdf:type rdf:resource="&Ontology1288824721253;Topic"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#SHANGHAI -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;SHANGHAI">
+        <rdf:type rdf:resource="&Ontology1288824721253;City"/>
+        <locatedIn rdf:resource="&Ontology1288824721253;CHINA"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#SOUTH_KOREA -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;SOUTH_KOREA">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.example.org/iswc/Ontology1288824721253.owl#USA -->
+
+    <owl:NamedIndividual rdf:about="&Ontology1288824721253;USA">
+        <rdf:type rdf:resource="&Ontology1288824721253;Country"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1469) http://owlapi.sourceforge.net -->
+

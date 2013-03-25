@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY unsatisfiability "http://www.example.org/iswc/unsatisfiability.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.example.org/iswc/unsatisfiability.owl#"
+     xml:base="http://www.example.org/iswc/unsatisfiability.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:unsatisfiability="http://www.example.org/iswc/unsatisfiability.owl#">
+    <owl:Ontology rdf:about="http://www.example.org/iswc/unsatisfiability.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#hasEvent -->
+
+    <owl:ObjectProperty rdf:about="&unsatisfiability;hasEvent">
+        <rdfs:range rdf:resource="&unsatisfiability;Event"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topObjectProperty -->
+
+    <owl:ObjectProperty rdf:about="&owl;topObjectProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#Conference -->
+
+    <owl:Class rdf:about="&unsatisfiability;Conference"/>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#Event -->
+
+    <owl:Class rdf:about="&unsatisfiability;Event"/>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#ISWC -->
+
+    <owl:Class rdf:about="&unsatisfiability;ISWC">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;SmallConference"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom rdf:resource="&unsatisfiability;Tutorial"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom rdf:resource="&unsatisfiability;Workshop"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#LargeConference -->
+
+    <owl:Class rdf:about="&unsatisfiability;LargeConference">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;Conference"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom rdf:resource="&unsatisfiability;Presentation"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom rdf:resource="&unsatisfiability;Tutorial"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom rdf:resource="&unsatisfiability;Workshop"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#Presentation -->
+
+    <owl:Class rdf:about="&unsatisfiability;Presentation">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;Event"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#SmallConference -->
+
+    <owl:Class rdf:about="&unsatisfiability;SmallConference">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;Conference"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:complementOf>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&unsatisfiability;hasEvent"/>
+                        <owl:someValuesFrom>
+                            <owl:Class>
+                                <owl:unionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&unsatisfiability;Tutorial"/>
+                                    <rdf:Description rdf:about="&unsatisfiability;Workshop"/>
+                                </owl:unionOf>
+                            </owl:Class>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:complementOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#Tutorial -->
+
+    <owl:Class rdf:about="&unsatisfiability;Tutorial">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;Event"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.example.org/iswc/unsatisfiability.owl#Workshop -->
+
+    <owl:Class rdf:about="&unsatisfiability;Workshop">
+        <rdfs:subClassOf rdf:resource="&unsatisfiability;Event"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1469) http://owlapi.sourceforge.net -->
+

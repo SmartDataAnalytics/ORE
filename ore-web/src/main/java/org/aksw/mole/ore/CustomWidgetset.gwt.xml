@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+    "-//Google Inc.//DTD Google Web Toolkit 1.7.0//EN"
+    "http://google-web-toolkit.googlecode.com/svn/tags/1.7.0/distro-source/core/src/gwt-module.dtd">
+<module>
+    <inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+ 	<inherits name="org.vaadin.sasha.portallayout.PortallayoutWidgetset" />
+
+    <inherits name="org.vaadin.easyuploads.EasyuploadsWidgetset" />
+    <inherits name="com.github.wolfie.refresher.RefresherApplicationWidgetset" />
+    <inherits name="org.vaadin.risto.stepper.widgetset.StepperWidgetset" />
+     <inherits name="org.vaadin.jonatan.contexthelp.widgetset.ContexthelpWidgetset" />
+     <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
+    
+
+    <inherits name="com.vaadin.incubator.customcheckbox.widgetset.CustomCheckboxApplicationWidgetset" />
+    
+
+    <inherits name="org.vaadin.overlay.OverlaysWidgetset" />
+
+    <inherits name="org.vaadin.henrik.superimmediatetextfield.SuperimmediatetextfieldApplicationWidgetset" />
+</module>
