@@ -18,6 +18,7 @@ public class ExplanationCache {
 	private ExplanationType explanationType;
 	private Map<OWLAxiom, Set<Explanation<OWLAxiom>>> cache = new HashMap<OWLAxiom, Set<Explanation<OWLAxiom>>>();
 	private Multiset<OWLAxiom> explanationAxioms = HashMultiset.create();
+	private Set<OWLAxiom> allFound = new HashSet<OWLAxiom>();
 
 	public ExplanationCache(ExplanationType explanationType) {
 		this.explanationType = explanationType;
@@ -74,8 +75,17 @@ public class ExplanationCache {
 		return max;
 	}
 	
+	public void setAllExplanationsFound(OWLAxiom entailment){
+		allFound.add(entailment);
+	}
+	
+	public boolean allExplanationsFound(OWLAxiom entailment){
+		return allFound.contains(entailment);
+	}
+	
 	public void clear(){
 		cache.clear();
+		allFound.clear();
 	}
 
 }

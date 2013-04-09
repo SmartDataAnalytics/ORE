@@ -16,8 +16,8 @@ public class JustificationClustering {
 	}
 	
 	public void run(){
-//		OWLOntologyDataset dataset = new TONESDataset();
-		OWLOntologyDataset dataset = new BioPortalDataset();
+		OWLOntologyDataset dataset = new TONESDataset();
+//		OWLOntologyDataset dataset = new BioPortalDataset();
 		Collection<OWLOntology> ontologies = dataset.loadOntologies();
 	}
 	

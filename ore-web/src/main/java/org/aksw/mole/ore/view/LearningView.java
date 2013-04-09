@@ -10,6 +10,8 @@ import org.aksw.mole.ore.LearningManager;
 import org.aksw.mole.ore.OREApplication;
 import org.aksw.mole.ore.UserSession;
 import org.aksw.mole.ore.model.Individual;
+import org.aksw.mole.ore.model.Knowledgebase;
+import org.aksw.mole.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.mole.ore.util.Renderer;
 import org.aksw.mole.ore.util.Renderer.Syntax;
 import org.aksw.mole.ore.widget.IndividualsTable;
@@ -159,7 +161,12 @@ public class LearningView extends AbstractView<HorizontalSplitPanel>{
 		falseNegativesTable.removeAllItems();
 		falsePositivesTable.removeAllItems();
 		tree.removeAllItems();
-		setRootClasses();
+		Knowledgebase knowledgebase = UserSession.getKnowledgebaseManager().getKnowledgebase();
+		if(knowledgebase instanceof OWLOntologyKnowledgebase){
+			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()){
+				setRootClasses();
+			}
+		}
 	}
 	
 	private void setRootClasses(){

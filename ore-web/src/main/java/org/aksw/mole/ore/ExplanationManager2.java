@@ -1,6 +1,7 @@
 package org.aksw.mole.ore;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,8 +16,11 @@ import org.aksw.mole.ore.explanation.impl.laconic.RemainingAxiomPartsGenerator;
 import org.aksw.mole.ore.rootderived.RootClassFinder;
 import org.aksw.mole.ore.rootderived.StructureBasedRootClassFinder;
 import org.apache.log4j.Logger;
+import org.dllearner.core.KnowledgeSource;
 import org.dllearner.core.owl.Individual;
+import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
+import org.dllearner.reasoning.PelletReasoner;
 import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owl.explanation.api.ExplanationGeneratorFactory;
@@ -28,6 +32,7 @@ import org.semanticweb.owl.explanation.impl.blackbox.checker.InconsistentOntolog
 import org.semanticweb.owl.explanation.impl.blackbox.checker.SatisfiabilityEntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.laconic.LaconicExplanationGeneratorFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -39,6 +44,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
 
 import com.clarkparsia.owlapi.explanation.GlassBoxExplanation;
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
@@ -129,10 +135,13 @@ public class ExplanationManager2 {
 		long startTime = System.currentTimeMillis();
 		ExplanationCache cache = explanationType2Cache.get(type);
 		Set<Explanation<OWLAxiom>> explanations = cache.getExplanations(entailment, limit);
-		if(explanations == null){
+		if(explanations == null || !cache.allExplanationsFound(entailment)){
 			ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = getExplanationGeneratorFactory();
 			explanations = explanationGeneratorFactory.createExplanationGenerator(ontology).getExplanations(entailment, limit);
 			cache.addExplanations(entailment, explanations);
+			if(explanations.size() < limit){
+				cache.setAllExplanationsFound(entailment);
+			}
 		}
 		logger.info("Got " + explanations.size() + " explanations in " + (System.currentTimeMillis()-startTime) + "ms.");
 		return explanations;
@@ -305,17 +314,31 @@ public class ExplanationManager2 {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 		String ontologyURL = "http://owl.cs.manchester.ac.uk/repository/download?ontology=http://www.co-ode.org/ontologies/pizza/pizza.owl&format=OWL/XML";
+		ontologyURL = "file:/home/me/work/ORE_old/ore-core/dataset/BioPortal/inconsistent/Influenza+Ontology";
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory dataFactory = man.getOWLDataFactory();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+		System.out.println(ontology.getLogicalAxiomCount());
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
 		
 		ExplanationManager2 manager = new ExplanationManager2(reasoner, reasonerFactory);
-		for(OWLClass cls : manager.getUnsatisfiableClasses()){
-			System.out.println(manager.getUnsatisfiabilityExplanations(cls));
+		manager.setExplanationLimit(2);
+		Set<Explanation<OWLAxiom>> inconsistencyExplanations = manager.getInconsistencyExplanations();
+		for (Explanation<OWLAxiom> explanation : inconsistencyExplanations) {
+			for (OWLAxiom axiom : explanation.getAxioms()) {
+				System.out.println(axiom);
+				for(OWLOntology importedOntology : ontology.getImports()){
+					if(importedOntology.containsAxiom(axiom, true)){
+						System.out.println(importedOntology);
+					} 
+				}
+				
+			}
 		}
+		
 	}
 	
 }

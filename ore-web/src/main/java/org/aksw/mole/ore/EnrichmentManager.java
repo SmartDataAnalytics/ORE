@@ -1,5 +1,7 @@
 package org.aksw.mole.ore;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URLDecoder;
@@ -7,10 +9,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.aksw.mole.ore.exception.OREException;
@@ -61,10 +64,12 @@ import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.Syntax;
-
 public class EnrichmentManager {
+	
+	enum QueryMode {
+		ITERATIVE,
+		SINGLE
+	}
 	
 	private List<Class<? extends LearningAlgorithm>> objectPropertyAlgorithms;
 	private List<Class<? extends LearningAlgorithm>> dataPropertyAlgorithms;
@@ -86,6 +91,7 @@ public class EnrichmentManager {
 	private double threshold = 0.75;
 	private int maxNrOfReturnedAxioms = 5;
 	private boolean useInference;
+	private QueryMode queryMode = QueryMode.ITERATIVE;
 	
 	private List<AxiomType> axiomTypes;
 	
@@ -95,6 +101,9 @@ public class EnrichmentManager {
 	private LearningAlgorithm currentAlgorithm;
 	
 	private boolean isRunning = false;
+	
+	private Map<AxiomType, AbstractAxiomLearningAlgorithm> learningAlgorithmInstances = new HashMap<AxiomType, AbstractAxiomLearningAlgorithm>();
+	
 	
 	public EnrichmentManager(SparqlEndpoint endpoint, ExtractionDBCache cache) {
 		this.endpoint = endpoint;
@@ -152,6 +161,20 @@ public class EnrichmentManager {
 		axiomType2Class.put(AxiomType.DATA_PROPERTY_DOMAIN, DataPropertyDomainAxiomLearner.class);
 		axiomType2Class.put(AxiomType.DATA_PROPERTY_RANGE, DataPropertyRangeAxiomLearner.class);
 		axiomType2Class.put(AxiomType.FUNCTIONAL_DATA_PROPERTY, FunctionalDataPropertyAxiomLearner.class);
+		
+		loadProperties();
+	}
+	
+	private void loadProperties(){
+		try {
+			InputStream is = getClass().getResourceAsStream("/enrichment.properties" );
+			Properties properties = new Properties();
+			properties.load(is);
+			queryMode = QueryMode.valueOf(properties.getProperty("query.mode").toUpperCase());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public SparqlEndpoint getEndpoint() {
@@ -258,59 +281,6 @@ public class EnrichmentManager {
 		}
 	}
 	
-	public List<EvaluatedAxiom> getEvaluatedAxioms(String resourceURI, ResourceType resourceType, AxiomType axiomType, int maxExecutionTimeInSeconds, double threshold, boolean useInference) throws OREException{
-		return getEvaluatedAxioms(resourceURI, resourceType, Collections.singletonList(axiomType), maxExecutionTimeInSeconds, threshold, useInference);
-	}
-	
-	public List<EvaluatedAxiom> getEvaluatedAxioms(String resourceURI, ResourceType resourceType, List<AxiomType> axiomTypes, int maxExecutionTimeInSeconds, double threshold, boolean useInference) throws OREException{
-		this.axiomTypes = axiomTypes;
-		if(!isRunning){
-			isRunning = true;
-			learnedAxioms = new ArrayList<EvaluatedAxiom>();
-			
-			try {
-				// common helper objects
-				SPARQLTasks st = new SPARQLTasks(endpoint);
-				
-				currentEntity = getEntity(resourceURI, resourceType);
-				if(currentEntity == null){
-					currentEntity = st.guessResourceType(resourceURI, true);
-				} 
-				
-				SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
-				ks.init();
-				
-				//check if endpoint supports SPARQL 1.1
-				boolean supportsSPARQL_1_1 = st.supportsSPARQL_1_1();
-				ks.setSupportsSPARQL_1_1(supportsSPARQL_1_1);
-				
-				if(useInference && !reasoner.isPrepared()){
-					System.out.print("Precomputing subsumption hierarchy ... ");
-					long startTime = System.currentTimeMillis();
-					reasoner.prepareSubsumptionHierarchy();
-					System.out.println("done in " + (System.currentTimeMillis() - startTime) + " ms");
-				}
-				
-				if(currentEntity instanceof ObjectProperty) {
-					runObjectPropertyAlgorithms(ks, (ObjectProperty) currentEntity);
-				} else if(currentEntity instanceof DatatypeProperty) {
-					runDataPropertyAlgorithms(ks, (DatatypeProperty) currentEntity);
-				} else if(currentEntity instanceof NamedClass) {
-					runClassLearningAlgorithms(ks, (NamedClass) currentEntity);				
-				} else {
-					throw new OREException(new Exception("The type " + currentEntity.getClass() + " of resource " + currentEntity + " cannot be handled by this enrichment tool."));
-				}
-			} catch (ComponentInitException e) {
-				e.printStackTrace();
-				throw new OREException();
-			}
-			isRunning = false;
-		}
-		
-		
-		return learnedAxioms;
-	}
-	
 	public List<EvaluatedAxiom> getEvaluatedAxioms2(String resourceURI, ResourceType resourceType, AxiomType axiomType, int maxExecutionTimeInSeconds, double threshold, boolean useInference) throws OREException{
 			List<EvaluatedAxiom> learnedAxioms = new ArrayList<EvaluatedAxiom>();
 			
@@ -336,7 +306,7 @@ public class EnrichmentManager {
 					reasoner.prepareSubsumptionHierarchy();
 					System.out.println("done in " + (System.currentTimeMillis() - startTime) + " ms");
 				}
-				learnedAxioms = applyLearningAlgorithm2(axiomType2Class.get(axiomType), ks, currentEntity);
+				learnedAxioms = applyLearningAlgorithm2(axiomType, ks, currentEntity);
 				
 			} catch (ComponentInitException e) {
 				e.printStackTrace();
@@ -372,7 +342,7 @@ public class EnrichmentManager {
 				reasoner.prepareSubsumptionHierarchy();
 				System.out.println("done in " + (System.currentTimeMillis() - startTime) + " ms");
 			}
-			learnedAxioms = applyLearningAlgorithm2(axiomType2Class.get(axiomType), ks, currentEntity);
+			learnedAxioms = applyLearningAlgorithm2(axiomType, ks, currentEntity);
 			
 		} catch (ComponentInitException e) {
 			e.printStackTrace();
@@ -383,53 +353,7 @@ public class EnrichmentManager {
 	return learnedAxioms;
 }
 	
-	public List<EvaluatedAxiom> getEvaluatedAxioms(String resourceURI, ResourceType resourceType, int maxExecutionTimeInSeconds, double threshold, boolean useInference) throws OREException{
-		if(!isRunning){
-			isRunning = true;
-			learnedAxioms = new ArrayList<EvaluatedAxiom>();
-			
-			try {
-				// common helper objects
-				SPARQLTasks st = new SPARQLTasks(endpoint);
-				
-				currentEntity = getEntity(resourceURI, resourceType);
-				if(currentEntity == null){
-					currentEntity = st.guessResourceType(resourceURI, true);
-				} 
-				
-				SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
-				ks.init();
-				
-				//check if endpoint supports SPARQL 1.1
-				boolean supportsSPARQL_1_1 = st.supportsSPARQL_1_1();
-				ks.setSupportsSPARQL_1_1(supportsSPARQL_1_1);
-				
-				if(useInference && !reasoner.isPrepared()){
-					System.out.print("Precomputing subsumption hierarchy ... ");
-					long startTime = System.currentTimeMillis();
-					reasoner.prepareSubsumptionHierarchy();
-					System.out.println("done in " + (System.currentTimeMillis() - startTime) + " ms");
-				}
-				
-				if(currentEntity instanceof ObjectProperty) {
-					runObjectPropertyAlgorithms(ks, (ObjectProperty) currentEntity);
-				} else if(currentEntity instanceof DatatypeProperty) {
-					runDataPropertyAlgorithms(ks, (DatatypeProperty) currentEntity);
-				} else if(currentEntity instanceof NamedClass) {
-					runClassLearningAlgorithms(ks, (NamedClass) currentEntity);				
-				} else {
-					throw new OREException(new Exception("The type " + currentEntity.getClass() + " of resource " + currentEntity + " cannot be handled by this enrichment tool."));
-				}
-			} catch (ComponentInitException e) {
-				e.printStackTrace();
-				throw new OREException();
-			}
-			isRunning = false;
-		}
-		
-		
-		return learnedAxioms;
-	}
+	
 	@SuppressWarnings("unchecked")
 	private void runClassLearningAlgorithms(SparqlEndpointKS ks, NamedClass nc) throws ComponentInitException {
 //		System.out.println("Running algorithms for class " + nc);
@@ -477,6 +401,7 @@ public class EnrichmentManager {
 //		if(reasoner != null){
 			((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
 //		}
+			((AbstractAxiomLearningAlgorithm)learner).setForceSPARQL_1_0_Mode(queryMode == QueryMode.ITERATIVE);
 		learner.init();
 		String algName = AnnComponentManager.getName(learner);
 		System.out.print("Applying " + algName + " on " + entity + " ... ");
@@ -499,7 +424,9 @@ public class EnrichmentManager {
 		return learnedAxioms;
 	}
 	
-	private List<EvaluatedAxiom> applyLearningAlgorithm2(Class<? extends LearningAlgorithm> algorithmClass, SparqlEndpointKS ks, Entity entity) throws ComponentInitException {
+	private List<EvaluatedAxiom> applyLearningAlgorithm2(AxiomType axiomType, SparqlEndpointKS ks, Entity entity) throws ComponentInitException {
+		
+		Class<? extends LearningAlgorithm> algorithmClass = axiomType2Class.get(axiomType);
 		AxiomLearningAlgorithm learner = null;
 		try {
 			learner = (AxiomLearningAlgorithm)algorithmClass.getConstructor(
@@ -517,6 +444,7 @@ public class EnrichmentManager {
 //		if(reasoner != null){
 			((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
 //		}
+			((AbstractAxiomLearningAlgorithm)learner).setForceSPARQL_1_0_Mode(queryMode == QueryMode.ITERATIVE);
 		learner.init();
 		String algName = AnnComponentManager.getName(learner);
 		System.out.print("Applying " + algName + " on " + entity + " ... ");
@@ -535,7 +463,16 @@ public class EnrichmentManager {
 		List<EvaluatedAxiom> learnedAxioms = learner
 				.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
 		System.out.println(prettyPrint(learnedAxioms));
+		learningAlgorithmInstances.put(axiomType, la);
 		return learnedAxioms;
+	}
+	
+	public void getFalsePositives(AxiomType axiomType, EvaluatedAxiom axiom){
+		
+	}
+
+	public void getFalseNegatives(AxiomType axiomType, EvaluatedAxiom axiom){
+		
 	}
 	
 

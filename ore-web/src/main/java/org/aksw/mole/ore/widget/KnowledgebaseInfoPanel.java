@@ -51,10 +51,10 @@ public class KnowledgebaseInfoPanel extends VerticalLayout{
 	
 	private void visualizeOntology(OWLOntologyKnowledgebase kb){
 		OWLOntology ontology = kb.getOntology();
-		int nrOfClasses = ontology.getClassesInSignature().size();
-		int nrOfObjectProperties = ontology.getObjectPropertiesInSignature().size();
-		int nrOfDataProperties = ontology.getDataPropertiesInSignature().size();
-		int nrOfIndividuals = ontology.getIndividualsInSignature().size();
+		int nrOfClasses = ontology.getClassesInSignature(true).size();
+		int nrOfObjectProperties = ontology.getObjectPropertiesInSignature(true).size();
+		int nrOfDataProperties = ontology.getDataPropertiesInSignature(true).size();
+		int nrOfIndividuals = ontology.getIndividualsInSignature(true).size();
 		OWLProfileReport report = new OWL2Profile().checkOntology(ontology);
 		OWLProfile profile = report.getProfile();
 		
