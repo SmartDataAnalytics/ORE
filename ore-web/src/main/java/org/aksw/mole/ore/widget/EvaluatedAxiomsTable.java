@@ -64,7 +64,7 @@ public class EvaluatedAxiomsTable extends Table{
 	
 	private Renderer renderer = new Renderer();
 	
-	public EvaluatedAxiomsTable(AxiomType axiomType, Collection<EvaluatedAxiom> axioms) {
+	public EvaluatedAxiomsTable(final AxiomType axiomType, Collection<EvaluatedAxiom> axioms) {
 		this.axiomType = axiomType;
 		
 		setSizeFull();
@@ -112,7 +112,7 @@ public class EvaluatedAxiomsTable extends Table{
 		addGeneratedColumn("Accuracy", new ColumnGenerator() {
 			
 			@Override
-			public Object generateCell(Table source, Object itemId, Object columnId) {
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
 				
 				HorizontalLayout cell = new HorizontalLayout();
 				cell.setWidth("100%");
@@ -133,7 +133,7 @@ public class EvaluatedAxiomsTable extends Table{
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						System.out.println("Click");
+						getApplication().getMainWindow().addWindow(new AxiomScoreExplanationDialog(axiomType, (EvaluatedAxiom)itemId));
 					}
 				});
 				buttons.addComponent(posExampleButton);
@@ -191,7 +191,7 @@ public class EvaluatedAxiomsTable extends Table{
 			explanationPattern = ScoreExplanationPattern.getGenericPattern();
 		}
 		explanationPattern = explanationPattern.replace("$total", "<b>" + String.valueOf(score.getTotalNrOfExamples()) + "</b>");
-		explanationPattern = explanationPattern.replace("$pos", "<b>" + String.valueOf(score.getNrOfpositiveExamples()) + "</b>");
+		explanationPattern = explanationPattern.replace("$pos", "<b>" + String.valueOf(score.getNrOfPositiveExamples()) + "</b>");
 		Axiom axiom = evAxiom.getAxiom();
 		OWLAxiom owlAxiom = OWLAPIConverter.getOWLAPIAxiom(axiom);
 		String prop1 = null;

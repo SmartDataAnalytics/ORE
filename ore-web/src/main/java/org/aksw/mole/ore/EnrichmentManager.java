@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.aksw.mole.ore.exception.OREException;
@@ -37,6 +38,7 @@ import org.dllearner.algorithms.properties.FunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.InverseFunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.IrreflexiveObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
+import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner2;
 import org.dllearner.algorithms.properties.ObjectPropertyRangeAxiomLearner;
 import org.dllearner.algorithms.properties.ReflexiveObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.SubDataPropertyOfAxiomLearner;
@@ -52,6 +54,7 @@ import org.dllearner.core.LearningAlgorithm;
 import org.dllearner.core.config.ConfigHelper;
 import org.dllearner.core.owl.DatatypeProperty;
 import org.dllearner.core.owl.Entity;
+import org.dllearner.core.owl.KBElement;
 import org.dllearner.core.owl.NamedClass;
 import org.dllearner.core.owl.ObjectProperty;
 import org.dllearner.kb.SparqlEndpointKS;
@@ -118,7 +121,7 @@ public class EnrichmentManager {
 		objectPropertyAlgorithms.add(SubObjectPropertyOfAxiomLearner.class);
 		objectPropertyAlgorithms.add(FunctionalObjectPropertyAxiomLearner.class);
 		objectPropertyAlgorithms.add(InverseFunctionalObjectPropertyAxiomLearner.class);
-		objectPropertyAlgorithms.add(ObjectPropertyDomainAxiomLearner.class);
+		objectPropertyAlgorithms.add(ObjectPropertyDomainAxiomLearner2.class);
 		objectPropertyAlgorithms.add(ObjectPropertyRangeAxiomLearner.class);
 		objectPropertyAlgorithms.add(SymmetricObjectPropertyAxiomLearner.class);
 		objectPropertyAlgorithms.add(AsymmetricObjectPropertyAxiomLearner.class);
@@ -463,16 +466,20 @@ public class EnrichmentManager {
 		List<EvaluatedAxiom> learnedAxioms = learner
 				.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
 		System.out.println(prettyPrint(learnedAxioms));
-		learningAlgorithmInstances.put(axiomType, la);
+		learningAlgorithmInstances.put(axiomType, (AbstractAxiomLearningAlgorithm)learner);
 		return learnedAxioms;
 	}
 	
-	public void getFalsePositives(AxiomType axiomType, EvaluatedAxiom axiom){
-		
+	public Set<KBElement> getPositives(AxiomType axiomType, EvaluatedAxiom axiom){
+		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
+		Set<KBElement> positiveExamples = la.getPositiveExamples(axiom);
+		return positiveExamples;
 	}
 
-	public void getFalseNegatives(AxiomType axiomType, EvaluatedAxiom axiom){
-		
+	public Set<KBElement> getNegatives(AxiomType axiomType, EvaluatedAxiom axiom){
+		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
+		Set<KBElement> negativeExamples = la.getNegativeExamples(axiom);
+		return negativeExamples;
 	}
 	
 

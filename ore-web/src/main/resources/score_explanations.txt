@@ -2,9 +2,9 @@
 FunctionalObjectProperty|In $total triples where an individual x is connected by $prop1 to an individual y, there are $pos cases where y is unique.
 #FunctionalDataProperty| $pos out of $total subjects in triples using the property $prop1 have one unique value.
 FunctionalDataProperty|In $total triples where an individual x is connected by $prop1 to a value y, there are $pos cases where y is unique.
-ObjectPropertyDomain| In $total triples using the property $prop1, there are $pos cases in which the subject of the triple belongs to class $cls (without using inference).
-ObjectPropertyRange| In $total triples using the property $prop1, there are $pos cases in which the object of the triple belongs to class $cls (without using inference).
-DataPropertyDomain| In $total triples using the property $prop1, there are $pos cases in which the subject of the triple belongs to class $cls (without using inference).
+ObjectPropertyDomain| In $total triples using the property $prop1, there are $pos cases in which the subject of the triple belongs to class $cls1 (without using inference).
+ObjectPropertyRange| In $total triples using the property $prop1, there are $pos cases in which the object of the triple belongs to class $cls1 (without using inference).
+DataPropertyDomain| In $total triples using the property $prop1, there are $pos cases in which the subject of the triple belongs to class $cls1 (without using inference).
 DataPropertyRange| In $total triples using the property $prop1, there are $pos cases in which the object of the triple is of type $datatype (without using inference).
 SubObjectPropertyOf| In $total triples where an individual x is connected by $prop1 to an individual y, there are $pos cases where x is also connected by $prop2 to y.
 SubDataPropertyOf| In $total triples where an individual x is connected by $prop1 to an individual y, there are $pos cases where x is also connected by $prop2 to y.

@@ -122,7 +122,10 @@ public class OREApplication extends Application implements ParameterHandler, Win
 	public void handleParameters(Map<String, String[]> parameters) {
 		if(parameters.containsKey(ENDPOINT_URL)){
 			String endpointURL = URLParameters.decode(parameters.get(ENDPOINT_URL)[0]);
-			String graph = URLParameters.decode(parameters.get(DEFAULT_GRAPH_URI)[0]);
+			String graph = "";	
+			if (parameters.containsKey(DEFAULT_GRAPH_URI)) {
+				graph = URLParameters.decode(parameters.get(DEFAULT_GRAPH_URI)[0]);
+			}
 			List<String> defaultGraphURIs = new ArrayList<String>();
 			if(graph != null){
 				defaultGraphURIs.add(graph);

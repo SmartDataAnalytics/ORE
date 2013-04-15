@@ -40,10 +40,6 @@
 			<artifactId>json</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>sparql</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
 		</dependency>
