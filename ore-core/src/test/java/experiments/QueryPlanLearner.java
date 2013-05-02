@@ -3,7 +3,10 @@ package experiments;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
@@ -98,7 +101,7 @@ public class QueryPlanLearner {
 		//4. Ignore axioms
 		
 		// optimisation:
-		// option 1: reinformcement learning
+		// option 1: reinforcement learning
 		// option 2: save all fragments and remove until consistent
 		// option 3: percentage of axiom type in justifications
 		Multiset<String> axiomGenerators = TreeMultiset.create(); 
@@ -109,6 +112,11 @@ public class QueryPlanLearner {
 			do{
 				//compute an inconsistent fragment
 				Set<OWLAxiom> inconsistentFragment = inconsistencyFinder.getInconsistentFragment();
+				
+				// option 2: remove 
+				Set<OWLAxiom> inconsistentFragmentCopy = new TreeSet<OWLAxiom>(inconsistentFragment);
+				removeWhileInconsistent(inconsistentFragmentCopy);
+				// TODO: store axiom generators + average values over all fragments
 				
 				//compute the explanations for inconsistency in that fragment
 				Set<Explanation<OWLAxiom>> explanations = computeExplanations(inconsistentFragment, 10);
@@ -143,6 +151,33 @@ public class QueryPlanLearner {
 			System.out.println(gen + ": " + count + " = " + (count/total) + "%");
 		}
 		
+	}
+	
+	private void removeWhileInconsistent(Set<OWLAxiom> axioms) {
+		OWLAxiom ax;
+		do {
+			ax = removeRandomElementFromSet(axioms);
+		} while(!isConsistent(axioms));
+		axioms.add(ax);
+	}
+	
+	private OWLAxiom removeRandomElementFromSet(Set<OWLAxiom> s) {
+		int size = s.size();
+		int item = new Random().nextInt(size);
+		Iterator<OWLAxiom> it = s.iterator();
+		int i = 0;
+		while(it.hasNext()) {
+			if (i == item) {
+				it.remove();
+				return it.next();
+			}
+		    i = i + 1;
+		}
+		return null;
+	}
+	
+	private boolean isConsistent(Set<OWLAxiom> axioms) {
+		return true;
 	}
 	
 	private Multiset<OWLAxiom> computeAxiomFrequency(Set<Explanation<OWLAxiom>> explanations){
