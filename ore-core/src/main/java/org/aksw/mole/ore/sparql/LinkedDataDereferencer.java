@@ -100,4 +100,9 @@ public class LinkedDataDereferencer implements AxiomGenerator {
 		return ontology;
 	}
 
+	@Override
+	public int compareTo(AxiomGenerator other) {
+		return getClass().getName().compareTo(other.getClass().getName());
+	}
+
 }

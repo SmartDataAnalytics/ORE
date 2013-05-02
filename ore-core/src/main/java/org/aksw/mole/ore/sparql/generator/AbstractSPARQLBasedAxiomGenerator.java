@@ -124,6 +124,11 @@ public abstract class AbstractSPARQLBasedAxiomGenerator implements SPARQLBasedAx
 		}
 		return model;
 	}
+	
+	@Override
+	public int compareTo(AxiomGenerator other) {
+		return getClass().getName().compareTo(other.getClass().getName());
+	}
 
 
 }

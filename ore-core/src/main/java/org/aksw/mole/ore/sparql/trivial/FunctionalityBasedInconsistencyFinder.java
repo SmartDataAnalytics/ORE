@@ -23,6 +23,9 @@ import org.semanticweb.owlapi.model.OWLProperty;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
@@ -83,6 +86,16 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 		int offset = filterToOffset.containsKey(filter) ? filterToOffset.get(filter) : 0;
 		q.setOffset(offset);
 		Model model = executeConstructQuery(q);
+		StmtIterator stmtIterator = model.listStatements();
+		while(stmtIterator.hasNext()){
+			Statement next = stmtIterator.next();
+			if(next.getObject().toString().contains("http://dbpedia.org/datatype/usDollar")){
+				stmtIterator.remove();
+			}
+		}
+		for (RDFNode node : model.listObjects().toList()) {
+			System.out.println(node);
+		}
 		OWLOntology ontology = convert(model);
 		
 		Set<OWLAxiom> oldAxioms = ontology.getAxioms();

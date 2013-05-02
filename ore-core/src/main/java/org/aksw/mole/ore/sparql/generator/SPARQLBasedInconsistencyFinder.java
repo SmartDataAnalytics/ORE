@@ -143,7 +143,7 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 			}
 		}
 		
-		//create an helper which looks for trivial cases for inconsistency
+		//create a helper which looks for trivial cases for inconsistency
 		trivialInconsistencyFinder = new TrivialInconsistencyFinder(ks);
 		reset();
 	}
@@ -302,5 +302,10 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public int compareTo(AxiomGenerator o) {
+		return 0;
 	}
 }

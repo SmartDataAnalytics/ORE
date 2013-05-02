@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
 import org.aksw.mole.ore.sparql.InconsistencyFinder;
 import org.aksw.mole.ore.sparql.TimeOutException;
+import org.aksw.mole.ore.sparql.generator.AxiomGenerator;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
@@ -57,6 +58,11 @@ public class TrivialInconsistencyFinder implements InconsistencyFinder {
 	
 	public void setAxiomGenerationTracker(AxiomGenerationTracker tracker){
 		this.tracker = tracker;
+	}
+
+	@Override
+	public int compareTo(AxiomGenerator other) {
+		return getClass().getName().compareTo(other.getClass().getName());
 	}
 
 }
