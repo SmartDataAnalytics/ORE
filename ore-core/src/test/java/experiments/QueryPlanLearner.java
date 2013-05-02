@@ -9,11 +9,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
+import org.aksw.mole.ore.sparql.AxiomGenerationDistribution;
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.aksw.mole.ore.sparql.generator.AxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
 import org.aksw.mole.ore.util.HermiTReasonerFactory;
+import org.apache.commons.lang.NotImplementedException;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.ExtractionDBCache;
@@ -102,7 +104,10 @@ public class QueryPlanLearner {
 		
 		// optimisation:
 		// option 1: reinforcement learning
-		// option 2: save all fragments and remove until consistent
+		// option 2: save all fragments and remove while inconsistent
+		// 2a: random removal, 2b: minimal fragment / diagnosis
+		Set<AxiomGenerationDistribution> distributions = new HashSet<AxiomGenerationDistribution>();
+//		Map<AxiomGenerator,Double> 
 		// option 3: percentage of axiom type in justifications
 		Multiset<String> axiomGenerators = TreeMultiset.create(); 
 		
@@ -116,7 +121,7 @@ public class QueryPlanLearner {
 				// option 2: remove 
 				Set<OWLAxiom> inconsistentFragmentCopy = new TreeSet<OWLAxiom>(inconsistentFragment);
 				removeWhileInconsistent(inconsistentFragmentCopy);
-				// TODO: store axiom generators + average values over all fragments
+				distributions.add(new AxiomGenerationDistribution(tracker, inconsistentFragmentCopy));
 				
 				//compute the explanations for inconsistency in that fragment
 				Set<Explanation<OWLAxiom>> explanations = computeExplanations(inconsistentFragment, 10);
@@ -151,6 +156,10 @@ public class QueryPlanLearner {
 			System.out.println(gen + ": " + count + " = " + (count/total) + "%");
 		}
 		
+		// average frequency in obtained fragments (option 2)
+		AxiomGenerationDistribution agd = AxiomGenerationDistribution.computeAverage(distributions);
+		System.out.println(agd);
+		
 	}
 	
 	private void removeWhileInconsistent(Set<OWLAxiom> axioms) {
@@ -177,7 +186,7 @@ public class QueryPlanLearner {
 	}
 	
 	private boolean isConsistent(Set<OWLAxiom> axioms) {
-		return true;
+		throw new NotImplementedException("consistency check not implemented");
 	}
 	
 	private Multiset<OWLAxiom> computeAxiomFrequency(Set<Explanation<OWLAxiom>> explanations){
