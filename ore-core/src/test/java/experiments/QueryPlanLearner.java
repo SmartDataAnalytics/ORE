@@ -67,7 +67,7 @@ public class QueryPlanLearner {
 	
 	public QueryPlanLearner(SparqlEndpointKS ks) {
 		this.ks = ks;
-		
+			
 		//decide which reasoner we use here
 		reasonerFactory = PelletReasonerFactory.getInstance();
 //		reasonerFactory = new HermiTReasonerFactory();
@@ -97,6 +97,12 @@ public class QueryPlanLearner {
 		//3. Track by which query the axioms in the explanation were (first) generated
 		//4. Ignore axioms
 		
+		// optimisation:
+		// option 1: reinformcement learning
+		// option 2: save all fragments and remove until consistent
+		// option 3: percentage of axiom type in justifications
+		Multiset<String> axiomGenerators = TreeMultiset.create(); 
+		
 		try {
 			int iteration = 1;
 			Set<OWLAxiom> axiomsToIgnore = new HashSet<OWLAxiom>();
@@ -110,9 +116,12 @@ public class QueryPlanLearner {
 				//compute the frequency of each axiom in the set of explanations by simply adding all axioms to a multiset
 				Multiset<OWLAxiom> axiomsMultiset = computeAxiomFrequency(explanations);
 				
+				
 				//track the kind of query generator, which was used to generate each of the axioms occurring in the explanations
 				for (OWLAxiom axiom : axiomsMultiset.elementSet()) {
 					AxiomGenerator generator = tracker.generatedFirstBy(axiom);
+					axiomGenerators.add(generator.getClass().getName());
+//					generator.
 //					System.out.println(axiom + ": " + generator.getClass().getSimpleName());
 				}
 				
@@ -126,6 +135,14 @@ public class QueryPlanLearner {
 		} catch (TimeOutException e) {
 			System.err.println("Got timeout.");
 		}
+		
+		// print frequency of axiom generators in justifications (option 3)
+		int total = axiomGenerators.size();
+		for(String gen : axiomGenerators.elementSet()) {
+			int count = axiomGenerators.count(gen);
+			System.out.println(gen + ": " + count + " = " + (count/total) + "%");
+		}
+		
 	}
 	
 	private Multiset<OWLAxiom> computeAxiomFrequency(Set<Explanation<OWLAxiom>> explanations){
@@ -157,7 +174,7 @@ public class QueryPlanLearner {
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia(), new ExtractionDBCache("cache"));
+		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW(), new ExtractionDBCache("cache"));
 		QueryPlanLearner learner = new QueryPlanLearner(ks);
 		learner.start();
 	}
