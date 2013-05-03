@@ -176,10 +176,12 @@ public class QueryPlanLearner {
 		int item = new Random().nextInt(size);
 		Iterator<OWLAxiom> it = s.iterator();
 		int i = 0;
+		OWLAxiom axiom;
 		while(it.hasNext()) {
+			axiom = it.next();
 			if (i == item) {
 				it.remove();
-				return it.next();
+				return axiom;
 			}
 		    i = i + 1;
 		}
