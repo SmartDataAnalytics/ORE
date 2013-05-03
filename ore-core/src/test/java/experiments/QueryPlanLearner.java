@@ -36,6 +36,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
@@ -186,7 +187,13 @@ public class QueryPlanLearner {
 	}
 	
 	private boolean isConsistent(Set<OWLAxiom> axioms) {
-		throw new NotImplementedException("consistency check not implemented");
+		try {
+			OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(manager.createOntology(axioms));
+			return reasoner.isConsistent();
+		} catch (OWLOntologyCreationException e) {
+			e.printStackTrace();
+		}
+		return true;//will never happen
 	}
 	
 	private Multiset<OWLAxiom> computeAxiomFrequency(Set<Explanation<OWLAxiom>> explanations){
