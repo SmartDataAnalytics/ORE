@@ -112,6 +112,10 @@ public class QueryPlanLearner {
 		// option 3: percentage of axiom type in justifications
 		Multiset<String> axiomGenerators = TreeMultiset.create(); 
 		
+//		boolean useOption1 = false;
+		boolean useOption2 = false;
+		boolean useOption3 = true;
+		
 		try {
 			int iteration = 1;
 			Set<OWLAxiom> axiomsToIgnore = new HashSet<OWLAxiom>();
@@ -120,16 +124,17 @@ public class QueryPlanLearner {
 				Set<OWLAxiom> inconsistentFragment = inconsistencyFinder.getInconsistentFragment();
 				
 				// option 2: remove 
-				Set<OWLAxiom> inconsistentFragmentCopy = new TreeSet<OWLAxiom>(inconsistentFragment);
-				removeWhileInconsistent(inconsistentFragmentCopy);
-				distributions.add(new AxiomGenerationDistribution(tracker, inconsistentFragmentCopy));
+				if(useOption2) {
+					Set<OWLAxiom> inconsistentFragmentCopy = new TreeSet<OWLAxiom>(inconsistentFragment);
+					removeWhileInconsistent(inconsistentFragmentCopy);
+					distributions.add(new AxiomGenerationDistribution(tracker, inconsistentFragmentCopy));
+				}
 				
 				//compute the explanations for inconsistency in that fragment
 				Set<Explanation<OWLAxiom>> explanations = computeExplanations(inconsistentFragment, 10);
 				
 				//compute the frequency of each axiom in the set of explanations by simply adding all axioms to a multiset
 				Multiset<OWLAxiom> axiomsMultiset = computeAxiomFrequency(explanations);
-				
 				
 				//track the kind of query generator, which was used to generate each of the axioms occurring in the explanations
 				for (OWLAxiom axiom : axiomsMultiset.elementSet()) {
@@ -151,10 +156,12 @@ public class QueryPlanLearner {
 		}
 		
 		// print frequency of axiom generators in justifications (option 3)
-		int total = axiomGenerators.size();
-		for(String gen : axiomGenerators.elementSet()) {
-			int count = axiomGenerators.count(gen);
-			System.out.println(gen + ": " + count + " = " + (count/total) + "%");
+		if(useOption3) {
+			int total = axiomGenerators.size();
+			for(String gen : axiomGenerators.elementSet()) {
+				int count = axiomGenerators.count(gen);
+				System.out.println(gen + ": " + count + " = " + (count/total) + "%");
+			}
 		}
 		
 		// average frequency in obtained fragments (option 2)
