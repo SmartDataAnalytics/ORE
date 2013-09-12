@@ -15,8 +15,6 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 
 public class RepairManager {
 	
-	
-	
 	private Collection<OWLOntologyChange> repairPlan;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;

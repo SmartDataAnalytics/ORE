@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.aksw.commons.sparql.api.cache.core.QueryExecutionFactoryCache;
-import org.aksw.commons.sparql.api.cache.extra.CacheCoreH2;
-import org.aksw.commons.sparql.api.cache.extra.CacheImpl;
-import org.aksw.commons.sparql.api.core.QueryExecutionFactory;
-import org.aksw.commons.sparql.api.http.QueryExecutionFactoryHttp;
+import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCache;
+import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
+import org.aksw.jena_sparql_api.cache.extra.CacheImpl;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.mole.ore.explanation.api.Explanation;
 import org.aksw.mole.ore.explanation.impl.PelletExplanationGenerator;
 import org.apache.log4j.ConsoleAppender;

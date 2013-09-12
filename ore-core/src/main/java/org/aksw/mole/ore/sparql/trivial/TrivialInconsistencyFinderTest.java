@@ -31,7 +31,7 @@ public class TrivialInconsistencyFinderTest {
 
 	@Test
 	public void testGetInconsistentFragment() throws OWLOntologyCreationException {
-		InconsistencyFinder finder = new TrivialInconsistencyFinder(ks);
+		InconsistencyFinder finder = new SPARQLBasedTrivialInconsistencyFinder(ks);
 		Set<OWLAxiom> axioms;
 		try {
 			axioms = finder.getInconsistentFragment();

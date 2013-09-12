@@ -2,6 +2,7 @@ package org.aksw.mole.ore.validation.constraint;
 
 
 import org.dllearner.utilities.owl.OWLClassExpressionToSPARQLConverter;
+import org.dllearner.utilities.owl.VariablesMapping;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -39,7 +40,6 @@ import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
@@ -58,33 +58,39 @@ import org.semanticweb.owlapi.model.PrefixManager;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
+import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
-
-public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
+public class OWLAxiomConstraintToSPARQLConstructConverter implements OWLAxiomVisitor{
 	
 	private String root = "?x";
 	private String sparql;
-	private OWLClassExpressionConstraintToSPARQLConverter expressionConstraintConverter;
+	private OWLClassExpressionConstraintToSPARQLConstructQueryConverter expressionConstraintConverter;
 	private OWLClassExpressionToSPARQLConverter expressionConverter;
 	private boolean ignoreGenericTypeStatements = true;
+	private String allowedResourceNamespace;
 	
 	public String convert(String rootVariable, OWLAxiom axiom){
 		this.root = rootVariable;
 		sparql = "";
-		expressionConstraintConverter = new OWLClassExpressionConstraintToSPARQLConverter(ignoreGenericTypeStatements);
-		expressionConverter = new OWLClassExpressionToSPARQLConverter();
+		VariablesMapping mapping = new VariablesMapping();
+		expressionConstraintConverter = new OWLClassExpressionConstraintToSPARQLConstructQueryConverter(mapping, ignoreGenericTypeStatements);
+		expressionConverter = new OWLClassExpressionToSPARQLConverter(mapping);
 		axiom.accept(this);
 		return sparql;
 	}
 	
 	public Query asQuery(String rootVariable, OWLAxiom axiom){
-		String queryString = "SELECT DISTINCT " + rootVariable + " WHERE {";
-		queryString += convert(rootVariable, axiom);
-		queryString += "}";
+		String queryString = convert(rootVariable, axiom);
+		return QueryFactory.create(queryString, Syntax.syntaxARQ);
+	}
+	
+	public Query asQuery(String rootVariable, OWLAxiom axiom, String allowedResourceNamespace){
+		this.allowedResourceNamespace = allowedResourceNamespace;
+		String queryString = convert(rootVariable, axiom);
 		return QueryFactory.create(queryString, Syntax.syntaxARQ);
 	}
 
@@ -113,10 +119,7 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 		OWLClassExpression subClass = axiom.getSubClass();
 		String subClassPattern = expressionConverter.convert(root, subClass);
 		OWLClassExpression superClass = axiom.getSuperClass();
-		String superClassPattern = expressionConstraintConverter.convert(root, superClass, subClassPattern);
-		if(!(superClass instanceof OWLObjectIntersectionOf)){
-			sparql += subClassPattern;
-		}
+		String superClassPattern = expressionConstraintConverter.convert(root, superClass, subClassPattern, allowedResourceNamespace);
 		sparql += superClassPattern;
 	}
 
@@ -175,9 +178,13 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 	@Override
 	public void visit(OWLFunctionalObjectPropertyAxiom axiom) {
 		String propertyURI = axiom.getProperty().asOWLObjectProperty().toStringID();
-		sparql += 	root + " <" + propertyURI + "> ?o1." +
+		sparql += 	"CONSTRUCT {" +
+					root + " <" + propertyURI + "> ?o1." +
+					root + " <" + propertyURI + "> ?o2.}" +
+					"WHERE {" +
+					root + " <" + propertyURI + "> ?o1." +
 					root + " <" + propertyURI + "> ?o2." +
-					"FILTER(?o1 != ?o2)";
+					"FILTER(?o1 != ?o2)}";
 	}
 
 	@Override
@@ -199,9 +206,13 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 	@Override
 	public void visit(OWLFunctionalDataPropertyAxiom axiom) {
 		String propertyURI = axiom.getProperty().asOWLDataProperty().toStringID();
-		sparql += 	root + " <" + propertyURI + "> ?o1." +
+		sparql += 	"CONSTRUCT {" +
+					root + " <" + propertyURI + "> ?o1." +
+					root + " <" + propertyURI + "> ?o2.}" +
+					"WHERE {" +
+					root + " <" + propertyURI + "> ?o1." +
 					root + " <" + propertyURI + "> ?o2." +
-					"FILTER(?o1 != ?o2)";
+					"FILTER(?o1 != ?o2)}";
 	}
 
 	@Override
@@ -227,7 +238,11 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 	@Override
 	public void visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
 		String propertyURI = axiom.getProperty().asOWLObjectProperty().toStringID();
-		sparql += 	root + " <" + propertyURI + "> " + root;
+		sparql += 	"CONSTRUCT {" +
+					root + " <" + propertyURI + "> " + root +
+					"WHERE {" +
+					root + " <" + propertyURI + "> " + root +
+					"}";
 	}
 
 	@Override
@@ -237,7 +252,11 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 	@Override
 	public void visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
 		String propertyURI = axiom.getProperty().asOWLObjectProperty().toStringID();
-		sparql += 	"?s1 <" + propertyURI + "> " + root +
+		sparql += 	"CONSTRUCT {" +
+					"?s1 <" + propertyURI + "> " + root +
+					"?s2 <" + propertyURI + "> " + root +
+					"} WHERE {" +
+					"?s1 <" + propertyURI + "> " + root +
 					"?s2 <" + propertyURI + "> " + root +
 					"FILTER(?s1 != ?s2)}";
 	}
@@ -268,7 +287,7 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		OWLAxiomConstraintToSPARQLConverter converter = new OWLAxiomConstraintToSPARQLConverter();
+		OWLAxiomConstraintToSPARQLConstructConverter converter = new OWLAxiomConstraintToSPARQLConstructConverter();
 		
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory df = man.getOWLDataFactory();

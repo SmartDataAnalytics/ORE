@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.aksw.commons.collections.diff.ModelDiff;
+import org.dllearner.utilities.owl.VariablesMapping;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -28,7 +28,6 @@ import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDataUnionOf;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
-import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
@@ -46,11 +45,9 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLPropertyExpression;
 import org.semanticweb.owlapi.model.OWLPropertyExpressionVisitor;
 import org.semanticweb.owlapi.model.PrefixManager;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
@@ -59,84 +56,63 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
 
-public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassExpressionVisitor, OWLPropertyExpressionVisitor, OWLDataRangeVisitor{
+public class OWLClassExpressionConstraintToSPARQLConstructQueryConverter implements OWLClassExpressionVisitor, OWLPropertyExpressionVisitor, OWLDataRangeVisitor{
 	
-	private String sparql = "";
+	private String constructTemplate = "";
+	private String constructPattern = "";
 	private Stack<String> variables = new Stack<String>();
-	private Map<OWLEntity, String> variablesMapping;
-	
-	private int classCnt = 0;
-	private int propCnt = 0;
-	private int indCnt = 0;
 	
 	private OWLDataFactory df = new OWLDataFactoryImpl();
 	
 	private Map<Integer, Boolean> intersection;
 	private String existingPattern;
 	private boolean ignoreGenericTypeStatements = true;
+	private String missingURI = "http://ore.aksw.org/missing";
+	private VariablesMapping mapping;
+	private String allowedResourceNamespace;
 	
-	public OWLClassExpressionConstraintToSPARQLConverter(boolean ignoreGenericTypeStatements) {
+	public OWLClassExpressionConstraintToSPARQLConstructQueryConverter(VariablesMapping mapping, boolean ignoreGenericTypeStatements) {
+		this.mapping = mapping;
 		this.ignoreGenericTypeStatements = ignoreGenericTypeStatements;
 	}
 	
-	public OWLClassExpressionConstraintToSPARQLConverter() {
+	public OWLClassExpressionConstraintToSPARQLConstructQueryConverter(VariablesMapping mapping) {
+		this.mapping = mapping;
+	}
+	
+	public OWLClassExpressionConstraintToSPARQLConstructQueryConverter() {
+		this.mapping = new VariablesMapping();
 	}
 
-	public String convert(String rootVariable, OWLClassExpression expr){
-		reset();
-		variables.push(rootVariable);
-		expr.accept(this);
-		return sparql;
+	public String convert(String rootVariable, OWLClassExpression expr, String subClassPattern, String allowedResourceNamespace){
+		this.allowedResourceNamespace = allowedResourceNamespace;
+//		mapping.reset();
+		return convert(rootVariable, expr, subClassPattern);
 	}
 	
 	public String convert(String rootVariable, OWLClassExpression expr, String existingPattern){
 		this.existingPattern = existingPattern;
 		reset();
+		
 		variables.push(rootVariable);
 		expr.accept(this);
-		return sparql;
+		if(allowedResourceNamespace != null){
+			constructPattern += "FILTER(REGEX(" + rootVariable + ",'^" + allowedResourceNamespace + "'))";
+		}
+		return "CONSTRUCT{" + constructTemplate + "} WHERE {" + (!(expr instanceof OWLObjectIntersectionOf) ? existingPattern : "") + constructPattern + "}";
 	}
 	
-	public String convert(String rootVariable, OWLPropertyExpression expr){
-		variables.push(rootVariable);
-		sparql = "";
-		expr.accept(this);
-		return sparql;
-	}
 	
 	public Query asQuery(String rootVariable, OWLClassExpression expr){
-		String queryString = "SELECT DISTINCT " + rootVariable + " WHERE {";
-		queryString += convert(rootVariable, expr);
-		queryString += "}";
+		String queryString = convert(rootVariable, expr, null);
 		return QueryFactory.create(queryString, Syntax.syntaxARQ);
 	}
 	
 	private void reset(){
 		variables.clear();
-		classCnt = 0;
-		propCnt = 0;
-		indCnt = 0;
-		sparql = "";
+		constructTemplate = "";
+		constructPattern = "";
 		intersection = new HashMap<Integer, Boolean>();
-	}
-	
-	private String getVariable(OWLEntity entity){
-		String var = variablesMapping.get(entity);
-		if(var == null){
-			if(entity.isOWLClass()){
-				var = "?cls" + classCnt++;
-			} else if(entity.isOWLObjectProperty() || entity.isOWLDataProperty()){
-				var = "?p" + propCnt++;
-			} else if(entity.isOWLNamedIndividual()){
-				var = buildIndividualVariable();
-			} 
-			variablesMapping.put(entity, var);
-		}
-		return var;
-	}
-	
-	private String buildIndividualVariable(){
-		return "?s" + indCnt++;
 	}
 	
 	private int modalDepth(){
@@ -191,9 +167,15 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 
 	@Override
 	public void visit(OWLClass ce) {
-		sparql += "FILTER NOT EXISTS{";
-		sparql += triple(variables.peek(), "a", ce.toStringID());
-		sparql += "}";
+		constructPattern += "FILTER NOT EXISTS{";
+		constructPattern += triple(variables.peek(), "a", ce.toStringID());
+		constructPattern += "}";
+		constructPattern += bind(ce.toStringID(), mapping.getVariable(ce));
+		constructTemplate += triple(variables.peek(), "a", mapping.getVariable(ce));
+	}
+	
+	private String bind(String uri, String variable){
+		return "BIND(<" + uri + "> AS " + variable +  ")";
 	}
 
 	@Override
@@ -201,20 +183,20 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 		enterIntersection();
 		List<OWLClassExpression> operands = ce.getOperandsAsList();
 		for (int i = 0; i < operands.size()-1; i++) {
-			sparql += "{";
+			constructPattern += "{";
 			if(modalDepth() == 1 && existingPattern != null){
-				sparql += existingPattern;
+				constructPattern += existingPattern;
 			}
 			operands.get(i).accept(this);
-			sparql += "}";
-			sparql += " UNION ";
+			constructPattern += "}";
+			constructPattern += " UNION ";
 		}
-		sparql += "{";
+		constructPattern += "{";
 		if(modalDepth() == 1 && existingPattern != null){
-			sparql += existingPattern;
+			constructPattern += existingPattern;
 		}
 		operands.get(operands.size()-1).accept(this);
-		sparql += "}";
+		constructPattern += "}";
 		leaveIntersection();
 	}
 
@@ -230,21 +212,22 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 	public void visit(OWLObjectComplementOf ce) {
 		String subject = variables.peek();
 		if(!inIntersection() && modalDepth() == 1){
-			sparql += triple(subject, "?p", "?o");
+			constructPattern += triple(subject, "?p", "?o");
 		} 
 		ce.getOperand().accept(this);
 	}
 
 	@Override
 	public void visit(OWLObjectSomeValuesFrom ce) {
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
-		sparql += "FILTER NOT EXISTS{";
+		constructPattern += "FILTER NOT EXISTS{";
 		if(propertyExpression.isAnonymous()){
 			//property expression is inverse of a property
-			sparql += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), variables.peek());
+			constructPattern += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), variables.peek());
 		} else {
-			sparql += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), objectVariable);
+			constructPattern += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), objectVariable);
+			
 		}
 		OWLClassExpression filler = ce.getFiller();
 		if(filler.isAnonymous()){
@@ -253,17 +236,20 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 			variables.pop();
 		} else {
 			if(ignoreGenericTypeStatements && !filler.isOWLThing()){
-				sparql += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+				constructPattern += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+				constructTemplate += triple(objectVariable, "a", filler.asOWLClass().toStringID());
 			}
 		}
-		sparql += "}";
+		constructPattern += "}";
+		constructPattern += bind(missingURI, objectVariable + "_mis");
+		constructTemplate += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), objectVariable + "_mis");
 		
 	}
 
 	@Override
 	public void visit(OWLObjectAllValuesFrom ce) {
 //		String subject = variables.peek();
-//		String objectVariable = buildIndividualVariable();
+//		String objectVariable = mapping.newIndividualVariable();
 //		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
 //		String predicate = propertyExpression.getNamedProperty().toStringID();
 //		OWLClassExpression filler = ce.getFiller();
@@ -274,7 +260,7 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 //			sparql += triple(variables.peek(), predicate, objectVariable);
 //		}
 //		
-//		String var = buildIndividualVariable();
+//		String var = mapping.newIndividualVariable();
 //		sparql += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt1) WHERE {";
 //		sparql += triple(subject, predicate, var);
 //		variables.push(var);
@@ -282,7 +268,7 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 //		variables.pop();
 //		sparql += "} GROUP BY " + subject + "}";
 //		
-//		var = buildIndividualVariable();
+//		var = mapping.newIndividualVariable();
 //		sparql += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt2) WHERE {";
 //		sparql += triple(subject, predicate, var);
 //		sparql += "} GROUP BY " + subject + "}";
@@ -298,112 +284,114 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 	public void visit(OWLObjectHasValue ce) {
 		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
 		OWLIndividual value = ce.getValue();
-		sparql += "FILTER NOT EXISTS{";
+		constructPattern += "FILTER NOT EXISTS{";
 		if(propertyExpression.isAnonymous()){
 			//property expression is inverse of a property
-			sparql += triple(value.toStringID(), propertyExpression.getNamedProperty().toStringID(), variables.peek());
+			constructPattern += triple(value.toStringID(), propertyExpression.getNamedProperty().toStringID(), variables.peek());
 		} else {
-			sparql += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), value.toStringID());
+			constructPattern += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), value.toStringID());
 		}
-		sparql += "}";
+		constructPattern += "}";
+		constructPattern += bind(value.toStringID(), mapping.getVariable(value.asOWLNamedIndividual()));
+		constructTemplate += triple(variables.peek(), propertyExpression.getNamedProperty().toStringID(), mapping.getVariable(value.asOWLNamedIndividual()));
 	}
 
 	@Override
 	public void visit(OWLObjectMinCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
 		if(propertyExpression.isAnonymous()){
 			//property expression is inverse of a property
-			sparql += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
+			constructPattern += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
 		} else {
-			sparql += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
+			constructPattern += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
 		}
 		OWLClassExpression filler = ce.getFiller();
 		if(filler.isAnonymous()){
-			String var = buildIndividualVariable();
+			String var = mapping.newIndividualVariable();
 			variables.push(var);
-			sparql += triple(objectVariable, "a", var);
+			constructPattern += triple(objectVariable, "a", var);
 			filler.accept(this);
 			variables.pop();
 		} else {
-			sparql += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+			constructPattern += triple(objectVariable, "a", filler.asOWLClass().toStringID());
 		}
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")<" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")<" + cardinality + ")}";
 		
 	}
 
 	@Override
 	public void visit(OWLObjectExactCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
 		if(propertyExpression.isAnonymous()){
 			//property expression is inverse of a property
-			sparql += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
+			constructPattern += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
 		} else {
-			sparql += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
+			constructPattern += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
 		}
 		OWLClassExpression filler = ce.getFiller();
 		if(filler.isAnonymous()){
-			String var = buildIndividualVariable();
+			String var = mapping.newIndividualVariable();
 			variables.push(var);
-			sparql += triple(objectVariable, "a", var);
+			constructPattern += triple(objectVariable, "a", var);
 			filler.accept(this);
 			variables.pop();
 		} else {
-			sparql += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+			constructPattern += triple(objectVariable, "a", filler.asOWLClass().toStringID());
 		}
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")!=" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")!=" + cardinality + ")}";
 	}
 
 	@Override
 	public void visit(OWLObjectMaxCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLObjectPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
 		if(propertyExpression.isAnonymous()){
 			//property expression is inverse of a property
-			sparql += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
+			constructPattern += triple(objectVariable, propertyExpression.getNamedProperty().toStringID(), subjectVariable);
 		} else {
-			sparql += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
+			constructPattern += triple(subjectVariable, propertyExpression.getNamedProperty().toStringID(), objectVariable);
 		}
 		OWLClassExpression filler = ce.getFiller();
 		if(filler.isAnonymous()){
-			String var = buildIndividualVariable();
+			String var = mapping.newIndividualVariable();
 			variables.push(var);
-			sparql += triple(objectVariable, "a", var);
+			constructPattern += triple(objectVariable, "a", var);
 			filler.accept(this);
 			variables.pop();
 		} else {
-			sparql += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+			constructPattern += triple(objectVariable, "a", filler.asOWLClass().toStringID());
 		}
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")>" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")>" + cardinality + ")}";
 	}
 
 	@Override
 	public void visit(OWLObjectHasSelf ce) {
 		String subject = variables.peek();
 		OWLObjectPropertyExpression property = ce.getProperty();
-		sparql += triple(subject, property.getNamedProperty().toStringID(), subject);
+		constructPattern += triple(subject, property.getNamedProperty().toStringID(), subject);
 	}
 
 	@Override
 	public void visit(OWLObjectOneOf ce) {
 		String subject = variables.peek();
 		if(modalDepth() == 1){
-			sparql += triple(subject, "?p", "?o");
+			constructPattern += triple(subject, "?p", "?o");
 		} 
-		sparql += "FILTER(" + subject + " NOT IN (";
+		constructPattern += "FILTER(" + subject + " NOT IN (";
 		String values = "";
 		for (OWLIndividual ind : ce.getIndividuals()) {
 			if(!values.isEmpty()){
@@ -411,110 +399,112 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 			}
 			values += "<" + ind.toStringID() + ">";
 		}
-		sparql += values;
-		sparql +=  "))"; 
+		constructPattern += values;
+		constructPattern +=  "))"; 
 		
 	}
 
 	@Override
 	public void visit(OWLDataSomeValuesFrom ce) {
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
-		sparql += "FILTER NOT EXISTS{";
-		sparql += triple(variables.peek(), propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
+		constructPattern += "FILTER NOT EXISTS{";
+		constructPattern += triple(variables.peek(), propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
 		OWLDataRange filler = ce.getFiller();
 		variables.push(objectVariable);
 		filler.accept(this);
 		variables.pop();
-		sparql += "}";
+		constructPattern += "}";
+		constructPattern += bind(missingURI, objectVariable + "_mis");
+		constructTemplate += triple(variables.peek(), propertyExpression.asOWLDataProperty().toStringID(), objectVariable + "_mis");
 	}
 
 	@Override
 	public void visit(OWLDataAllValuesFrom ce) {
 		String subject = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
 		String predicate = propertyExpression.asOWLDataProperty().toStringID();
 		OWLDataRange filler = ce.getFiller();
-		sparql += triple(variables.peek(), predicate, objectVariable);
+		constructPattern += triple(variables.peek(), predicate, objectVariable);
 		
-		String var = buildIndividualVariable();
-		sparql += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt1) WHERE {";
-		sparql += triple(subject, predicate, var);
+		String var = mapping.newIndividualVariable();
+		constructPattern += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt1) WHERE {";
+		constructPattern += triple(subject, predicate, var);
 		variables.push(var);
 		filler.accept(this);
 		variables.pop();
-		sparql += "} GROUP BY " + subject + "}";
+		constructPattern += "} GROUP BY " + subject + "}";
 		
-		var = buildIndividualVariable();
-		sparql += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt2) WHERE {";
-		sparql += triple(subject, predicate, var);
-		sparql += "} GROUP BY " + subject + "}";
+		var = mapping.newIndividualVariable();
+		constructPattern += "{SELECT " + subject + " (COUNT(" + var + ") AS ?cnt2) WHERE {";
+		constructPattern += triple(subject, predicate, var);
+		constructPattern += "} GROUP BY " + subject + "}";
 		
-		sparql += "FILTER(?cnt1=?cnt2)";
+		constructPattern += "FILTER(?cnt1=?cnt2)";
 	}
 
 	@Override
 	public void visit(OWLDataHasValue ce) {
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
 		OWLLiteral value = ce.getValue();
-		sparql += "FILTER NOT EXISTS{";
-		sparql += triple(variables.peek(), propertyExpression.asOWLDataProperty().toStringID(), value);
-		sparql += "}";
+		constructPattern += "FILTER NOT EXISTS{";
+		constructPattern += triple(variables.peek(), propertyExpression.asOWLDataProperty().toStringID(), value);
+		constructPattern += "}";
 	}
 
 	@Override
 	public void visit(OWLDataMinCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
-		sparql += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
 		OWLDataRange filler = ce.getFiller();
 		variables.push(objectVariable);
 		filler.accept(this);
 		variables.pop();
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")>=" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")>=" + cardinality + ")}";
 	}
 
 	@Override
 	public void visit(OWLDataExactCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
-		sparql += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
 		OWLDataRange filler = ce.getFiller();
 		variables.push(objectVariable);
 		filler.accept(this);
 		variables.pop();
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")=" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")=" + cardinality + ")}";
 	}
 
 	@Override
 	public void visit(OWLDataMaxCardinality ce) {
 		String subjectVariable = variables.peek();
-		String objectVariable = buildIndividualVariable();
+		String objectVariable = mapping.newIndividualVariable();
 		OWLDataPropertyExpression propertyExpression = ce.getProperty();
 		int cardinality = ce.getCardinality();
-		sparql += "{SELECT " + subjectVariable + " WHERE {";
-		sparql += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
+		constructPattern += "{SELECT " + subjectVariable + " WHERE {";
+		constructPattern += triple(subjectVariable, propertyExpression.asOWLDataProperty().toStringID(), objectVariable);
 		OWLDataRange filler = ce.getFiller();
 		variables.push(objectVariable);
 		filler.accept(this);
 		variables.pop();
 		
-		sparql += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")<=" + cardinality + ")}";
+		constructPattern += "} GROUP BY " + subjectVariable + " HAVING(COUNT(" + objectVariable + ")<=" + cardinality + ")}";
 	}
 	
 	@Override
 	public void visit(OWLDatatype node) {
-		if(ignoreGenericTypeStatements && !node.isRDFPlainLiteral()){
-			sparql += "FILTER(DATATYPE(" + variables.peek() + "=<" + node.getIRI().toString() + ">))";
+		if(ignoreGenericTypeStatements && !node.isRDFPlainLiteral() && !node.isTopDatatype()){
+			constructPattern += "FILTER(DATATYPE(" + variables.peek() + "=<" + node.getIRI().toString() + ">))";
 		}
 	}
 
@@ -522,9 +512,9 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 	public void visit(OWLDataOneOf node) {
 		String subject = variables.peek();
 		if(modalDepth() == 1){
-			sparql += triple(subject, "?p", "?o");
+			constructPattern += triple(subject, "?p", "?o");
 		} 
-		sparql += "FILTER(" + subject + " IN (";
+		constructPattern += "FILTER(" + subject + " IN (";
 		String values = "";
 		for (OWLLiteral value : node.getValues()) {
 			if(!values.isEmpty()){
@@ -532,8 +522,8 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 			}
 			values += render(value);
 		}
-		sparql += values;
-		sparql +=  "))"; 
+		constructPattern += values;
+		constructPattern +=  "))"; 
 	}
 
 	@Override
@@ -554,7 +544,7 @@ public class OWLClassExpressionConstraintToSPARQLConverter implements OWLClassEx
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		OWLClassExpressionConstraintToSPARQLConverter converter = new OWLClassExpressionConstraintToSPARQLConverter();
+		OWLClassExpressionConstraintToSPARQLConstructQueryConverter converter = new OWLClassExpressionConstraintToSPARQLConstructQueryConverter();
 		
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory df = man.getOWLDataFactory();

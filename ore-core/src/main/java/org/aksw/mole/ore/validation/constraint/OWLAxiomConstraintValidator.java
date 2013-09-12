@@ -1,49 +1,73 @@
 package org.aksw.mole.ore.validation.constraint;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
+import org.dllearner.kb.sparql.SparqlQuery;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
 public class OWLAxiomConstraintValidator {
+	
+	private static final Logger logger = Logger.getLogger(OWLAxiomConstraintValidator.class.getName());
+	
+	private SparqlEndpoint endpoint;
+	private ExtractionDBCache cache;
 
-	public OWLAxiomConstraintValidator() {
+	public OWLAxiomConstraintValidator(SparqlEndpoint endpoint, ExtractionDBCache cache) {
+		this.endpoint = endpoint;
+		this.cache = cache;
 	}
 	
-	public void validate(SparqlEndpoint endpoint, OWLOntology constraintAxioms){
-		validate(endpoint, constraintAxioms.getLogicalAxioms());
+	public OWLAxiomConstraintValidator(SparqlEndpoint endpoint) {
+		this(endpoint, null);
 	}
 	
-	public void validate(SparqlEndpoint endpoint, Collection<? extends OWLAxiom> constraintAxioms){
+	public Multimap<OWLAxiom, String> validate(SparqlEndpoint endpoint, OWLOntology constraintAxioms){
+		return validate(endpoint, constraintAxioms.getLogicalAxioms());
+	}
+	
+	public Multimap<OWLAxiom, String> validate(SparqlEndpoint endpoint, Collection<? extends OWLAxiom> constraintAxioms){
+		Multimap<OWLAxiom, String> constraint2ViolatingResources = HashMultimap.create();
 		OWLAxiomConstraintToSPARQLConverter converter = new OWLAxiomConstraintToSPARQLConverter();
 		for(OWLAxiom axiom : constraintAxioms){
-			Query query = converter.asQuery("?x", axiom);System.out.println(query);
-			QueryEngineHTTP qe = new QueryEngineHTTP(endpoint.getURL().toString(), query);
-			ResultSet rs = qe.execSelect();
+			Query query = converter.asQuery("?x", axiom);
+			logger.info("Validating constraint\n" + axiom + "\nby executing\n" + query);
+			ResultSet rs = executeSelectQuery(query);
+			QuerySolution qs;
+			RDFNode node;
 			while(rs.hasNext()){
-				System.out.println(rs.next().get("x"));
+				qs = rs.next();
+				node = qs.get("x");
+				if(node.isURIResource()){
+					constraint2ViolatingResources.put(axiom, node.asResource().getURI());
+				}
 			}
 		}
+		return constraint2ViolatingResources;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		SparqlEndpoint endpoint = new SparqlEndpoint(new URL("http://lod2.wolterskluwer.de/virtuoso/sparql"));
-		
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = man.loadOntologyFromOntologyDocument(new File(args[0]));
-		
-		OWLAxiomConstraintValidator validator = new OWLAxiomConstraintValidator();
-		validator.validate(endpoint, ontology);
+	private ResultSet executeSelectQuery(Query query) {
+		ResultSet rs;
+		if(cache != null){
+			rs = SparqlQuery.convertJSONtoResultSet(cache.executeSelectQuery(endpoint, query.toString()));
+		} else {
+			QueryEngineHTTP queryExecution = new QueryEngineHTTP(endpoint.getURL().toString(),
+					query);
+			queryExecution.setDefaultGraphURIs(endpoint.getDefaultGraphURIs());
+			queryExecution.setNamedGraphURIs(endpoint.getNamedGraphURIs());
+			rs = queryExecution.execSelect();
+		}
+		return rs;
 	}
-
 }

@@ -2,19 +2,27 @@ package experiments;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.aksw.mole.ore.util.PrefixedShortFromProvider;
 import org.apache.log4j.Logger;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.algorithms.celoe.CELOE;
@@ -24,6 +32,7 @@ import org.dllearner.algorithms.qtl.cache.QueryTreeCache;
 import org.dllearner.algorithms.qtl.datastructures.QueryTree;
 import org.dllearner.algorithms.qtl.operations.lgg.EvaluatedQueryTree;
 import org.dllearner.algorithms.qtl.operations.lgg.NoiseSensitiveLGG;
+import org.dllearner.algorithms.qtl.operations.lgg.NoiseSensitiveLGGMultithreaded;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedAxiom;
@@ -53,6 +62,7 @@ import org.dllearner.utilities.datastructures.SortedSetTuple;
 import org.dllearner.utilities.examples.AutomaticNegativeExampleFinderSPARQL2;
 import org.dllearner.utilities.owl.OWLEntityTypeAdder;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -67,8 +77,9 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
-import com.clarkparsia.owlapiv3.XSD;
-import com.hp.hpl.jena.rdf.model.Literal;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -95,26 +106,35 @@ public class WoltersKluwerDataEquivalentClasses {
 					new URL("http://vocabulary.wolterskluwer.de/PoolParty/sparql/arbeitsrecht"));
 			wkEndpoint2 = new SparqlEndpoint(new URL("http://vocabulary.wolterskluwer.de/PoolParty/sparql/court"));
 			wkEndpoint3 = new SparqlEndpoint(new URL("http://lod2.wolterskluwer.de/virtuoso/sparql"));
+//			wkEndpoint3 = SparqlEndpoint.getEndpointDBpedia();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private String wkNS = "http://schema.wolterskluwer.de/";
-	private final int maxQueryTreeDepth = 1;
-	private final int maxNrOfPositiveExamples = 10;
-	private final int minNrOfExamples = 2;
-	private double minAccuracy = 0.6;
+	private final int maxQueryTreeDepth = 0;// 0 means only direct triples
+	private final int maxNrOfPositiveExamples = 20;
+	private final int minNrOfPositiveExamples = 3;
+	private double minAccuracy = 0.4;
 
 	private SparqlEndpointKS ks;
 	private SPARQLReasoner reasoner;
 	private Set<NamedClass> classes;
 	private OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	private OWLObjectRenderer renderer = new ManchesterOWLSyntaxOWLObjectRendererImpl();
+	private NumberFormat df = NumberFormat.getPercentInstance();
+	
 
 	public WoltersKluwerDataEquivalentClasses() {
 		ks = new SparqlEndpointKS(wkEndpoint3);
 		reasoner = new SPARQLReasoner(ks);
 		classes = reasoner.getTypes();
+//		classes = Sets.newHashSet(new NamedClass("http://schema.wolterskluwer.de/SubjectEditorial"));
+		renderer.setShortFormProvider(new PrefixedShortFromProvider());
+		
+		ToStringRenderer.getInstance().setRenderer(renderer);
+		df.setMinimumFractionDigits(1);
 	}
 
 	public void learnWithLGG() throws LearningProblemUnsupportedException, OWLOntologyCreationException, OWLOntologyStorageException, FileNotFoundException {
@@ -127,11 +147,8 @@ public class WoltersKluwerDataEquivalentClasses {
 			try {
 				// logger.info("Learning description for class " + cls + "...");
 				SortedSet<Individual> posExamples = reasoner.getIndividuals(cls, maxNrOfPositiveExamples);
-				if (posExamples.isEmpty()) {
-//					 logger.warn("...skipped because class contains no instances.");
-					logger.warn(cls + "\t contains no directly asserted instances.");
-				} else if(posExamples.size() < minNrOfExamples){
-					logger.warn(cls + "\t contains no at least " + minNrOfExamples + " asserted instances.");
+				if(posExamples.size() < minNrOfPositiveExamples){
+					logger.warn(cls + "\t contains not at least " + minNrOfPositiveExamples + " asserted instances.");
 				} else {
 					logger.info(cls + " is " + "(based on " + posExamples.size() + " examples)" + " equivalent to ");
 					PosOnlyLP lp = new PosOnlyLP();
@@ -156,7 +173,7 @@ public class WoltersKluwerDataEquivalentClasses {
 
 					logger.info(classExpression);
 					logger.info("##############################################################");
-					OWLAxiom axiom = df.getOWLEquivalentClassesAxiom(owlClass, classExpression);
+					OWLAxiom axiom = df.getOWLSubClassOfAxiom(owlClass, classExpression);
 					// System.out.println(axiom);
 					man.addAxiom(schema, axiom);
 				}
@@ -168,38 +185,37 @@ public class WoltersKluwerDataEquivalentClasses {
 	}
 	
 	public void learnWithNoiseRobustLGG() throws LearningProblemUnsupportedException, OWLOntologyCreationException, OWLOntologyStorageException, FileNotFoundException {
-		ToStringRenderer.getInstance().setRenderer(new ManchesterOWLSyntaxOWLObjectRendererImpl());
 		OWLDataFactory df = new OWLDataFactoryImpl();
-		OWLOntology schema = man.createOntology(IRI.create("http://schema.wolterskluwer.de/constraints/"));
 		Monitor mon = MonitorFactory.getTimeMonitor("LGG");
+		Map<OWLClass, Map<OWLClassExpression, Double>> result = new HashMap<OWLClass, Map<OWLClassExpression,Double>>();
 		for (NamedClass cls : classes) {
 			if (!cls.getName().startsWith(wkNS)) continue;
-//			if(!cls.getName().equals("http://schema.wolterskluwer.de/aufsatz")) continue;
+//			if (!cls.getName().startsWith("http://dbpedia.org/ontology/")) continue;
+//			if(!cls.getName().equals("http://schema.wolterskluwer.de/SubjectEditorial")) continue;
 			try {
+				OWLClass owlClass = df.getOWLClass(IRI.create(cls.getName()));
 				// logger.info("Learning description for class " + cls + "...");
 				SortedSet<Individual> posExamples = reasoner.getIndividuals(cls, maxNrOfPositiveExamples);
-				if (posExamples.isEmpty()) {
-//					 logger.warn("...skipped because class contains no instances.");
-					logger.warn(cls + "\t contains no directly asserted instances.");
-				} else if(posExamples.size() < minNrOfExamples){
-					logger.warn(cls + "\t contains no at least " + minNrOfExamples + " asserted instances.");
+				if(posExamples.size() < minNrOfPositiveExamples){
+					logger.warn(cls + "\t contains not at least " + minNrOfPositiveExamples + " asserted instances.");
 				}  else {
-					logger.info(cls + " is " + "(based on " + posExamples.size() + " examples)" + " equivalent to ");
+					Map<OWLClassExpression, Double> solutionsWithScore = new LinkedHashMap<OWLClassExpression, Double>();
+					logger.info(cls + " is " + "(based on " + posExamples.size() + " examples)" + " described by ");
+//					NoiseSensitiveLGGMultithreaded<String> lggGenerator = new NoiseSensitiveLGGMultithreaded<String>();
 					NoiseSensitiveLGG<String> lggGenerator = new NoiseSensitiveLGG<String>();
 					List<QueryTree<String>> posExampleTrees = getQueryTrees(
 							new ArrayList<String>(Datastructures.individualSetToStringSet(posExamples)));
+					
 					mon.start();
 					List<EvaluatedQueryTree<String>> solutions = lggGenerator.computeLGG(posExampleTrees);
 					mon.stop();
 					int i = 1;
 					for (EvaluatedQueryTree<String> evaluatedQueryTree : solutions) {
-						if(evaluatedQueryTree.getScore() >=minAccuracy){
+						if(evaluatedQueryTree.getScore() >= minAccuracy){
 							logger.info("Solution " + i++);
 							QueryTree<String> lgg = evaluatedQueryTree.getTree();
-							
-							OWLClass owlClass = df.getOWLClass(IRI.create(cls.getName()));
 							OWLClassExpression classExpression = lgg.asOWLClassExpression();
-							// remove the class to learn form the class expressions, as
+							// remove the class to learn from the class expressions, as
 							// it is trivially contained in
 							if (classExpression.isAnonymous()) {
 								Set<OWLClassExpression> operands = ((OWLObjectIntersectionOf) classExpression).getOperands();
@@ -207,8 +223,10 @@ public class WoltersKluwerDataEquivalentClasses {
 								classExpression = df.getOWLObjectIntersectionOf(operands);
 							}
 							logger.info(classExpression + "\n(" + evaluatedQueryTree.getScore() + ")");
+							solutionsWithScore.put(classExpression, evaluatedQueryTree.getScore());
 						}
 					}
+					result.put(owlClass, solutionsWithScore);
 					logger.info("##############################################################");
 					
 				}
@@ -216,9 +234,51 @@ public class WoltersKluwerDataEquivalentClasses {
 				e.printStackTrace();
 			}
 		}
+		toHTML(result);
 		logger.info("t(LGG)_min=" + mon.getMin());
 		logger.info("t(LGG)_max=" + mon.getMax());
 		logger.info("t(LGG)_total=" + mon.getTotal());
+	}
+	
+	private void toHTML(Map<OWLClass, Map<OWLClassExpression, Double>> result){
+		File dir = new File("wkd-suggestions");
+		dir.mkdir();
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table>\n");
+		for (Entry<OWLClass, Map<OWLClassExpression, Double>> entry : result
+				.entrySet()) {
+			OWLClass cls = entry.getKey();
+			Map<OWLClassExpression, Double> value = entry.getValue();
+			toHTML(cls, value);
+			sb.append("<tr><td>").append("<a href=\"" + filename(cls) + "\">" + renderer.render(cls) + "</a>").append("</td></tr>");
+		}
+		sb.append("</table>");
+		try {
+			Files.write(sb.toString(), new File(dir, "wkd-suggestions.html"), Charsets.UTF_8);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void toHTML(OWLClass cls, Map<OWLClassExpression, Double> result){
+		File dir = new File("wkd-suggestions");
+		dir.mkdir();
+		StringBuilder sb = new StringBuilder();
+		sb.append(cls).append(" is described by\n");
+		sb.append("<table border=\"1\">\n");
+		sb.append("<tr><th>Suggestion</td><td>Score</td></tr>\n");
+		for (Entry<OWLClassExpression, Double> entry : result
+				.entrySet()) {
+			OWLClassExpression classExpression = entry.getKey();
+			Double value = entry.getValue();
+			sb.append("<tr>").append("<td>").append("<pre>" + classExpression + "</pre>").append("</td>").append("<td>").append(df.format(value)).append("</td>").append("</tr>\n");
+		}
+		sb.append("</table>");
+		try {
+			Files.write(sb.toString(), new File(dir, filename(cls)), Charsets.UTF_8);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void learnWithCELOE() throws ComponentInitException {
@@ -313,6 +373,8 @@ public class WoltersKluwerDataEquivalentClasses {
 							.equals(RDFS.Literal.asNode()))) {
 				// remove statements like <x a owl:Class>
 				statementsToRemove.add(st);
+			} else if (st.getPredicate().getURI().equals("http://www.metalex.eu/metalex/2008-05-02#fragment")) {//remove wkd:
+				statementsToRemove.add(st);
 			} else {
 				// fix URIs with spaces
 				Resource newSubject = (Resource) subject;
@@ -329,12 +391,12 @@ public class WoltersKluwerDataEquivalentClasses {
 						newObject = model.createResource(uri.replace(" ", ""));
 					}
 				}
-				if (object.isLiteral()) {
-					Literal lit = object.asLiteral();
-					if (lit.getDatatype() == null || lit.getDatatype().equals(XSD.STRING)) {
-						newObject = model.createLiteral("shortened", "en");
-					}
-				}
+//				if (object.isLiteral()) {
+//					Literal lit = object.asLiteral();
+//					if (lit.getDatatype() == null || lit.getDatatype().equals(XSD.STRING)) {
+//						newObject = model.createLiteral("shortened", "en");
+//					}
+//				}
 				statementsToAdd.add(model.createStatement(newSubject, st.getPredicate(), newObject));
 				statementsToRemove.add(st);
 			}
@@ -375,6 +437,7 @@ public class WoltersKluwerDataEquivalentClasses {
 			try {
 				logger.debug("Generating tree for " + resource);
 				model = cbdGenerator.getConciseBoundedDescription(resource);
+				filter(model);
 				tree = treeCache.getQueryTree(resource, model);
 				if(logger.isDebugEnabled()){
 					logger.debug("Tree for resource " + resource);
@@ -387,6 +450,19 @@ public class WoltersKluwerDataEquivalentClasses {
 			}
 		}
 		return trees;
+	}
+	
+	private String filename(OWLClass cls){
+		String filename = renderer.render(cls);
+		filename = encode(filename) + ".html";
+		return filename;
+	}
+	
+	private String encode(String s){
+		s = s.replace("/", "+");
+		s = s.replace(":", "+");
+		s = s.replace(" ", "+");
+		return s;
 	}
 
 	public static void main(String[] args) throws Exception {

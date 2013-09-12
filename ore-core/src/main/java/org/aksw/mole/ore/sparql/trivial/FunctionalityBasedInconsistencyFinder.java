@@ -12,22 +12,19 @@ import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLProperty;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialInconsistencyFinder {
 	
@@ -93,9 +90,6 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 				stmtIterator.remove();
 			}
 		}
-		for (RDFNode node : model.listObjects().toList()) {
-			System.out.println(node);
-		}
 		OWLOntology ontology = convert(model);
 		
 		Set<OWLAxiom> oldAxioms = ontology.getAxioms();
@@ -120,15 +114,22 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 				}
 			}
 		}
-		for(OWLAxiom axiom : AxiomType.getAxiomsOfTypes(oldAxioms, AxiomType.FUNCTIONAL_OBJECT_PROPERTY)){
-			OWLObjectProperty property = ((OWLFunctionalObjectPropertyAxiom)axiom).getProperty().asOWLObjectProperty();
-			newAxioms.add(factory.getOWLFunctionalObjectPropertyAxiom(property));
+		for (OWLDataProperty dp : dataProperties) {
+			newAxioms.add(factory.getOWLFunctionalDataPropertyAxiom(dp));
+		}
+		for (OWLObjectProperty op : objectProperties) {
+			newAxioms.add(factory.getOWLFunctionalObjectPropertyAxiom(op));
 		}
 		
-		for(OWLAxiom axiom : AxiomType.getAxiomsOfTypes(oldAxioms, AxiomType.FUNCTIONAL_DATA_PROPERTY)){
-			OWLDataProperty property = ((OWLFunctionalDataPropertyAxiom)axiom).getProperty().asOWLDataProperty();
-			newAxioms.add(factory.getOWLFunctionalDataPropertyAxiom(property));
-		}
+//		for(OWLAxiom axiom : AxiomType.getAxiomsOfTypes(oldAxioms, AxiomType.FUNCTIONAL_OBJECT_PROPERTY)){
+//			OWLObjectProperty property = ((OWLFunctionalObjectPropertyAxiom)axiom).getProperty().asOWLObjectProperty();
+//			newAxioms.add(factory.getOWLFunctionalObjectPropertyAxiom(property));
+//		}
+//		
+//		for(OWLAxiom axiom : AxiomType.getAxiomsOfTypes(oldAxioms, AxiomType.FUNCTIONAL_DATA_PROPERTY)){
+//			OWLDataProperty property = ((OWLFunctionalDataPropertyAxiom)axiom).getProperty().asOWLDataProperty();
+//			newAxioms.add(factory.getOWLFunctionalDataPropertyAxiom(property));
+//		}
 		return newAxioms;
 	}
 }

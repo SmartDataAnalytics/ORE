@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -385,7 +386,7 @@ public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassE
 			computeRootDerivedClasses();
 			ontologyChanged = false;
 		}
-		return Collections.unmodifiableSet(rootClasses);
+		return new TreeSet<OWLClass>(rootClasses);
 	}
 	
 	@Override
@@ -394,7 +395,7 @@ public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassE
 			computeRootDerivedClasses();
 			ontologyChanged = false;
 		}
-		return Collections.unmodifiableSet(derivedClasses);
+		return new TreeSet<OWLClass>(derivedClasses);
 	}
 
 	@Override

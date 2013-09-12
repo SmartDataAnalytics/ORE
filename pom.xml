@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw.mole</groupId>
 	<artifactId>ore</artifactId>
@@ -9,7 +8,8 @@
 	<modules>
 		<module>ore-core</module>
 		<module>ore-web</module>
-	</modules>
+    <module>ore-ui</module>
+  </modules>
 	<properties>
 		<!-- tell the compiler we can use 1.6 -->
 		<maven.compiler.source>1.6</maven.compiler.source>
@@ -20,13 +20,13 @@
 			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>http://maven.aksw.org/archiva/repository/internal</url>
-			<releases />
+			<releases/>
 		</repository>
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
-			<snapshots />
+			<snapshots/>
 		</repository>
 		<repository>
 			<id>pellet_etc</id>

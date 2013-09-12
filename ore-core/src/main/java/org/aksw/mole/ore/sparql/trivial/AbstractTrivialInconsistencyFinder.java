@@ -38,7 +38,6 @@ public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiom
 			queryString = query.substring(0, query.lastIndexOf('}'));
 			queryString += filter + "}";
 		}
-		System.out.println(queryString);
 		Query q = QueryFactory.create(queryString);
 		q.setLimit(limit);
 		int offset = filterToOffset.containsKey(filter) ? filterToOffset.get(filter) : 0;
@@ -47,6 +46,7 @@ public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiom
 		OWLOntology ontology = convert(model);
 		axioms.addAll(ontology.getLogicalAxioms());
 		filterToOffset.put(filter, offset+limit);
+		System.out.println(q);
 		return axioms;
 	}
 

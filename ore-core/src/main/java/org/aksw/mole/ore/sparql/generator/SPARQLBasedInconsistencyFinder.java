@@ -2,15 +2,11 @@ package org.aksw.mole.ore.sparql.generator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
-import org.aksw.mole.ore.sparql.InconsistencyFinder;
-import org.aksw.mole.ore.sparql.LinkedDataDereferencer;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.aksw.mole.ore.sparql.generator.generic.AsymmetricPropertyAxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.generic.ClassAssertionAxiomGenerator;
@@ -33,63 +29,28 @@ import org.aksw.mole.ore.sparql.generator.generic.SubClassOfAxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.generic.SubPropertyOfAxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.generic.SymmetricPropertyAxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.generic.TransitivePropertyAxiomGenerator;
-import org.aksw.mole.ore.sparql.trivial.TrivialInconsistencyFinder;
+import org.aksw.mole.ore.sparql.trivial.SPARQLBasedTrivialInconsistencyFinder;
 import org.dllearner.kb.SparqlEndpointKS;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.google.common.base.Stopwatch;
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 
-public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
+public class SPARQLBasedInconsistencyFinder extends AbstractSPARQLBasedInconsistencyFinder {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SPARQLBasedInconsistencyFinder.class);
 	
-	private Stopwatch stopWatch = new Stopwatch();
-	private Monitor consistencyMonitor = MonitorFactory.getTimeMonitor("consistency checks");
-	private Monitor overallMonitor = MonitorFactory.getTimeMonitor("overall runtime");
-	
-	private volatile boolean stop = false;
-	
-	private long maxRuntimeInMilliseconds = 
-											TimeUnit.MINUTES.toMillis(1);
-//											TimeUnit.HOURS.toMillis(1);
-	
-	//terminate algorithm if first inconsistency found, otherwise until stop is called or timeout occurs
-	private boolean stopIfInconsistencyFound = true;
-	//use linked data to get more information
-	private boolean useLinkedData = true;
-	private Set<String> linkedDataNamespaces = new HashSet<String>();
-	private LinkedDataDereferencer linkedDataDereferencer = new LinkedDataDereferencer();
-
-	private SparqlEndpointKS ks;
-	
-	private OWLReasonerFactory reasonerFactory;
-	private OWLReasoner reasoner;
-	private OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-	private OWLOntology fragment;
-	
-	private TrivialInconsistencyFinder trivialInconsistencyFinder;
+	private SPARQLBasedTrivialInconsistencyFinder trivialInconsistencyFinder;
 	private List<Class<? extends SPARQLBasedGeneralAxiomGenerator>> generalAxiomGeneratorsClasses = 
 			new ArrayList<Class<? extends SPARQLBasedGeneralAxiomGenerator>>();
 	private List<SPARQLBasedGeneralAxiomGenerator> generalAxiomGenerators = 
 			new ArrayList<SPARQLBasedGeneralAxiomGenerator>();
 
-	private Set<OWLAxiom> axiomsToIgnore = new HashSet<OWLAxiom>();
-	
-	private AxiomGenerationTracker tracker;
-	
 	public SPARQLBasedInconsistencyFinder(SparqlEndpointKS ks) {
 		this(ks, PelletReasonerFactory.getInstance());
 	}
@@ -144,24 +105,10 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 		}
 		
 		//create a helper which looks for trivial cases for inconsistency
-		trivialInconsistencyFinder = new TrivialInconsistencyFinder(ks);
+		trivialInconsistencyFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
 		reset();
 	}
 	
-	public void reset(){
-		//create empty ontology to which retrieved axioms are added
-		try {
-			fragment = manager.createOntology();
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-		}
-		
-		//create the reasoner which is used to check for consistency
-		reasoner = reasonerFactory.createNonBufferingReasoner(fragment);
-		//create an helper which looks for trivial cases for inconsistency
-		trivialInconsistencyFinder = new TrivialInconsistencyFinder(ks);
-	}
-
 	@Override
 	public Set<OWLAxiom> getInconsistentFragment() throws TimeOutException {
 		stop = false;
@@ -169,13 +116,16 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 		//firstly, check for trivial inconsistency cases
 		logger.info("Looking for trivial inconsistency cases...");
 		Set<OWLAxiom> trivialInconsistentFragment = trivialInconsistencyFinder.getInconsistentFragment();
-		tracker.track(trivialInconsistencyFinder, trivialInconsistentFragment);
+		if(tracker != null){
+			tracker.track(trivialInconsistencyFinder, trivialInconsistentFragment);
+		}
 		addAxioms(trivialInconsistencyFinder, trivialInconsistentFragment);
-		if(terminationCriteriaSatisfied()){
+		if(!terminationCriteriaSatisfied()){//!fragment.getLogicalAxioms().isEmpty()){
 			logger.info("Found axioms leading to trivial inconsistency.");
 			if(stopIfInconsistencyFound){
 				logger.info("Early termination.");
 			}
+			return fragment.getAxioms();
 		}
 		
 		//iteration starts here
@@ -206,12 +156,14 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 				entities.addAll(fragment.getIndividualsInSignature());
 				for(OWLEntity entity : entities){
 					for (String ns : linkedDataNamespaces) {
-						if(entity.toStringID().startsWith(ns)){
-							try {
-								Set<OWLAxiom> axioms = linkedDataDereferencer.dereference(entity);
-								addAxioms(linkedDataDereferencer, axioms);
-							} catch (ExecutionException e) {
-								e.printStackTrace();
+						if(!terminationCriteriaSatisfied()){
+							if(entity.toStringID().startsWith(ns)){
+								try {
+									Set<OWLAxiom> axioms = linkedDataDereferencer.dereference(entity);
+									addAxioms(linkedDataDereferencer, axioms);
+								} catch (ExecutionException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					}
@@ -222,51 +174,67 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 		return fragment.getAxioms();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#isConsistent()
+	 */
 	@Override
-	public void setMaximumRuntime(long duration, TimeUnit timeUnit) {
-		this.maxRuntimeInMilliseconds = timeUnit.toMillis(duration);
+	protected boolean isConsistent() {
+		return reasoner.isConsistent();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#setAxiomsToIgnore(java.util.Set)
+	 */
 	@Override
 	public void setAxiomsToIgnore(Set<OWLAxiom> axiomsToIgnore) {
-		this.axiomsToIgnore = axiomsToIgnore;
+		super.setAxiomsToIgnore(axiomsToIgnore);
 		trivialInconsistencyFinder.setAxiomsToIgnore(axiomsToIgnore);
-		manager.removeAxioms(fragment, axiomsToIgnore);
 	}
 	
-	public void setLinkedDataNamespaces(Set<String> linkedDataNamespaces) {
-		this.linkedDataNamespaces = linkedDataNamespaces;
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#addProgressMonitor(org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder.SPARQLBasedInconsistencyProgressMonitor)
+	 */
+	@Override
+	public void addProgressMonitor(SPARQLBasedInconsistencyProgressMonitor mon) {
+		super.addProgressMonitor(mon);
+		trivialInconsistencyFinder.addProgressMonitor(mon);
 	}
 	
-	public void setUseLinkedData(boolean useLinkedData) {
-		this.useLinkedData = useLinkedData;
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#removeProgressMonitor(org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder.SPARQLBasedInconsistencyProgressMonitor)
+	 */
+	@Override
+	public void removeProgressMonitor(SPARQLBasedInconsistencyProgressMonitor mon) {
+		super.removeProgressMonitor(mon);
+		trivialInconsistencyFinder.removeProgressMonitor(mon);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#reset()
+	 */
+	@Override
+	public void reset() {
+		super.reset();
+		// create an helper which looks for trivial cases for inconsistency
+		trivialInconsistencyFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#setStopIfInconsistencyFound(boolean)
+	 */
+	@Override
 	public void setStopIfInconsistencyFound(boolean stopIfInconsistencyFound) {
-		this.stopIfInconsistencyFound = stopIfInconsistencyFound;
+		super.setStopIfInconsistencyFound(stopIfInconsistencyFound);
+		trivialInconsistencyFinder.setStopIfInconsistencyFound(stopIfInconsistencyFound);
 	}
 	
-	public void stop() {
-		this.stop = true;
-	}
-	
-	public void setAxiomGenerationTracker(AxiomGenerationTracker tracker){
-		this.tracker = tracker;
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedInconsistencyFinder#setAxiomGenerationTracker(org.aksw.mole.ore.sparql.AxiomGenerationTracker)
+	 */
+	@Override
+	public void setAxiomGenerationTracker(AxiomGenerationTracker tracker) {
+		super.setAxiomGenerationTracker(tracker);
 		trivialInconsistencyFinder.setAxiomGenerationTracker(tracker);
-	}
-	
-	private void addAxioms(AxiomGenerator generator, Set<OWLAxiom> axioms){
-		if(tracker != null){
-			tracker.track(generator, axioms);
-		}
-		Set<OWLAxiom> axiomsWithoutIgnored = new HashSet<OWLAxiom>(axioms);
-		axiomsWithoutIgnored.removeAll(axiomsToIgnore);
-		manager.addAxioms(fragment, axiomsWithoutIgnored);
-	}
-	
-	private boolean timeExpired(){
-		boolean timeOut = stopWatch.elapsed(TimeUnit.MILLISECONDS) >= maxRuntimeInMilliseconds;
-		return timeOut;
 	}
 	
 	public void showStatistics(){
@@ -279,33 +247,8 @@ public class SPARQLBasedInconsistencyFinder implements InconsistencyFinder {
 				new ArrayList<AxiomType<?>>(AxiomType.ABoxAxiomTypes).toArray(new AxiomType[]{})).size() + " axioms");
 	}
 	
-	private boolean terminationCriteriaSatisfied() throws TimeOutException {
-		if(stop){
-			return true;
-		} else {
-			//check for timeout
-			boolean timeOut = timeExpired();
-			if(timeOut){
-				consistencyMonitor.start();
-				boolean consistent = reasoner.isConsistent();
-				consistencyMonitor.stop();
-				if(!consistent){
-					return true;
-				}
-				throw new TimeOutException();
-			} else if(stopIfInconsistencyFound){
-				//check for consistency
-				consistencyMonitor.start();
-				boolean consistent = reasoner.isConsistent();
-				consistencyMonitor.stop();
-				return !consistent;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public int compareTo(AxiomGenerator o) {
-		return 0;
+	public static void main(String[] args) throws Exception {
+		Set<OWLAxiom> inconsistentFragment = new SPARQLBasedInconsistencyFinder(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW())).getInconsistentFragment();
+		System.out.println(inconsistentFragment);
 	}
 }

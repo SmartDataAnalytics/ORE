@@ -3,7 +3,7 @@ package org.aksw.mole.ore;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.commons.sparql.api.http.QueryExecutionFactoryHttp;
+import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.mole.ore.model.Knowledgebase;
 import org.aksw.mole.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.mole.ore.model.SPARQLEndpointKnowledgebase;
