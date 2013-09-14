@@ -1,0 +1,21 @@
+It is quite common in ontologies that a subclass has the same head noun as its parent class.<sup>1</sup> 
+By an earlier study we estimated that in ontologies for 
+technical domains this simple pattern is verified in 50–80% of class-subclass pairs such that the subclass name is a multi-token one. This number further increases 
+if we consider thesaurus correspondence (synonymy and hypernymy) rather than literal string equality. In fact, the set-theoretic nature of taxonomic path entails that 
+the correspondence of head nouns along this path should be close to 100% in principle; the only completely innocent deviations from it should 
+be those caused by incomplete thesauri. In other words, any violation of head noun correspondence may potentially indicate a (smaller or greater) problem in the ontology. Prototypical situations are:
+<ul>
+<li>
+Inadequate use of class-subclass relationship, typically in the place of whole-part or class-instance relationship, i.e., a conceptualisation error frequently 
+occurring in novice ontologies.
+</li>
+<li>
+Name shorthanding, typically manifested by use of adjective, such as ‘State-Owned’ (subclass of ‘Company’).
+</li>
+</ul>
+While the former requires complex refactoring of the ontology fragment, the latter can be healed by propagation of the parent name down to the child name.
+
+<hr>
+<div class="footnote"><p>
+<sup>1</sup>
+The head noun is typically the last token, but not always, in particular due to possible prepositional constructions, as, e.g., in ‘HeadOfDepartment’.

@@ -1,0 +1,4 @@
+#label,URL,useReasoning(only if ontology is coherent), imagefile, explanation
+non-exact-matching direct child, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1a.xml, false, tp_np1a.svg, Check for each asserted subClassOf relationship whether the subclass has the same head noun as the superclass.  
+non-matching direct child, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1b.xml, false, tp_np1b.svg, Check for each asserted subClassOf relationship whether the head noun of the superclass is a hypernym of the head noun of the subclass.   
+non-matching child, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1c.xml, true, tp_np1c.svg, Check for each inferred subClassOf relationship whether the head noun of the superclass is a hypernym of the head noun of the subclass.   

@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   preserveAspectRatio="xMidYMid"
+   style="width:100%;height:100%;"
+   viewBox="0 0 1010 500"
+   id="svg4255"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   width="100%"
+   height="100%"
+   sodipodi:docname="tp_np1b.svg">
+  <metadata
+     id="metadata4397">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1176"
+     id="namedview4395"
+     showgrid="false"
+     inkscape:zoom="1.0641607"
+     inkscape:cx="388.05263"
+     inkscape:cy="250"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4255" />
+  <defs
+     id="defs4257" />
+  <rect
+     x="10.5"
+     y="10.5"
+     width="480"
+     height="260"
+     r="15"
+     rx="15"
+     ry="15"
+     fill="#ffffff"
+     stroke="#aaaaaa"
+     stroke-width="2"
+     style="stroke-width: 2px; cursor: move;"
+     id="rect4259" />
+  <text
+     x="30.5"
+     y="30"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#808080"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: bold; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-weight="bold"
+     font-family="Segoe UI"
+     id="text4261">
+    <tspan
+       id="tspan4263">op1</tspan>
+  </text>
+  <rect
+     x="520.5"
+     y="10.5"
+     width="480"
+     height="260"
+     r="15"
+     rx="15"
+     ry="15"
+     fill="#ffffff"
+     stroke="#aaaaaa"
+     stroke-width="2"
+     style="stroke-width: 2px; cursor: move;"
+     id="rect4265" />
+  <text
+     x="540.5"
+     y="30"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#808080"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: bold; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-weight="bold"
+     font-family="Segoe UI"
+     id="text4267">
+    <tspan
+       id="tspan4269">op2</tspan>
+  </text>
+  <rect
+     x="10.494858"
+     y="300.49484"
+     width="989.67352"
+     height="150.01028"
+     r="15"
+     rx="14.845102"
+     ry="15.001028"
+     style="fill:#ffffff;stroke:#aaaaaa;stroke-width:1.98971486px"
+     id="rect4271" />
+  <text
+     x="30.5"
+     y="320"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#808080"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: bold; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-weight="bold"
+     font-family="Segoe UI"
+     id="text4273">
+    <tspan
+       id="tspan4275">pt</tspan>
+  </text>
+  <rect
+     x="40.5"
+     y="70.5"
+     width="70"
+     height="30"
+     r="5"
+     rx="5"
+     ry="5"
+     fill="#c7f464"
+     stroke="#000000"
+     stroke-width="0"
+     style="stroke-width:0px;cursor:move;fill:#349aff;fill-opacity:1"
+     id="rect4277" />
+  <text
+     x="75.5"
+     y="90"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4279">
+    <tspan
+       id="tspan4281">?OP1_A</tspan>
+  </text>
+  <rect
+     x="40.5"
+     y="200.5"
+     width="70"
+     height="30"
+     r="5"
+     rx="5"
+     ry="5"
+     fill="#c7f464"
+     stroke="#000000"
+     stroke-width="0"
+     style="stroke-width:0px;cursor:move;fill:#349aff;fill-opacity:1"
+     id="rect4283" />
+  <text
+     x="75.5"
+     y="220"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4285">
+    <tspan
+       id="tspan4287">?OP1_P</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M75.5,104.5L75.5,190.5"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="-1"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4289" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M78.5,103.5L74.5,103.5"
+     opacity="0"
+     transform="rotate(270 76.5 103.5)"
+     style="opacity: 0;"
+     id="path4291" />
+  <path
+     fill="#000000"
+     stroke="#000000"
+     d="M81.5,196.5L71.5,191.5L71.5,201.5Z"
+     transform="rotate(90 76.5 196.5)"
+     id="path4293" />
+  <rect
+     x="42.5"
+     y="140.5"
+     width="66"
+     height="15"
+     r="0"
+     rx="0"
+     ry="0"
+     fill="#ffffff"
+     stroke="#ffffff"
+     id="rect4295" />
+  <text
+     x="75.5"
+     y="152"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#000000"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: Arial;"
+     font-size="12px"
+     id="text4297">
+    <tspan
+       id="tspan4299">subClassOf</tspan>
+  </text>
+  <rect
+     x="550.5"
+     y="70.5"
+     width="70"
+     height="30"
+     r="5"
+     rx="5"
+     ry="5"
+     fill="#c7f464"
+     stroke="#000000"
+     stroke-width="0"
+     style="stroke-width:0px;cursor:move;fill:#349aff;fill-opacity:1"
+     id="rect4301" />
+  <text
+     x="585.5"
+     y="90"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4303">
+    <tspan
+       id="tspan4305">?OP2_A</tspan>
+  </text>
+  <rect
+     x="550.5"
+     y="200.5"
+     width="70"
+     height="30"
+     r="5"
+     rx="5"
+     ry="5"
+     fill="#c7f464"
+     stroke="#000000"
+     stroke-width="0"
+     style="stroke-width:0px;cursor:move;fill:#349aff;fill-opacity:1"
+     id="rect4307" />
+  <text
+     x="585.5"
+     y="220"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4309">
+    <tspan
+       id="tspan4311">?OP2_P</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M585.5,104.5L585.5,190.5"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="-1"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4313" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M588.5,103.5L584.5,103.5"
+     opacity="0"
+     transform="rotate(270 586.5 103.5)"
+     style="opacity: 0;"
+     id="path4315" />
+  <path
+     fill="#000000"
+     stroke="#000000"
+     d="M591.5,196.5L581.5,191.5L581.5,201.5Z"
+     transform="rotate(90 586.5 196.5)"
+     id="path4317" />
+  <rect
+     x="552.5"
+     y="140.5"
+     width="66"
+     height="15"
+     r="0"
+     rx="0"
+     ry="0"
+     fill="#ffffff"
+     stroke="#ffffff"
+     id="rect4319" />
+  <text
+     x="585.5"
+     y="152"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#000000"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: Arial;"
+     font-size="12px"
+     id="text4321">
+    <tspan
+       id="tspan4323">subClassOf</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M120.5,85.5L540.5,85.5"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="7,4"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4325" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M121.5,86.5L111.5,81.5L111.5,91.5Z"
+     transform="rotate(540 116.5 86.5)"
+     id="path4327" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M551.5,86.5L541.5,81.5L541.5,91.5Z"
+     transform="rotate(360 546.5 86.5)"
+     id="path4329" />
+  <rect
+     x="323.5"
+     y="78.5"
+     width="14"
+     height="15"
+     r="0"
+     rx="0"
+     ry="0"
+     fill="#ffffff"
+     stroke="#ffffff"
+     id="rect4331" />
+  <text
+     x="330.5"
+     y="90"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#000000"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: Arial;"
+     font-size="12px"
+     id="text4333">
+    <tspan
+       id="tspan4335">eq</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M120.5,215.5L540.5,215.5"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="7,4"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4337" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M121.5,216.5L111.5,211.5L111.5,221.5Z"
+     transform="rotate(540 116.5 216.5)"
+     id="path4339" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M551.5,216.5L541.5,211.5L541.5,221.5Z"
+     transform="rotate(360 546.5 216.5)"
+     id="path4341" />
+  <rect
+     x="323.5"
+     y="208.5"
+     width="14"
+     height="15"
+     r="0"
+     rx="0"
+     ry="0"
+     fill="#ffffff"
+     stroke="#ffffff"
+     id="rect4343" />
+  <text
+     x="330.5"
+     y="220"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#000000"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: Arial;"
+     font-size="12px"
+     id="text4345">
+    <tspan
+       id="tspan4347">eq</tspan>
+  </text>
+  <rect
+     x="183.49999999999994"
+     y="129.5"
+     width="125.00000000000011"
+     height="58.000000000000014"
+     r="5"
+     rx="6.170212765957447"
+     ry="6.170212765957447"
+     fill="#556270"
+     stroke="#ffff00"
+     stroke-width="0"
+     style="stroke-width: 0px; cursor: move;"
+     transform="  "
+     id="rect4349" />
+  <text
+     x="246.5"
+     y="148.60000610351562"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4351">
+    <tspan
+       id="tspan4353">head_noun(?OP1_A)</tspan>
+    <tspan
+       dy="14.399999999999999"
+       x="246"
+       id="tspan4355">not_hypernym(1.0)</tspan>
+    <tspan
+       dy="14.399999999999999"
+       x="246"
+       id="tspan4357">head_noun(?OP1_P)</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M114.29361922621966,202.53087216484153L174.01595193445084,182.56504832689913"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="-1"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4359" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M114.89680961310984,203.66499619972282L110.89680961310984,203.66499619972282"
+     opacity="0"
+     transform="rotate(521.514659123657 112.89680961310984 203.66499619972282)"
+     style="opacity: 0;"
+     id="path4361" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M184.25797596722543,181.4797382396959L174.25797596722543,176.4797382396959L174.25797596722543,186.4797382396959Z"
+     transform="rotate(341.514659123657 179.25797596722543 181.4797382396959)"
+     id="path4363" />
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M114.17713765153188,102.05971289479078L174.3071558711703,127.80453007973861"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="-1"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4365" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M114.83856882576595,101.77252506909626L110.83856882576595,101.77252506909626"
+     opacity="0"
+     transform="rotate(203.1783088226323 112.83856882576595 101.77252506909626)"
+     style="opacity: 0;"
+     id="path4367" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M184.40357793558513,130.27249964397487L174.40357793558513,125.27249964397487L174.40357793558513,135.27249964397487Z"
+     transform="rotate(23.17830882263229 179.40357793558513 130.27249964397487)"
+     id="path4369" />
+  <rect
+     x="40.50000000000004"
+     y="360.5"
+     width="183.99999999999991"
+     height="34.00000000000001"
+     r="5"
+     rx="3.2978415963841883"
+     ry="3.2978415963841883"
+     fill="#ff00ff"
+     stroke="#ffff00"
+     stroke-width="0"
+     style="stroke-width: 0px; cursor: move;"
+     transform="  "
+     id="rect4371" />
+  <text
+     x="132.5"
+     y="382"
+     text-anchor="middle"
+     font="10px &quot;Arial&quot;"
+     stroke="none"
+     fill="#ffffff"
+     style="text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-size: 12px; line-height: normal; font-family: 'Segoe UI'; cursor: move;"
+     font-size="12px"
+     font-family="Segoe UI"
+     id="text4373">
+    <tspan
+       id="tspan4375">?OP1_A+head_noun(?OP1_P)</tspan>
+  </text>
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M162.23534649914902,358.33284508222624L553.8243049850041,105.91788729443442"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="7,4"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4377" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M163.05431708519095,359.9164225411131L159.05431708519095,359.9164225411131"
+     opacity="0"
+     transform="rotate(507.19451138021 161.05431708519095 359.9164225411131)"
+     style="opacity: 0;"
+     id="path4379" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M563.5268785198992,103.70894364721721L553.5268785198992,98.70894364721721L553.5268785198992,108.70894364721721Z"
+     transform="rotate(327.19451138021 558.5268785198992 103.70894364721721)"
+     id="path4381" />
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M82.1054026241415,234.27324956334957L123.19945640260919,351.0668760916261"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="7,4"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4383" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M83.94159020095964,232.88662478167478L79.94159020095964,232.88662478167478"
+     opacity="0"
+     transform="rotate(250.61548432064222 81.94159020095964 232.88662478167478)"
+     style="opacity: 0;"
+     id="path4385" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M130.35898746056387,356.28343804581306L120.35898746056387,351.28343804581306L120.35898746056387,361.28343804581306Z"
+     transform="rotate(70.61548432064222 125.35898746056387 356.28343804581306)"
+     id="path4387" />
+  <path
+     fill="none"
+     stroke="#d3d3d3"
+     d="M79.19443952353217,104.42590071704201L127.2656135199367,350.685248207395"
+     fill-opacity="0"
+     stroke-width="1"
+     stroke-dasharray="7,4"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     stroke-miterlimit="1"
+     stroke-opacity="1"
+     style="fill-opacity: 0; stroke-width: 1px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 1; stroke-opacity: 1; cursor: move;"
+     id="path4389" />
+  <path
+     fill="none"
+     stroke="#000000"
+     d="M81.31126085765649,102.962950358521L77.31126085765649,102.962950358521"
+     opacity="0"
+     transform="rotate(258.954449602474 79.31126085765649 102.962950358521)"
+     style="opacity: 0;"
+     id="path4391" />
+  <path
+     fill="#d3d3d3"
+     stroke="#d3d3d3"
+     d="M133.72356018462588,356.0926241036975L123.72356018462588,351.0926241036975L123.72356018462588,361.0926241036975Z"
+     transform="rotate(78.95444960247403 128.72356018462588 356.0926241036975)"
+     id="path4393" />
+</svg>
