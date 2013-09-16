@@ -97,6 +97,10 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.dllearner</groupId>
+			<artifactId>components-core</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
 			<version>1.8.2</version>
@@ -141,6 +145,18 @@
 			<groupId>edu.stanford</groupId>
 			<artifactId>tagger</artifactId>
 			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-distribution</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.clarkparsia</groupId>
+			<artifactId>pellet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.semanticweb.owl.explanation</groupId>
+			<artifactId>explanation-api</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -28,12 +28,6 @@
 		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>owlapi</artifactId>
-					<groupId>net.sourceforge.owlapi</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -56,22 +50,8 @@
 			<artifactId>owlapi-dlsyntax</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.owldl</groupId>
+			<groupId>com.clarkparsia</groupId>
 			<artifactId>pellet</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>jena</artifactId>
-					<groupId>com.hp.hpl.jena</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>owlapi</artifactId>
-					<groupId>net.sourceforge.owlapi</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.owldl</groupId>
-			<artifactId>pellet-jena</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
