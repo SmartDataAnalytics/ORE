@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.model.ResourceType;
@@ -39,7 +39,6 @@ import org.dllearner.algorithms.properties.FunctionalDataPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.FunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.InverseFunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.IrreflexiveObjectPropertyAxiomLearner;
-import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner2;
 import org.dllearner.algorithms.properties.ObjectPropertyRangeAxiomLearner;
 import org.dllearner.algorithms.properties.ReflexiveObjectPropertyAxiomLearner;
@@ -150,10 +149,10 @@ public class EnrichmentManager {
 	
 	private Map<AxiomType, AbstractAxiomLearningAlgorithm> learningAlgorithmInstances = new HashMap<AxiomType, AbstractAxiomLearningAlgorithm>();
 	
-	public EnrichmentManager(SparqlEndpoint endpoint, String cacheDirectory) {
+	public EnrichmentManager(SparqlEndpoint endpoint, CacheEx cache) {
 		this.endpoint = endpoint;
 		
-		reasoner = new SPARQLReasoner(new SparqlEndpointKS(endpoint), cacheDirectory);
+		reasoner = new SPARQLReasoner(new SparqlEndpointKS(endpoint), cache);
 		
 		objectPropertyAlgorithms = new LinkedList<Class<? extends LearningAlgorithm>>();
 		objectPropertyAlgorithms.add(DisjointObjectPropertyAxiomLearner.class);

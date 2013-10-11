@@ -14,13 +14,9 @@ import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.aksw.mole.ore.sparql.generator.AxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
-import org.aksw.mole.ore.util.HermiTReasonerFactory;
-import org.apache.commons.lang.NotImplementedException;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.SparqlEndpointKS;
-import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.semanticweb.owl.explanation.api.ConsoleExplanationProgressMonitor;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owl.explanation.api.ExplanationGenerator;
 import org.semanticweb.owl.explanation.api.ExplanationGeneratorFactory;
@@ -234,7 +230,7 @@ public class QueryPlanLearner {
 	
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW(), new ExtractionDBCache("cache"));
+		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW(), "cache");
 		QueryPlanLearner learner = new QueryPlanLearner(ks);
 		learner.start();
 	}

@@ -46,5 +46,13 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 	public OWLOntology getBaseOntology() {
 		return ontology;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SPARQL Endpoint at " + endpoint.getURL().toString();
+	}
 
 }

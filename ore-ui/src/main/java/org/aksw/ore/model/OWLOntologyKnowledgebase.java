@@ -64,5 +64,13 @@ public class OWLOntologyKnowledgebase implements Knowledgebase{
 			coherent = reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom().isEmpty();
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return ontology.toString();
+	}
 
 }

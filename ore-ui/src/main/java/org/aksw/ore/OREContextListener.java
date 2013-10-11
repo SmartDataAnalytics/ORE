@@ -17,7 +17,7 @@ public class OREContextListener implements ServletContextListener{
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		PatOMatPatternLibrary.init();
 		ScoreExplanationPattern.init();
-		OREConfiguration.loadSettings();
+		OREConfiguration.loadSettings(servletContextEvent.getServletContext());
 	}
 	
 

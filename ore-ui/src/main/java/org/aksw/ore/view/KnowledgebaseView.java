@@ -3,18 +3,26 @@
  */
 package org.aksw.ore.view;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
+import org.aksw.ore.component.FileUploadDialog;
 import org.aksw.ore.component.KnowledgebaseAnalyzationDialog;
 import org.aksw.ore.component.LoadFromURIDialog;
 import org.aksw.ore.component.SPARQLEndpointDialog;
-import org.aksw.ore.component.FileUploadDialog;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
@@ -22,6 +30,9 @@ import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -31,9 +42,9 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -43,6 +54,7 @@ import com.vaadin.ui.VerticalLayout;
 public class KnowledgebaseView extends VerticalLayout implements View, KnowledgebaseLoadingListener {
 	
 	private Label kbInfo;
+	private Button saveOntologyButton;
 	
 	public KnowledgebaseView() {
 		addStyleName("dashboard-view");
@@ -145,6 +157,8 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		buttons.addComponent(endpointButton);
 		buttons.setComponentAlignment(endpointButton, Alignment.MIDDLE_LEFT);
 		
+		buttons.addComponent(createSaveOntologyButton());
+		
 		return buttons;
 	}
 	
@@ -160,6 +174,39 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private void onLoadOntologyFromRepository(){
 		
+	}
+	
+	private Button createSaveOntologyButton(){
+		Button button = new Button("Save ontology");
+		StreamResource res = new StreamResource(new StreamSource() {
+			
+			@Override
+			public InputStream getStream() {
+				Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
+				if(knowledgebase != null){
+					if(knowledgebase instanceof OWLOntologyKnowledgebase){
+						final OWLOntology ontology = ((OWLOntologyKnowledgebase) knowledgebase).getOntology();
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						ByteArrayInputStream bais;
+						try {System.out.println(ontology);
+							ontology.getOWLOntologyManager().saveOntology(ontology, new RDFXMLOntologyFormat(), baos);
+							bais = new ByteArrayInputStream(baos.toByteArray());
+							baos.close();
+							return bais;
+						} catch (OWLOntologyStorageException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				return null;
+			}
+		},"ontology.owl");
+		FileDownloader downloader = new FileDownloader(res);
+		downloader.extend(button);
+		
+		return button;
 	}
 	
 	private void onSetSPARQLEndpoint(){

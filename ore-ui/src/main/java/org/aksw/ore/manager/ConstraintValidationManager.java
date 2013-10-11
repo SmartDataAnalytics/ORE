@@ -43,21 +43,12 @@ public class ConstraintValidationManager {
 	private QueryExecutionFactory qef;
 	private Model model;
 
-	public ConstraintValidationManager(SparqlEndpointKS ks, String cacheDirectory) {
+	public ConstraintValidationManager(SparqlEndpointKS ks, CacheEx cache) {
 		if(ks.isRemote()){
 			SparqlEndpoint endpoint = ks.getEndpoint();
 			qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
-			if(cacheDirectory != null){
-				try {
-					long timeToLive = TimeUnit.DAYS.toMillis(30);
-					CacheCoreEx cacheBackend = CacheCoreH2.create(cacheDirectory, timeToLive, true);
-					CacheEx cacheFrontend = new CacheExImpl(cacheBackend);
-					qef = new QueryExecutionFactoryCacheEx(qef, cacheFrontend);
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+			if(cache != null){
+				qef = new QueryExecutionFactoryCacheEx(qef, cache);
 			}
 			qef = new QueryExecutionFactoryPaginated(qef, 10000);
 			

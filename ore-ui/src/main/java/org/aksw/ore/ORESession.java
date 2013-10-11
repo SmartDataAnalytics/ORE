@@ -3,6 +3,13 @@
  */
 package org.aksw.ore;
 
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
+
+import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
+import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
+import org.aksw.jena_sparql_api.cache.extra.CacheEx;
+import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
 import org.aksw.ore.manager.ConstraintValidationManager;
 import org.aksw.ore.manager.EnrichmentManager;
@@ -59,6 +66,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			SparqlEndpoint endpoint = SparqlEndpoint.getEndpointLOD2Cloud();
 			endpoint.getDefaultGraphURIs().add("http://dbpedia.org");
 			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
+			//SPARQL cache
+			long timeToLive = TimeUnit.DAYS.toMillis(30);
+			CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
+			CacheEx cache = new CacheExImpl(cacheBackend);
 			//dummy explanation manager
 			ExplanationManager expMan = new ExplanationManager(reasoner, reasonerFactory);
 			VaadinSession.getCurrent().setAttribute(ExplanationManager.class, expMan);
@@ -66,10 +77,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
 			//dummy constraint manager
-			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, "validation-cache");
+			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//dummy enrichment manager
-			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), "enrichment-cache");
+			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
 			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
 			//dummy incremental inconsistency finder
 			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
@@ -90,6 +101,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 	}
 	
@@ -123,11 +138,22 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
 			SparqlEndpoint endpoint = ((SPARQLEndpointKnowledgebase) knowledgebase).getEndpoint();
 			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
+			//SPARQL cache
+			CacheEx cache = null;
+			try {
+				long timeToLive = TimeUnit.DAYS.toMillis(30);
+				CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
+				cache = new CacheExImpl(cacheBackend);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 			//constraint manager
-			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, "validation-cache");
+			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//enrichment manager
-			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), "enrichment-cache");
+			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
 			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
 			//incremental inconsistency finder
 			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);

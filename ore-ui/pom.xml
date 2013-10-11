@@ -9,7 +9,7 @@
 	<groupId>org.aksw.ore</groupId>
 	<artifactId>ore-ui</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<name>ORE Web Application</name>
 
 	<properties>
@@ -99,6 +99,24 @@
 		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>stanford-corenlp</artifactId>
+					<groupId>edu.stanford.nlp</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>lucene-analyzers-common</artifactId>
+					<groupId>org.apache.lucene</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>lucene-core</artifactId>
+					<groupId>org.apache.lucene</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>lucene-queryparser</artifactId>
+					<groupId>org.apache.lucene</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
@@ -134,7 +152,7 @@
 		<dependency>
 			<groupId>org.cz.vse.keg</groupId>
 			<artifactId>transformation</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.mit</groupId>
@@ -161,6 +179,7 @@
 	</dependencies>
 
 	<build>
+	<finalName>ore</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -259,4 +278,40 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<profiles>
+	<profile>
+		<id>debian</id>
+		<build>
+		<finalName>ore</finalName>
+			<plugins>
+				<plugin>
+					<artifactId>jdeb</artifactId>
+					<groupId>org.vafer</groupId>
+					<version>1.0</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>jdeb</goal>
+							</goals>
+							<configuration>
+								<dataSet>
+									<data>
+										<src>${project.build.directory}/${project.build.finalName}.war</src>
+										<type>file</type>
+										<mapper>
+											<type>perm</type>
+											<prefix>/var/lib/tomcat6/webapps</prefix>
+										</mapper>
+									</data>
+								</dataSet>
+							<changesIn>src/deb/changes.txt</changesIn>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+</profiles>
 </project>

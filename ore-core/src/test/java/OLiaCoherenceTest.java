@@ -73,7 +73,7 @@ public class OLiaCoherenceTest {
 		
 	}
 
-	@Test
+//	@Test
 	public void testCoherency() {
 		System.out.println(reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom());
 	}

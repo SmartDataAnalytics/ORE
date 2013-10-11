@@ -21,7 +21,6 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
@@ -123,7 +122,7 @@ public class PelletExplanationGenerator implements ExplanationGenerator {
 			OWLOntology ontology = manager.loadOntology(IRI.create("http://protege.stanford.edu/plugins/owl/owl-library/koala.owl"));
 			PelletReasoner reasoner = new PelletReasonerFactory().createNonBufferingReasoner(ontology);
 			PelletExplanationGenerator expGen = new PelletExplanationGenerator(reasoner);
-			ExplanationFormatter formatter = new ExplanationFormatter();
+			ExplanationFormatter formatter = new ExplanationFormatter(manager);
 			
 			for(OWLClass cls : reasoner.getUnsatisfiableClasses().getEntitiesMinusBottom()){
 				OWLAxiom entailment = factory.getOWLSubClassOfAxiom(cls, factory.getOWLNothing());

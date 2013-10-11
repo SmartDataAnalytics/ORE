@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,7 @@ import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -411,7 +414,14 @@ public class NamingView extends VerticalLayout implements View{
 			transformer.transform(source, result);
 			String instructions = result.getWriter().toString();
 			transformation.setInstructions(instructions);
-			transformation.transformOntology(TransformationStrategy.Progressive, true);
+			OWLOntology transformOntology = transformation.transformOntology(TransformationStrategy.Progressive, true);
+			try {
+				transformOntology.getOWLOntologyManager().saveOntology(transformOntology, new FileOutputStream("/home/me/renamed.owl"));
+			} catch (OWLOntologyStorageException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 			Notification.show("Transformation was successful.");
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
@@ -671,6 +681,7 @@ public class NamingView extends VerticalLayout implements View{
 					transformation.saveOntology("patomat_test.owl");
 					transformedOntology = transformation.getOntology();
 					System.out.println(transformedOntology.getLogicalAxiomCount());
+					man.saveOntology(ontology, new FileOutputStream("renamed.owl"));
 				} catch (TransformerConfigurationException e) {
 					e.printStackTrace();
 				} catch (IllegalArgumentException e) {

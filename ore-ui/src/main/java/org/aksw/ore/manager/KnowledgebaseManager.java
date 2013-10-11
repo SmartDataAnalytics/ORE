@@ -8,6 +8,7 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
@@ -18,6 +19,9 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import com.hp.hpl.jena.query.QueryExecution;
 
 public class KnowledgebaseManager implements OWLOntologyLoaderListener{
+	
+	
+	private static final Logger logger = Logger.getLogger(KnowledgebaseManager.class.getName());
 	
 	public interface KnowledgebaseLoadingListener{
 		void knowledgebaseChanged(Knowledgebase knowledgebase);
@@ -36,6 +40,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	public void setKnowledgebase(Knowledgebase knowledgebase) {
+		logger.debug("Set knowledgebase to " + knowledgebase);
 		this.knowledgebase = knowledgebase;
 //		analyzeKnowledgebase();
 		fireKnowledgebaseChanged();
@@ -82,13 +87,13 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		}
 	}
 	
-	public void addListener(KnowledgebaseLoadingListener l){System.out.println("Add listener " + l);
+	public void addListener(KnowledgebaseLoadingListener l){//System.out.println("Add listener " + l);
 		synchronized(listeners){
 			listeners.add(l);
 		}
 	}
 	
-	public void removeListener(KnowledgebaseLoadingListener l){System.out.println("Remove listener " + l);
+	public void removeListener(KnowledgebaseLoadingListener l){//System.out.println("Remove listener " + l);
 		synchronized(listeners){
 			listeners.remove(l);
 		}
@@ -100,17 +105,17 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		}
 	}
 	
-	private void fireKnowledgebaseChanged(){System.out.println("Fire KB changed");
+	private void fireKnowledgebaseChanged(){//System.out.println("Fire KB changed");
 		synchronized(listeners){
-			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {System.out.println(l);
+			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
 				l.knowledgebaseChanged(knowledgebase);
 			}
 		}
 	}
 	
-	private void fireKnowledgebaseAnalyzed(){System.out.println("Fire KB analyzed");
+	private void fireKnowledgebaseAnalyzed(){//System.out.println("Fire KB analyzed");
 		synchronized (listeners) {
-			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {System.out.println(l);
+			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
 				l.knowledgebaseAnalyzed(knowledgebase);
 			}
 		}

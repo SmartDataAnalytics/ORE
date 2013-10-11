@@ -9,9 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import uk.ac.manchester.cs.bhig.util.Tree;
-import uk.ac.manchester.cs.owl.explanation.ordering.DefaultExplanationOrderer;
+import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrderer;
+import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrdererImpl;
 import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationTree;
 
 import com.google.common.cache.CacheBuilder;
@@ -20,7 +22,7 @@ import com.google.common.cache.LoadingCache;
 
 public class ExplanationFormatter2 {
 	
-	private DefaultExplanationOrderer orderer;
+	private ExplanationOrderer orderer;
 	private LoadingCache<Explanation<OWLAxiom>, FormattedExplanation> cache = CacheBuilder.newBuilder()
 		       .maximumSize(100)
 		       .expireAfterWrite(10, TimeUnit.MINUTES)
@@ -31,8 +33,8 @@ public class ExplanationFormatter2 {
 		             }
 		           });
 	
-	public ExplanationFormatter2() {
-		orderer = new DefaultExplanationOrderer();
+	public ExplanationFormatter2(OWLOntologyManager manager) {
+		orderer = new ExplanationOrdererImpl(manager);
 	}
 	
 	public FormattedExplanation getFormattedExplanation(Explanation<OWLAxiom> explanation){

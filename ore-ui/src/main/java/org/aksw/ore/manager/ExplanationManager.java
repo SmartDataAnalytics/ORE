@@ -102,7 +102,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 		rootClassFinder = new StructureBasedRootClassFinder(reasoner);
 		
 		usageChecker = new AxiomUsageChecker(ontology);
-		formatter = new ExplanationFormatter2();
+		formatter = new ExplanationFormatter2(ontology.getOWLOntologyManager());
 	}
 	
 	private ExplanationGeneratorFactory<OWLAxiom> createExplanationGeneratorFactory(ExplanationType type){

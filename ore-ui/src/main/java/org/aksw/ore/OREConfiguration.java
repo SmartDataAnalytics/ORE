@@ -22,11 +22,12 @@ public class OREConfiguration {
 
 	private static String wordNetDirectory;
 	private static String posTaggerModelsDirectory;
+	private static String cacheDirectory;
 	
 	public OREConfiguration() {
 	}
 	
-	public static void loadSettings(){
+	public static void loadSettings(ServletContext servletContext){
 		InputStream is;
 		try {
 			is = OREConfiguration.class.getClassLoader().getResourceAsStream("settings.ini");
@@ -38,8 +39,6 @@ public class OREConfiguration {
 				posTaggerModelsDirectory = baseSection.get("posTaggerModelsDir", String.class).trim();
 			}
 			
-//			ServletContext sc = VaadinServlet.getCurrent().getServletContext();
-			System.out.println(OREConfiguration.class.getClassLoader());
 			if(wordNetDirectory == null || wordNetDirectory.isEmpty()){
 				wordNetDirectory = OREConfiguration.class.getClassLoader().getResource("wordnet").getPath();
 			}
@@ -47,6 +46,9 @@ public class OREConfiguration {
 			if(posTaggerModelsDirectory == null || posTaggerModelsDirectory.isEmpty()){
 				posTaggerModelsDirectory = OREConfiguration.class.getClassLoader().getResource("postagger").getPath();
 			}
+			
+			//set cache directory
+			cacheDirectory = servletContext.getRealPath("cache");
 		} catch (InvalidFileFormatException e2) {
 			e2.printStackTrace();
 		} catch (IOException e2) {
@@ -67,6 +69,13 @@ public class OREConfiguration {
 	 */
 	public static String getPosTaggerModelsDirectory() {
 		return posTaggerModelsDirectory;
+	}
+	
+	/**
+	 * @return the cacheDirectory
+	 */
+	public static String getCacheDirectory() {
+		return cacheDirectory;
 	}
 	
 	

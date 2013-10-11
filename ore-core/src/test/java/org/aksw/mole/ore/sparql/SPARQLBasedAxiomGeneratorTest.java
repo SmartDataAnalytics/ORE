@@ -90,7 +90,7 @@ public class SPARQLBasedAxiomGeneratorTest {
 		propertyRelatedAxiomGenerators.add(PropertyAssertionAxiomForPropertyGenerator.class);
 	}
 
-	@Test
+//	@Test
 	public void testNextAxioms() {
 		for (Class<? extends SPARQLBasedGeneralAxiomGenerator> cls : generalAxiomGenerators) {
 			try {
@@ -116,7 +116,7 @@ public class SPARQLBasedAxiomGeneratorTest {
 		
 	}
 	
-	@Test
+//	@Test
 	public void testNextAxiomsForClass() {
 		OWLClass cls = dataFactory.getOWLClass(IRI.create("http://dbpedia.org/ontology/Book"));
 		for (Class<? extends SPARQLBasedEntityRelatedAxiomGenerator<OWLClass>> generatorClass : classRelatedAxiomGenerators) {
@@ -142,7 +142,7 @@ public class SPARQLBasedAxiomGeneratorTest {
 		}
 	}
 	
-	@Test
+//	@Test
 	public void testNextAxiomsForProperty() {
 		OWLProperty prop = dataFactory.getOWLObjectProperty(IRI.create("http://dbpedia.org/ontology/birthPlace"));
 		for (Class<? extends SPARQLBasedEntityRelatedAxiomGenerator<OWLProperty>> generatorClass : propertyRelatedAxiomGenerators) {
