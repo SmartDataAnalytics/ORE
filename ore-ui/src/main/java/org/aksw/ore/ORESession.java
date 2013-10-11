@@ -57,8 +57,9 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 //			kbMan.addListener(this);
 			//dummy ontology
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-			OWLOntology ontology = man.loadOntology(IRI.create("http://localhost/tambis-patched.owl"));
-			ontology = man.loadOntology(IRI.create("http://localhost/swore.rdf"));
+			OWLOntology ontology = man.loadOntology(IRI.create("http://xmlns.com/foaf/spec/20100809.rdf"));
+//			OWLOntology ontology = man.loadOntology(IRI.create("http://localhost/tambis-patched.owl"));
+//			ontology = man.loadOntology(IRI.create("http://localhost/swore.rdf"));
 			OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 			OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
 			VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
@@ -108,7 +109,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		}
 	}
 	
-	public static void initialize(Knowledgebase knowledgebase){System.out.println("init");
+	public static void initialize(Knowledgebase knowledgebase){
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		if(knowledgebase instanceof OWLOntologyKnowledgebase){
 			OWLOntologyKnowledgebase ontologyKB = (OWLOntologyKnowledgebase) knowledgebase;
