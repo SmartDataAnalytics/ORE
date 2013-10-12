@@ -50,7 +50,6 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	}
 	
 	public static void init(){
-		try {
 			//KB manager
 			KnowledgebaseManager kbMan = new KnowledgebaseManager();
 			VaadinSession.getCurrent().setAttribute(KnowledgebaseManager.class, kbMan);
@@ -113,13 +112,6 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			}
 //			kbMan.setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
 			
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
 	}
 	
 	public static void initialize(Knowledgebase knowledgebase){
