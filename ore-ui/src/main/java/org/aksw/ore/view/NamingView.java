@@ -28,8 +28,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.aksw.ore.OREConfiguration;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.ProgressDialog;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.KnowledgebaseManager;
 import org.aksw.ore.model.NamingPattern;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -277,7 +277,7 @@ public class NamingView extends VerticalLayout implements View{
 			}
 		});
 		
-		return new ConfigurablePanel(namingPatternsTable);
+		return new WhitePanel(namingPatternsTable);
 	}
 	
 	private Component createPatternInstancesView(){
@@ -304,7 +304,7 @@ public class NamingView extends VerticalLayout implements View{
 				return l;
 			}
 		});
-		return new ConfigurablePanel(patternInstancesTable);
+		return new WhitePanel(patternInstancesTable);
 	}
 	
 	private Component createInstructionsView(){
@@ -365,7 +365,7 @@ public class NamingView extends VerticalLayout implements View{
 		instructionsTable.setVisibleColumns(new Object[] {"selected", "instruction"});
 		instructionsTable.setColumnWidth("selected", 30);
 		
-		return new ConfigurablePanel(instructionsTable);
+		return new WhitePanel(instructionsTable);
 	}
 	
 	private void onDetectNamingPattern(){
