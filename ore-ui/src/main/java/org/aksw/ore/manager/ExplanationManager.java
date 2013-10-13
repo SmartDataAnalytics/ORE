@@ -156,7 +156,6 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 		long startTime = System.currentTimeMillis();
 		ExplanationCache cache = explanationType2Cache.get(type);
 		Set<Explanation<OWLAxiom>> explanations = cache.getExplanations(entailment, limit);
-		System.out.println(entailment + ":" + explanations);
 		if(explanations == null || (explanations.size() < limit && !cache.allExplanationsFound(entailment))){
 			ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = getExplanationGeneratorFactory();
 			try {
@@ -360,10 +359,11 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	public static void main(String[] args) throws Exception {
 		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
 		String ontologyURL = "http://owl.cs.manchester.ac.uk/repository/download?ontology=http://www.co-ode.org/ontologies/pizza/pizza.owl&format=OWL/XML";
-		ontologyURL = "file:/home/me/work/ORE_old/ore-core/dataset/BioPortal/inconsistent/Influenza+Ontology";
+//		ontologyURL = "file:/home/me/work/ORE_old/ore-core/dataset/BioPortal/inconsistent/Influenza+Ontology";
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory dataFactory = man.getOWLDataFactory();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+//		ontology = man.loadOntology(IRI.create("/home/me/Downloads/inc.owl"));
 		System.out.println(ontology.getLogicalAxiomCount());
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);

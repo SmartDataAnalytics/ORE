@@ -132,7 +132,7 @@ public class NamingView extends VerticalLayout implements View{
 		layout.addComponent(createInstructionsView(), 4, 0);
 		
 		detectButton = new Button("Detect");
-//		detectButton.addStyleName("icon-detect");
+		detectButton.addStyleName("icon-detect");
 		detectButton.setWidth(null);
 		detectButton.setEnabled(false);
 		detectButton.addClickListener(new Button.ClickListener() {

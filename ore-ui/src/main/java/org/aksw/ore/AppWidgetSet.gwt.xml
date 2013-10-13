@@ -3,7 +3,9 @@
 	    This file is automatically updated based on new dependencies by the
 	    goal "vaadin:update-widgetset".
 	-->
-
+<generate-with class="org.aksw.ore.OptimizedConnectorBundleLoaderFactory">
+      <when-type-assignable class="com.vaadin.client.metadata.ConnectorBundleLoader" />
+</generate-with>
 	<!-- Inherit DefaultWidgetSet -->
 	<inherits name="com.vaadin.DefaultWidgetSet" /> 
     

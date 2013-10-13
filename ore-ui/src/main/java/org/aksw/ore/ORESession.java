@@ -28,7 +28,6 @@ import org.dllearner.reasoning.PelletReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -54,64 +53,68 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			KnowledgebaseManager kbMan = new KnowledgebaseManager();
 			VaadinSession.getCurrent().setAttribute(KnowledgebaseManager.class, kbMan);
 //			kbMan.addListener(this);
-			//use Pellet as OWL reasoner
-			OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 			
-			//dummy ontology
-			OWLOntology ontology = null;
+//			loadDummyKnowledgebases();
+	}
+	
+	private static void loadDummyKnowledgebases(){
+		//use Pellet as OWL reasoner
+		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
+		
+		//dummy ontology
+		OWLOntology ontology = null;
+		try {
+			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+			ontology = man.loadOntology(IRI.create("http://xmlns.com/foaf/spec/20100809.rdf"));
+			
+			OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
+			VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
+			//dummy explanation manager
+			ExplanationManager expMan = new ExplanationManager(reasoner, reasonerFactory);
+			VaadinSession.getCurrent().setAttribute(ExplanationManager.class, expMan);
+			//dummy repair manager
+			RepairManager repMan = new RepairManager(ontology);
+			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
+			//learning manager
+			PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
 			try {
-				OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-				ontology = man.loadOntology(IRI.create("http://xmlns.com/foaf/spec/20100809.rdf"));
-				
-				OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
-				VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
-				//dummy explanation manager
-				ExplanationManager expMan = new ExplanationManager(reasoner, reasonerFactory);
-				VaadinSession.getCurrent().setAttribute(ExplanationManager.class, expMan);
-				//dummy repair manager
-				RepairManager repMan = new RepairManager(ontology);
-				VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
-				//learning manager
-				PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
-				try {
-					pelletReasoner.init();
-				} catch (ComponentInitException e) {
-					e.printStackTrace();
-				}
-				LearningManager learnMan = new LearningManager(pelletReasoner);
-				VaadinSession.getCurrent().setAttribute(LearningManager.class, learnMan);
-			} catch (Exception e) {
+				pelletReasoner.init();
+			} catch (ComponentInitException e) {
 				e.printStackTrace();
 			}
-			
-			//dummy SPARQL endpoint
-			try {
-				SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
-				SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
-				//SPARQL cache
-				long timeToLive = TimeUnit.DAYS.toMillis(30);
-				CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
-				CacheEx cache = new CacheExImpl(cacheBackend);
-				//dummy constraint manager
-				ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
-				VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
-				//dummy enrichment manager
-				EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
-				VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
-				//dummy incremental inconsistency finder
-				SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
-				VaadinSession.getCurrent().setAttribute(SPARQLBasedInconsistencyFinder.class, sparqlBasedInconsistencyFinder);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			
-			//set current KB
-			if(ontology != null){
-				getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
-			}
-//			kbMan.setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
-			
+			LearningManager learnMan = new LearningManager(pelletReasoner);
+			VaadinSession.getCurrent().setAttribute(LearningManager.class, learnMan);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		//dummy SPARQL endpoint
+		try {
+			SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
+			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
+			//SPARQL cache
+			long timeToLive = TimeUnit.DAYS.toMillis(30);
+			CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
+			CacheEx cache = new CacheExImpl(cacheBackend);
+			//dummy constraint manager
+			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
+			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
+			//dummy enrichment manager
+			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
+			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
+			//dummy incremental inconsistency finder
+			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
+			VaadinSession.getCurrent().setAttribute(SPARQLBasedInconsistencyFinder.class, sparqlBasedInconsistencyFinder);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		//set current KB
+		if(ontology != null){
+			getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
+		}
+//		kbMan.setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
 	}
 	
 	public static void initialize(Knowledgebase knowledgebase){

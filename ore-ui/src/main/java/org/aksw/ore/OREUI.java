@@ -12,6 +12,7 @@ import org.aksw.ore.util.HelpManager;
 import org.aksw.ore.view.ConstraintValidationView;
 import org.aksw.ore.view.DebuggingView;
 import org.aksw.ore.view.EnrichmentView;
+import org.aksw.ore.view.InconsistencyDebuggingView;
 import org.aksw.ore.view.KnowledgebaseView;
 import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.NamingView;
@@ -20,6 +21,9 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 
 import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Lists;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -71,6 +75,30 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
         }
     };
     
+    Map<Class<? extends View>, String> view2ButtonLabel = new HashMap<Class<? extends View>, String>(){
+    	{
+    		put(KnowledgebaseView.class, "knowledge base");
+    		put(EnrichmentView.class, "enrichment");
+    		put(DebuggingView.class, "logical\ndebugging");
+    		put(SPARQLDebuggingView.class, "logical\ndebugging");
+    		put(NamingView.class, "naming issue\ndetection");
+    		put(ConstraintValidationView.class, "constraint\nvalidation");
+    	}
+    };
+    
+    private final static BiMap<Class<? extends View>, String> view2Route;
+    static{
+    	Map<Class<? extends View>, String> tmpView2Route = new HashMap<Class<? extends View>, String>();
+    	tmpView2Route.put(KnowledgebaseView.class, "knowledgebase");
+    	tmpView2Route.put(EnrichmentView.class, "enrichment");
+    	tmpView2Route.put(DebuggingView.class, "logical");
+//    	tmpView2Route.put(SPARQLDebuggingView.class, "/logical");
+    	tmpView2Route.put(NamingView.class, "naming");
+    	tmpView2Route.put(ConstraintValidationView.class, "constraints");
+    	
+    	view2Route = ImmutableBiMap.copyOf(tmpView2Route);
+    }
+    
     Map<String, Button> viewNameToMenuButton = new HashMap<String, Button>();
     
     private HelpManager helpManager;
@@ -106,19 +134,21 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
         navigator = new Navigator(this, content);
         
         // Create and register the views
-        navigator.addView("/knowledgebase", new KnowledgebaseView());
-        for (String route : routes.keySet()) {
-        	navigator.addView(route, routes.get(route));
-        }
+        navigator.addView(view2Route.get(KnowledgebaseView.class), new KnowledgebaseView());
+//        for (String route : routes.keySet()) {
+//        	navigator.addView(route, routes.get(route));
+//        }
         
         updateAvailableViews();
+        updateMenuButtons();
         
         String f = Page.getCurrent().getUriFragment();
         if (f != null && f.startsWith("!")) {
             f = f.substring(1);
         }
+        //default view is knowledgebase view
         if (f == null || f.equals("") || f.equals("/")) {
-        	f = "/knowledgebase";
+        	f = view2Route.get(KnowledgebaseView.class);
         }
         navigator.navigateTo(f);
     	viewNameToMenuButton.get(f).addStyleName("selected");
@@ -152,17 +182,42 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     
     private void updateAvailableViews(){
     	Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
-    	if(knowledgebase instanceof OWLOntologyKnowledgebase){
-			navigator.addView("/enrichment", new LearningView());
-			navigator.addView("/logical", new DebuggingView());
-			viewNameToMenuButton.get("/naming").setEnabled(true);
-		} else {
-			navigator.addView("/enrichment", new EnrichmentView());
-			navigator.addView("/logical", new SPARQLDebuggingView());
-			viewNameToMenuButton.get("/naming").setEnabled(false);
-		}
-    	viewNameToMenuButton.get("/enrichment").setEnabled(knowledgebase.canLearn());
-    	viewNameToMenuButton.get("/logical").setEnabled(knowledgebase.canDebug());
+    	if(knowledgebase != null){
+    		if(knowledgebase instanceof OWLOntologyKnowledgebase){
+    			navigator.addView(view2Route.get(EnrichmentView.class), new LearningView());
+    			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()){
+    				navigator.addView(view2Route.get(DebuggingView.class), new DebuggingView());
+    			} else {
+    				navigator.addView(view2Route.get(DebuggingView.class), new InconsistencyDebuggingView());
+    			}
+    			navigator.addView(view2Route.get(NamingView.class), new NamingView());
+    		} else {
+    			navigator.addView(view2Route.get(EnrichmentView.class), new EnrichmentView());
+    			navigator.addView(view2Route.get(DebuggingView.class), new SPARQLDebuggingView());
+    		}
+    		navigator.addView(view2Route.get(ConstraintValidationView.class), new ConstraintValidationView());
+    	}
+    }
+    
+    private void updateMenuButtons(){
+    	Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
+    	if(knowledgebase != null){
+    		if(knowledgebase instanceof OWLOntologyKnowledgebase){
+    			viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(knowledgebase.canLearn());
+    			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(knowledgebase.canDebug());
+    			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(true);
+    		} else {
+    			viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(true);
+    			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(true);
+    			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(false);
+    		}
+    		viewNameToMenuButton.get(view2Route.get(ConstraintValidationView.class)).setEnabled(true);
+    	} else {
+    		viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(false);
+			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(false);
+			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(false);
+			viewNameToMenuButton.get(view2Route.get(ConstraintValidationView.class)).setEnabled(false);
+    	}
     }
     
     private Component createSidebar(){
@@ -244,47 +299,66 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     
     private void createMenu(){
     	//enrichment and knowledge base button
-    	for (final String view : new String[]{"knowledgebase", "enrichment"}) {
-    		String caption = view.equals("knowledgebase") ? "knowledge base" : view;
+    	for (Class<? extends View> view : Lists.newArrayList(KnowledgebaseView.class, EnrichmentView.class, DebuggingView.class, NamingView.class, ConstraintValidationView.class)) {
+    		String caption = view2ButtonLabel.get(view);
+    		final String route = view2Route.get(view);
             Button b = new NativeButton(caption);
-            b.addStyleName("icon-" + view);
+            b.addStyleName("icon-" + route);
             b.addClickListener(new ClickListener() {
                 @Override
                 public void buttonClick(ClickEvent event) {
                     clearMenuSelection();
                     event.getButton().addStyleName("selected");
-                    if (!navigator.getState().equals("/" + view))
-                    	navigator.navigateTo("/" + view);
+                    if (!navigator.getState().equals(route))
+                    	navigator.navigateTo(route);
                 }
             });
             menu.addComponent(b);
-            viewNameToMenuButton.put("/" + view, b);
-    	}
-    	//the debugging buttons in extra layout
-    	HorizontalLayout debugging = new HorizontalLayout();
-    	debugging.setWidth("100px");
-    	debugging.setHeight("100px");
-    	Label debuggingLabel = new Label("Debugging");
-    	debuggingLabel.addStyleName("debugging-label");
-    	menu.addComponent(debuggingLabel);
-    	VerticalLayout l = new VerticalLayout();
-    	for (final String view : new String[]{"logical", "naming", "constraints"}) {
-            Button b = new NativeButton(view);
-            b.addStyleName("icon-" + view);
-            b.addClickListener(new ClickListener() {
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    clearMenuSelection();
-                    event.getButton().addStyleName("selected");
-                    if (!navigator.getState().equals("/" + view))
-                    	navigator.navigateTo("/" + view);
-                }
-            });
-            menu.addComponent(b);
-            viewNameToMenuButton.put("/" + view, b);
-    	}
-    	debugging.addComponent(l);
-    	debugging.setExpandRatio(l, 1f);
+            viewNameToMenuButton.put(route, b);
+		}
+//    	for (final String view : new String[]{"knowledgebase", "enrichment"}) {
+//    		String caption = view.equals("knowledgebase") ? "knowledge base" : view;
+//            Button b = new NativeButton(caption);
+//            b.addStyleName("icon-" + view);
+//            b.addClickListener(new ClickListener() {
+//                @Override
+//                public void buttonClick(ClickEvent event) {
+//                    clearMenuSelection();
+//                    event.getButton().addStyleName("selected");
+//                    if (!navigator.getState().equals("/" + view))
+//                    	navigator.navigateTo("/" + view);
+//                }
+//            });
+//            menu.addComponent(b);
+//            viewNameToMenuButton.put("/" + view, b);
+//    	}
+//    	viewNameToMenuButton.get("/enrichment").setEnabled(false);
+//    	//the debugging buttons in extra layout
+//    	HorizontalLayout debugging = new HorizontalLayout();
+//    	debugging.setWidth("100px");
+//    	debugging.setHeight("100px");
+//    	Label debuggingLabel = new Label("Debugging");
+//    	debuggingLabel.addStyleName("debugging-label");
+//    	menu.addComponent(debuggingLabel);
+//    	VerticalLayout l = new VerticalLayout();
+//    	for (final String view : new String[]{"logical", "naming", "constraints"}) {
+//            Button b = new NativeButton(view);
+//            b.addStyleName("icon-" + view);
+//            b.addClickListener(new ClickListener() {
+//                @Override
+//                public void buttonClick(ClickEvent event) {
+//                    clearMenuSelection();
+//                    event.getButton().addStyleName("selected");
+//                    if (!navigator.getState().equals("/" + view))
+//                    	navigator.navigateTo("/" + view);
+//                }
+//            });
+//            menu.addComponent(b);
+//            b.setEnabled(false);
+//            viewNameToMenuButton.put("/" + view, b);
+//    	}
+//    	debugging.addComponent(l);
+//    	debugging.setExpandRatio(l, 1f);
 //    	menu.addComponent(debugging);
     	
     	menu.addStyleName("menu");
@@ -311,6 +385,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
 		updateAvailableViews();
+		updateMenuButtons();
 	}
 
 	/* (non-Javadoc)

@@ -31,6 +31,7 @@ public class ExplanationsPanel extends VerticalLayout{
 	public ExplanationsPanel() {
 		setImmediate(true);
 		setSpacing(true);
+		setSizeFull();
 	}
 	
 	public void showExplanations(Collection<Explanation<OWLAxiom>> explanations){
