@@ -501,17 +501,26 @@
 		0% {
 		opacity: 0;
 	}
+100% {
+		opacity: 1;
+	}
 	}
 
 @-ms-keyframes fade-in {
 		0% {
 		opacity: 0;
 	}
+100% {
+		opacity: 1;
+	}
 	}
 
 @-o-keyframes fade-in {
 		0% {
 		opacity: 0;
+	}
+100% {
+		opacity: 1;
 	}
 	}
 
@@ -3937,11 +3946,11 @@ body .dashboard.v-app-loading {
 }
 
 .dashboard .v-window-closebox {
-	background: red;
+	/*background: red;*/
 }
 
 .dashboard .v-window-maximizebox {
-	background: blue;
+	/*background: blue;*/
 }
 
 .dashboard .v-window-restorebox {
@@ -4973,7 +4982,7 @@ body .dashboard.v-app-loading {
 }
 
 .dashboard .v-window-closebox {
-	background: #343638;
+	background: #F0F0F0;
 	color: #ddd;
 	font-size: 16px;
 	font-weight: normal;
@@ -5958,7 +5967,7 @@ body .dashboard.v-app-loading {
 	-ms-animation: fade-in 160ms ease-out;
 	-o-animation: fade-in 160ms ease-out;
 	animation: fade-in 160ms ease-out;
-	opacity: 1;
+	/*opacity: 1;*/
 	opacity: 0;
 	-webkit-animation-duration: 1500ms;
 	-moz-animation-duration: 1500ms;
@@ -6399,6 +6408,3 @@ div.footnote {
 .dashboard .dashboard-view .enrichment-options .v-horizontallayout {
 	padding: 40px 40px 40px 40px;	
 }
-
-
-

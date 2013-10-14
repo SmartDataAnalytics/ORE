@@ -15,6 +15,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -35,6 +36,7 @@ public class LoadFromURIDialog extends Window{
 		initUI();
 		uriField.setValue(ontologyURI);
 		onLoadOntology(ontologyURI);
+		setResizeLazy(false);
 	}
 	
 	public LoadFromURIDialog() {
@@ -47,7 +49,7 @@ public class LoadFromURIDialog extends Window{
 		setWidth("300px");
 		addStyleName("no-vertical-drag-hints");
 		addStyleName("no-horizontal-drag-hints");
-		setClosable(false);
+		setClosable(true);
 		setCloseShortcut(KeyCode.ESCAPE, null);
 		
 		VerticalLayout main = new VerticalLayout();
@@ -68,6 +70,7 @@ public class LoadFromURIDialog extends Window{
 		uriField.setWidth("100%");
 		uriField.setHeight(null);
 		uriField.setImmediate(true);
+		uriField.setTextChangeEventMode(TextChangeEventMode.EAGER);
 		uriField.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
