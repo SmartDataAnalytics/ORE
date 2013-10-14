@@ -30,6 +30,14 @@ public class OWLOntologyKnowledgebase implements Knowledgebase{
 		return !consistent || !coherent;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.model.Knowledgebase#canValidate()
+	 */
+	@Override
+	public boolean canValidate() {
+		return !ontology.getIndividualsInSignature().isEmpty();
+	}
+	
 	public boolean isConsistent() {
 		return consistent;
 	}

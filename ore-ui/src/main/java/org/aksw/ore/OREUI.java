@@ -202,16 +202,14 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     private void updateMenuButtons(){
     	Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
     	if(knowledgebase != null){
+    		viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(knowledgebase.canLearn());
+			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(knowledgebase.canDebug());
+			viewNameToMenuButton.get(view2Route.get(ConstraintValidationView.class)).setEnabled(knowledgebase.canValidate());
     		if(knowledgebase instanceof OWLOntologyKnowledgebase){
-    			viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(knowledgebase.canLearn());
-    			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(knowledgebase.canDebug());
     			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(true);
     		} else {
-    			viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(true);
-    			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(true);
     			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(false);
     		}
-    		viewNameToMenuButton.get(view2Route.get(ConstraintValidationView.class)).setEnabled(true);
     	} else {
     		viewNameToMenuButton.get(view2Route.get(EnrichmentView.class)).setEnabled(false);
 			viewNameToMenuButton.get(view2Route.get(DebuggingView.class)).setEnabled(false);

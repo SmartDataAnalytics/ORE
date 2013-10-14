@@ -35,6 +35,14 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.model.Knowledgebase#canValidate()
+	 */
+	@Override
+	public boolean canValidate() {
+		return true;
+	}
+	
 	public SparqlEndpoint getEndpoint() {
 		return endpoint;
 	}

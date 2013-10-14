@@ -4,5 +4,6 @@ public interface Knowledgebase {
 	
 	boolean canLearn();
 	boolean canDebug();
+	boolean canValidate();
 
 }

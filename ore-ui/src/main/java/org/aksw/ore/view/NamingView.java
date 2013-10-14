@@ -37,6 +37,7 @@ import org.aksw.ore.model.RenamingInstruction;
 import org.aksw.ore.util.PatOMatPatternLibrary;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -592,6 +593,7 @@ public class NamingView extends VerticalLayout implements View{
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory dataFactory = man.getOWLDataFactory();
 		OWLOntology ontology = man.loadOntologyFromOntologyDocument(new FileInputStream(new File("/home/me/work/projects/DL-Learner/examples/carcinogenesis/carcinogenesis.owl")));
+		ontology = man.loadOntology(IRI.create("http://xmlns.com/foaf/spec/20100809.rdf"));
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		man.saveOntology(ontology, new RDFXMLOntologyFormat(), baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
@@ -600,11 +602,11 @@ public class NamingView extends VerticalLayout implements View{
 		kbMan.setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
 		
 //		String ontologyURI = "http://nb.vse.cz/~svabo/oaei2011/data/confOf.owl";
-		String namingPattern = "http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1b.xml";
+		String namingPattern = "http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1a.xml";
 //		OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntology(IRI.create(ontologyURI));
 		TransformationPattern tp1 = new TransformationPatternImpl(namingPattern);
 		//pattern detection
-		OntologyTransformation<OWLOntology> transformation = new OntologyTransformationImpl(ontology, "/opt/wordnet-patomat", "/opt/postagger", "/tmp/");//UserSession.getOntology());
+		OntologyTransformation<OWLOntology> transformation = new OntologyTransformationImpl(ontology, "/opt/ore/wordnet", "/opt/ore/postagger", "/tmp/");//UserSession.getOntology());
 		OntologyPatternDetectionImpl detection = new OntologyPatternDetectionImpl(transformation.getDictionaryPath(), transformation.getModelsPath());	
 		ArrayList<String> pattern = detection.queryPatternStructuralAspect2(tp1, bais, false, false);
 		
@@ -663,7 +665,7 @@ public class NamingView extends VerticalLayout implements View{
 					e1.printStackTrace();
 				}
 			    //remove all renaming instance nodes not selected
-				for(RenamingInstruction i : selectedInstructions){
+				for(RenamingInstruction i : selectedInstructions){System.out.println(i);
 					if(!i.isSelected()){
 						parent.removeChild(i.getNode());
 					}
@@ -680,8 +682,8 @@ public class NamingView extends VerticalLayout implements View{
 					OWLOntology transformedOntology = transformation.transformOntology(TransformationStrategy.Progressive, true);
 					transformation.saveOntology("patomat_test.owl");
 					transformedOntology = transformation.getOntology();
-					System.out.println(transformedOntology.getLogicalAxiomCount());
 					man.saveOntology(ontology, new FileOutputStream("renamed.owl"));
+					man.saveOntology(transformedOntology, new FileOutputStream("renamed1.owl"));
 				} catch (TransformerConfigurationException e) {
 					e.printStackTrace();
 				} catch (IllegalArgumentException e) {
