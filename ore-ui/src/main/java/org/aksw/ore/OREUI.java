@@ -304,6 +304,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     		final String route = view2Route.get(view);
             Button b = new NativeButton(caption);
             b.addStyleName("icon-" + route);
+            b.addStyleName("multiline");
             b.addClickListener(new ClickListener() {
                 @Override
                 public void buttonClick(ClickEvent event) {

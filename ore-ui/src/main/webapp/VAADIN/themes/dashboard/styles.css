@@ -6378,6 +6378,10 @@ body .dashboard.v-app-loading {
 	width:80px;
 }
 
+.dashboard .v-nativebutton-multiline .v-nativebutton-caption {
+      white-space: pre;
+}
+
 .no-wrap .v-table-cell-wrapper{
  {   
   white-space: normal;   
@@ -6395,4 +6399,3 @@ div.footnote {
 .dashboard .dashboard-view .enrichment-options .v-horizontallayout {
 	padding: 40px 40px 40px 40px;	
 }
-

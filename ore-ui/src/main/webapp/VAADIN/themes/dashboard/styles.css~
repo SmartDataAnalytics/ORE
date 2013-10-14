@@ -421,6 +421,7 @@
 
 .icon-detect.v-nativebutton:before, .icon-detect > .v-button-wrap:before, .icon-detect.v-label:before, .v-menubar-menuitem-icon-detect:before {
 	content: "\e810";
+	display:block;
 }
 
 .icon-sales.v-nativebutton:before, .icon-sales > .v-button-wrap:before, .icon-sales.v-label:before, .v-menubar-menuitem-icon-sales:before {
@@ -6377,6 +6378,10 @@ body .dashboard.v-app-loading {
 	width:80px;
 }
 
+.dashboard .v-nativebutton-multiline .v-nativebutton-caption {
+      white-space: pre;
+}
+
 .no-wrap .v-table-cell-wrapper{
  {   
   white-space: normal;   
@@ -6394,4 +6399,6 @@ div.footnote {
 .dashboard .dashboard-view .enrichment-options .v-horizontallayout {
 	padding: 40px 40px 40px 40px;	
 }
+
+
 
