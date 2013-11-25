@@ -172,8 +172,12 @@ public class Renderer {
 				isReserved = true;
 				color = c;
 			}
-			if(isReserved){color = "#000000";
+			
+			if(isReserved){
+				color = "#000000";
 				bf.append("<b><font color=" + color + ">" + token + " </font></b>");
+			} else if(token.equals("(not")){//if token equals (not as workaround
+				bf.append("(<b><font color=" + color + ">not</font></b>");
 			} else {
 				bf.append(" " + token + " ");
 			}

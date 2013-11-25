@@ -140,7 +140,9 @@ public class EvaluatedAxiomsTable extends Table{
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						UI.getCurrent().addWindow(new AxiomScoreExplanationDialog(axiomType, (EvaluatedAxiom)itemId));
+						AxiomScoreExplanationDialog dialog = new AxiomScoreExplanationDialog(axiomType, (EvaluatedAxiom)itemId);
+						UI.getCurrent().addWindow(dialog);
+						dialog.center();
 					}
 				});
 //				buttons.addComponent(explainButton);

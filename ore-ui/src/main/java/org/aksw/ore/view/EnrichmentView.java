@@ -8,9 +8,9 @@ import java.util.Set;
 
 import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.EnrichmentProgressDialog;
 import org.aksw.ore.component.EvaluatedAxiomsTable;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.ResourceType;
@@ -32,6 +32,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -39,7 +40,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
@@ -88,13 +88,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		setSplitPosition(25);
 		
 		Component leftSide = createLeftSide();
-		addComponent(new ConfigurablePanel(leftSide));
+		addComponent(new WhitePanel(leftSide));
 		
 		VerticalLayout rightSide = new VerticalLayout();
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
 		rightSide.setCaption("Learned axioms");
-		addComponent(new ConfigurablePanel(rightSide));
+		addComponent(new WhitePanel(rightSide));
 		
 		createAxiomsPanel();
 		rightSide.addComponent(axiomsPanel);
@@ -135,6 +135,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		VerticalLayout leftSide = new VerticalLayout();
 		leftSide.setSizeFull();
 		leftSide.setCaption("Options");
+		leftSide.setSpacing(true);
+		leftSide.setMargin(new MarginInfo(false, false, true, false));
 		
 		Component configForm = createConfigForm();
 		Panel p = new Panel();
@@ -143,13 +145,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		leftSide.addComponent(p);
 		leftSide.setExpandRatio(p, 1f);
 		
-		HorizontalLayout buttonBar = new HorizontalLayout();
-		buttonBar.setWidth(null);
-		buttonBar.setSpacing(true);
-		buttonBar.addComponent(startButton); 
-		buttonBar.addComponent(stopButton);
-		buttonBar.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
-		leftSide.addComponent(buttonBar);
+		leftSide.addComponent(startButton);
+		leftSide.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
 		return leftSide;
 	}
@@ -215,19 +212,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 				
 			}
 		});
-//		HorizontalLayout buttonBar = new HorizontalLayout();
-//		buttonBar.setWidth(null);
-//		buttonBar.setSpacing(true);
-//		buttonBar.addComponent(startButton); 
-//		buttonBar.addComponent(stopButton);
-//		buttonBar.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
-//		form.addComponent(buttonBar);
-		
-//		HorizontalLayout footerLayout = new HorizontalLayout();
-//		footerLayout.addComponent(buttonBar);
-//		footerLayout.setWidth("100%");	 // centering - 3A
-//		footerLayout.setComponentAlignment(buttonBar, Alignment.BOTTOM_CENTER);	 // centering - 3B
-//		form.setFooter(footerLayout);
 		
 		return form;
 	}
@@ -334,20 +318,29 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		if(!axioms.isEmpty()){
 			try {
 				EvaluatedAxiomsTable table = new EvaluatedAxiomsTable(axiomType, axioms);
-				table.setWidth("90%");
+				table.setWidth("100%");
 				String axiomName = axiomType.getName();
 				if(axiomType.equals(AxiomType.IRREFLEXIVE_OBJECT_PROPERTY)){
-					axiomName = "IrreflexiveObjectProperty";
+					axiomName = "Irreflexive Object Property";
 				}
+				axiomName = splitCamelCase(axiomName);
 				table.setCaption(axiomName + " Axioms");
 				tables.add(table);
-				ConfigurablePanel c = new ConfigurablePanel(table);
+				WhitePanel c = new WhitePanel(table);
 				c.setHeight(null);
 				axiomsPanel.addComponent(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private String splitCamelCase(String s){
+		String split = s.replaceAll("([A-Z][a-z]+)", " $1") // Words beginning with UC
+        .replaceAll("([A-Z][A-Z]+)", " $1") // "Words" of only UC
+        .replaceAll("([^A-Za-z ]+)", " $1") // "Words" of non-letters
+        .trim();
+		return split;
 	}
 	
 	private ResourceType getSelectedResourceType(){

@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
 import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
+import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.manager.ConstraintValidationManager;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.manager.ExplanationManager;
@@ -18,6 +19,7 @@ import org.aksw.ore.manager.KnowledgebaseManager;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.manager.LearningManager;
 import org.aksw.ore.manager.RepairManager;
+import org.aksw.ore.manager.SPARQLExplanationManager;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
@@ -28,6 +30,7 @@ import org.dllearner.reasoning.PelletReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -146,18 +149,8 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
 			SparqlEndpoint endpoint = ((SPARQLEndpointKnowledgebase) knowledgebase).getEndpoint();
-			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
-			//SPARQL cache
-			CacheEx cache = null;
-			try {
-				long timeToLive = TimeUnit.DAYS.toMillis(30);
-				CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
-				cache = new CacheExImpl(cacheBackend);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			CacheEx cache = ((SPARQLEndpointKnowledgebase) knowledgebase).getCache();
+			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, cache);
 			//constraint manager
 			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
@@ -165,13 +158,23 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
 			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
 			//incremental inconsistency finder
-			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
-			VaadinSession.getCurrent().setAttribute(SPARQLBasedInconsistencyFinder.class, sparqlBasedInconsistencyFinder);
+			SPARQLBasedTrivialInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
+			VaadinSession.getCurrent().setAttribute(SPARQLBasedTrivialInconsistencyFinder.class, sparqlBasedInconsistencyFinder);
+//			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
+//			VaadinSession.getCurrent().setAttribute(SPARQLBasedInconsistencyFinder.class, sparqlBasedInconsistencyFinder);
 			//explanation manager
-			ExplanationManager expMan = new ExplanationManager(sparqlBasedInconsistencyFinder.getReasoner(), reasonerFactory);
-			VaadinSession.getCurrent().setAttribute(ExplanationManager.class, expMan);
+			OWLOntology ontology = null;
+			try {
+				ontology = OWLManager.createOWLOntologyManager().createOntology();
+			} catch (OWLOntologyCreationException e) {
+				e.printStackTrace();
+			}
+			OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
+			SPARQLExplanationManager expMan = new SPARQLExplanationManager(reasoner, reasonerFactory);
+//			ExplanationManager expMan = new ExplanationManager(sparqlBasedInconsistencyFinder.getReasoner(), reasonerFactory);
+			VaadinSession.getCurrent().setAttribute(SPARQLExplanationManager.class, expMan);
 			//repair manager
-			RepairManager repMan = new RepairManager(sparqlBasedInconsistencyFinder.getReasoner().getRootOntology());
+			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
 		}
 	}
@@ -182,6 +185,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	
 	public static ExplanationManager getExplanationManager(){
 		return VaadinSession.getCurrent().getAttribute(ExplanationManager.class);
+	}
+	
+	public static SPARQLExplanationManager getSPARQLExplanationManager(){
+		return VaadinSession.getCurrent().getAttribute(SPARQLExplanationManager.class);
 	}
 	
 	public static RepairManager getRepairManager(){
@@ -200,8 +207,12 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		return VaadinSession.getCurrent().getAttribute(LearningManager.class);
 	}
 	
-	public static SPARQLBasedInconsistencyFinder getSparqlBasedInconsistencyFinder(){
-		return VaadinSession.getCurrent().getAttribute(SPARQLBasedInconsistencyFinder.class);
+//	public static SPARQLBasedInconsistencyFinder getSparqlBasedInconsistencyFinder(){
+//		return VaadinSession.getCurrent().getAttribute(SPARQLBasedInconsistencyFinder.class);
+//	}
+	
+	public static SPARQLBasedTrivialInconsistencyFinder getSparqlBasedInconsistencyFinder(){
+		return VaadinSession.getCurrent().getAttribute(SPARQLBasedTrivialInconsistencyFinder.class);
 	}
 	
 	public static OWLReasoner getOWLReasoner(){

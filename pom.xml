@@ -46,9 +46,8 @@
 	</scm>
 	
 	<properties>
-		<!-- tell the compiler we can use 1.6 -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<!-- tell the compiler we can use 1.7 -->
+		<compiler.version>1.7</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
@@ -135,6 +134,11 @@
 	<artifactId>owlapi-api</artifactId>
 	<version>3.4.5</version>
 </dependency>
+<dependency>
+				<groupId>net.sourceforge.owlapi.owllink</groupId>
+				<artifactId>owllink</artifactId>
+				<version>1.2.2</version>
+			</dependency>
 			<dependency>
 				<groupId>com.clarkparsia</groupId>
 				<artifactId>pellet</artifactId>

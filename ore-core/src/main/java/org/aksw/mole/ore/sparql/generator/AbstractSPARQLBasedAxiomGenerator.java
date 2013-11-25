@@ -17,7 +17,7 @@ import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
-import org.apache.jena.riot.Lang;
+import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
 import org.dllearner.core.AbstractAxiomLearningAlgorithm;
 import org.dllearner.kb.LocalModelBasedSparqlEndpointKS;
 import org.dllearner.kb.SparqlEndpointKS;
@@ -70,6 +70,8 @@ public abstract class AbstractSPARQLBasedAxiomGenerator implements SPARQLBasedAx
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
+			} else if(ks.getCache() != null){
+				qef = new QueryExecutionFactoryCacheEx(qef, ks.getCache());
 			}
 //			qef = new QueryExecutionFactoryPaginated(qef, 10000);
 			
@@ -121,7 +123,7 @@ public abstract class AbstractSPARQLBasedAxiomGenerator implements SPARQLBasedAx
 	
 	protected Model executeConstructQuery(Query query) {
 		Model model = null;
-		logger.debug("Sending query\n{} ...", query);
+		logger.info("Sending query\n{} ...", query);
 		QueryExecution qe = null;
 		try {
 			qe = qef.createQueryExecution(query);

@@ -29,4 +29,9 @@ public interface InconsistencyFinder extends AxiomGenerator{
 	 * @param timeUnit
 	 */
 	void setAxiomsToIgnore(Set<OWLAxiom> axiomsToIgnore);
+	
+	/**
+	 * The algorithm is supposed to stop as soon as an inconsistency was found.
+	 */
+	void setStopIfInconsistencyFound(boolean stopIfInconsistencyFound);
 }

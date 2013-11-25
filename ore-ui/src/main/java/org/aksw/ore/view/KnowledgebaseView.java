@@ -7,17 +7,25 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
 
+import org.aksw.mole.ore.dataset.TONESDataset;
+import org.aksw.mole.ore.repository.tones.TONESRepository;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.FileUploadDialog;
 import org.aksw.ore.component.KnowledgebaseAnalyzationDialog;
 import org.aksw.ore.component.LoadFromURIDialog;
+import org.aksw.ore.component.OntologyRepositoryDialog;
 import org.aksw.ore.component.SPARQLEndpointDialog;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.aksw.ore.model.SPARQLKnowledgebaseStats;
+import org.aksw.ore.util.URLParameters;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
@@ -32,6 +40,8 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -42,6 +52,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
@@ -55,6 +66,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private Label kbInfo;
 	private Button saveOntologyButton;
+	private OntologyRepositoryDialog repositoryDialog;
 	
 	public KnowledgebaseView() {
 		addStyleName("dashboard-view");
@@ -62,11 +74,12 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		setSpacing(true);
 		setMargin(true);
 		
+		Component buttons = createButtons();
+//		buttons = createMenu();
+		addComponent(buttons);
+		
 		ConfigurablePanel knowledgeBaseInfo = new ConfigurablePanel(createKnowledgeBaseInfo());
 		addComponent(knowledgeBaseInfo);
-		
-		Component buttons = createButtons();
-		addComponent(buttons);
 		
 		setExpandRatio(knowledgeBaseInfo, 1f);
 		
@@ -172,8 +185,18 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		getUI().addWindow(dialog);
 	}
 	
+	private void onLoadOntologyFromURI(String ontologyURI){
+		LoadFromURIDialog dialog = new LoadFromURIDialog(ontologyURI);
+		getUI().addWindow(dialog);
+	}
+	
 	private void onLoadOntologyFromRepository(){
-		
+		if(repositoryDialog == null){
+			TONESRepository repository = new TONESRepository();
+			repository.initialize();
+			repositoryDialog = new OntologyRepositoryDialog(repository);
+		}
+		getUI().addWindow(repositoryDialog);
 	}
 	
 	private Button createSaveOntologyButton(){
@@ -214,6 +237,12 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		getUI().addWindow(dialog);
 	}
 	
+	private void onSetSPARQLEndpoint(String endpointURL, String defaultGraph){
+		SPARQLEndpointDialog dialog = new SPARQLEndpointDialog(endpointURL, defaultGraph);
+		getUI().addWindow(dialog);
+		dialog.okButton.click();
+	}
+	
 	public void refresh(){
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase != null){
@@ -234,11 +263,25 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private void visualizeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
 		SparqlEndpoint endpoint = kb.getEndpoint();
+		SPARQLKnowledgebaseStats stats = kb.getStats();
 		String htmlTable = 
 				"<table>" +
 				"<tr class=\"even\"><td>URL</td><td>" + endpoint.getURL().toString() + "</td></tr>";
 		if(!endpoint.getDefaultGraphURIs().isEmpty()){
 			htmlTable += "<tr class=\"odd\"><td>Default Graph URI</td><td>" + endpoint.getDefaultGraphURIs().iterator().next() + "</td></tr>";
+		
+		}
+		if(stats != null){
+			if(stats.getOwlClassCnt() != -1){
+				htmlTable += "<tr class=\"even\"><td>#Classes</td><td>" + stats.getOwlClassCnt() + "</td></tr>";
+			}
+			if(stats.getOwlObjectPropertyCnt() != -1){
+				htmlTable += "<tr class=\"odd\"><td>#ObjectProperties</td><td>" + stats.getOwlObjectPropertyCnt() + "</td></tr>";
+			}
+			if(stats.getOwlDataPropertyCnt() != -1){
+				htmlTable += "<tr class=\"even\"><td>#DataProperties</td><td>" + stats.getOwlDataPropertyCnt() + "</td></tr>";
+			}
+		
 		}
 		htmlTable += "</table>";	
 		kbInfo.setCaption("SPARQL Endpoint");
@@ -279,12 +322,29 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	 * @see com.vaadin.navigator.View#enter(com.vaadin.navigator.ViewChangeListener.ViewChangeEvent)
 	 */
 	@Override
-	public void enter(ViewChangeEvent event) {System.out.println(event.getParameters());
-		if(event.getParameters() != null){
-	       // split at "/", add each part as a label
-	       String[] p = event.getParameters().split("/");
-	       
-	    }     
+	public void enter(ViewChangeEvent event) {System.out.println("enter " + this);
+		handleURLRequestParameters();
+	}
+	
+	private void handleURLRequestParameters(){
+		String endpointURL = VaadinService.getCurrentRequest().getParameter(URLParameters.ENDPOINT_URL);
+		String defaultGraph = VaadinService.getCurrentRequest().getParameter(URLParameters.DEFAULT_GRAPH);
+		String ontologyURI = VaadinService.getCurrentRequest().getParameter(URLParameters.ONTOLOGY_URL);
+		if(endpointURL != null){
+//			try {
+//				SparqlEndpoint endpoint = new SparqlEndpoint(new URL(endpointURL), defaultGraph);
+//				
+//				boolean isOnline = ORESession.getKnowledgebaseManager().isOnline(endpoint);
+//				if(isOnline){
+//					ORESession.getKnowledgebaseManager().setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
+//				}
+//			} catch (MalformedURLException e) {
+//				onSetSPARQLEndpoint(endpointURL, defaultGraph);
+//			}
+			onSetSPARQLEndpoint(endpointURL, defaultGraph);
+		} else if(ontologyURI != null){
+			onLoadOntologyFromURI(ontologyURI);
+		}
 	}
 
 	/* (non-Javadoc)

@@ -20,7 +20,7 @@ public class TONESRepository implements OntologyRepository{
 	
 	private final String repositoryName = "TONES";
 
-    private final URI repositoryLocation = URI.create("http://owl.cs.manchester.ac.uk/repository");
+    private final URI repositoryLocation = URI.create("http://rpc295.cs.man.ac.uk:8080/repository");
 
     private List<RepositoryEntry> entries;
 

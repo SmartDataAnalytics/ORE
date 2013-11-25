@@ -8,6 +8,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Slider;
@@ -114,10 +116,12 @@ public class LearningOptionsPanel extends VerticalLayout{
 		profileDetails.addComponent(hasValueCheckBox);
 		
 		cardinalityCheckBox = new CheckBox("min/max with");
-		HorizontalLayout cardinalityLayout = new HorizontalLayout();
+		GridLayout cardinalityLayout = new GridLayout(2,1);
+//		HorizontalLayout cardinalityLayout = new HorizontalLayout();
 		cardinalityLayout.addComponent(cardinalityCheckBox);
-		cardinalityLayout.setComponentAlignment(cardinalityCheckBox, Alignment.MIDDLE_LEFT);
+//		cardinalityLayout.setComponentAlignment(cardinalityCheckBox, Alignment.MIDDLE_LEFT);
 		cardinalityLayout.setSizeUndefined();
+		cardinalityLayout.setWidth("100%");
 		cardinalityLayout.addStyleName("no-padding");
 		cardinalitySpinner = new IntStepper();
 		cardinalitySpinner.setStepAmount(1);
@@ -126,7 +130,7 @@ public class LearningOptionsPanel extends VerticalLayout{
 		cardinalitySpinner.setWidth("50px");
 		cardinalitySpinner.setImmediate(true);
 		cardinalityLayout.addComponent(cardinalitySpinner);
-		cardinalityLayout.setComponentAlignment(cardinalitySpinner, Alignment.MIDDLE_LEFT);
+//		cardinalityLayout.setComponentAlignment(cardinalitySpinner, Alignment.MIDDLE_LEFT);
 		profileDetails.addComponent(cardinalityLayout);
 		profileDetails.setComponentAlignment(cardinalityLayout, Alignment.MIDDLE_LEFT);
 		

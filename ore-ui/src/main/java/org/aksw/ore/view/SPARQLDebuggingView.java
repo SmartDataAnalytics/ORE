@@ -10,17 +10,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.mole.ore.explanation.api.ExplanationType;
-import org.aksw.mole.ore.sparql.TimeOutException;
-import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
+import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.ExplanationOptionsPanel;
-import org.aksw.ore.component.ExplanationTable;
 import org.aksw.ore.component.ExplanationsPanel;
 import org.aksw.ore.component.RepairPlanTable;
+import org.aksw.ore.component.SPARQLBasedExplanationTable;
 import org.aksw.ore.component.SPARQLDebuggingProgressDialog;
 import org.aksw.ore.component.SPARULDialog;
-import org.aksw.ore.manager.ExplanationManager;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -61,17 +60,22 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	
 	private Button startButton;
 	private Button stopButton;
+	
 	private CheckBox useLinkedDataCheckBox;
+	private CheckBox assumeUNA;
 	private CheckBox stopIfInconsistencyFoundCheckBox;
+	
 	private ListSelect uriList;
 	
 	private int currentLimit = 0;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
-	private Set<ExplanationTable> tables = new HashSet<ExplanationTable>();
+	private Set<SPARQLBasedExplanationTable> tables = new HashSet<SPARQLBasedExplanationTable>();
 	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<ExplanationTable, Property.ValueChangeListener>();
+	private Map<SPARQLBasedExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<SPARQLBasedExplanationTable, Property.ValueChangeListener>();
 	
-	private SPARQLBasedInconsistencyFinder incFinder;
+//	private SPARQLBasedInconsistencyFinder incFinder;
+	SPARQLBasedTrivialInconsistencyFinder incFinder;
+	Set<Explanation<OWLAxiom>> explanations;
 	
 	public SPARQLDebuggingView() {
 		addStyleName("dashboard-view");
@@ -85,7 +89,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	public void attach() {
 		super.attach();
 		ORESession.getRepairManager().addListener(repairPlanTable);
-		ORESession.getExplanationManager().addListener(this);
+		ORESession.getSPARQLExplanationManager().addListener(this);
 		rebuiltData();
 	}
 	
@@ -96,7 +100,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	public void detach() {
 		super.detach();
 		ORESession.getRepairManager().removeListener(repairPlanTable);
-		ORESession.getExplanationManager().removeListener(this);
+		ORESession.getSPARQLExplanationManager().removeListener(this);
 	}
 	
 	private void initUI(){
@@ -122,7 +126,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		Component configForm = createConfigForm();
 		l.addComponent(configForm);
 		
-		return new ConfigurablePanel(l);
+		return new WhitePanel(l);
 	}
 	
 	private Component createConfigForm(){
@@ -136,6 +140,11 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		stopIfInconsistencyFoundCheckBox.setImmediate(true);
 		form.addComponent(stopIfInconsistencyFoundCheckBox);
 		
+		assumeUNA = new CheckBox("Assume Unique Name Assumption");
+		assumeUNA.setValue(false);
+		assumeUNA.setImmediate(true);
+		form.addComponent(assumeUNA);
+		
 		final ModifiableListField uriList = new ModifiableListField();
 		
 		VerticalLayout linkedDataOptions = new VerticalLayout();
@@ -143,7 +152,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		form.addComponent(linkedDataOptions);
 		
 		useLinkedDataCheckBox = new CheckBox();
-		useLinkedDataCheckBox.setValue(true);
+		useLinkedDataCheckBox.setValue(false);
 		useLinkedDataCheckBox.setCaption("Use Linked Data");
 		useLinkedDataCheckBox.setImmediate(true);
 		useLinkedDataCheckBox.addValueChangeListener(new ValueChangeListener() {
@@ -164,26 +173,12 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-				onSearchingInconsistency();
+				onSearchInconsistency();
 			}
 		});
-//		form.getFooter().addComponent(startButton);
 		
-		stopButton = new Button("Stop");
-		stopButton.addClickListener(new ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				onStopSearchingInconsistency();
-			}
-		});
-		HorizontalLayout buttonBar = new HorizontalLayout();
-		buttonBar.setWidth(null);
-		buttonBar.addComponent(startButton); 
-		buttonBar.addComponent(stopButton);
-		buttonBar.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
-		form.addComponent(buttonBar);
-		form.setComponentAlignment(buttonBar, Alignment.MIDDLE_CENTER);
+		form.addComponent(startButton);
+		form.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
 		return form;
 	}
@@ -216,13 +211,14 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		
 		explanationsPanel = new ExplanationsPanel();
 		explanationsPanel.setCaption("Explanations");
+		explanationsPanel.setHeight(null);
 		//wrapper for scrolling
 		Panel panel = new Panel(explanationsPanel);
 		panel.setSizeFull();
 		l.addComponent(panel);
 		l.setExpandRatio(panel, 1.0f);
 		
-		ConfigurablePanel configurablePanel = new ConfigurablePanel(explanationsPanel);
+		WhitePanel configurablePanel = new WhitePanel(explanationsPanel);
 		configurablePanel.addComponent(optionsPanel);
 		return configurablePanel;
 	}
@@ -270,22 +266,21 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	}
 	
 	private void clearExplanations(){
-		for(ExplanationTable t : tables){
+		for(SPARQLBasedExplanationTable t : tables){
 			explanationsPanel.removeComponent(t);
 		}
 	}
 	
-	private void onSearchingInconsistency(){
+	private void onSearchInconsistency(){
 		startButton.setEnabled(false);
-		stopButton.setEnabled(true);
 		incFinder = ORESession.getSparqlBasedInconsistencyFinder();
 		incFinder.setStopIfInconsistencyFound(stopIfInconsistencyFoundCheckBox.getValue());
-		incFinder.setUseLinkedData((Boolean) useLinkedDataCheckBox.getValue());
+//		incFinder.setUseLinkedData((Boolean) useLinkedDataCheckBox.getValue());
 		Set<String> namespaces = new HashSet<String>();
 		for(Object item : uriList.getItemIds()){
 			namespaces.add((String)item);
 		}
-		incFinder.setLinkedDataNamespaces(namespaces);
+//		incFinder.setLinkedDataNamespaces(namespaces);
 		final SPARQLDebuggingProgressDialog progressDialog = new SPARQLDebuggingProgressDialog();
 		incFinder.addProgressMonitor(progressDialog);
 		getUI().addWindow(progressDialog);
@@ -293,20 +288,20 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			
 			@Override
 			public void run() {
-				try {
-					final Set<OWLAxiom> inconsistentFragment = incFinder.getInconsistentFragment();
+				incFinder.run();
+				explanations = incFinder.getExplanations();
+				ORESession.getSPARQLExplanationManager().setExplanations(explanations);
+				if(!explanations.isEmpty()){
 					UI.getCurrent().access(new Runnable() {
 						
 						@Override
 						public void run() {
-							if(inconsistentFragment != null && !inconsistentFragment.isEmpty()){
 								showExplanations();
-							}
 						}
+
 					});
-				} catch (TimeOutException e) {
-					e.printStackTrace();
 				}
+				
 				UI.getCurrent().access(new Runnable() {
 					
 					@Override
@@ -314,7 +309,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 						incFinder.removeProgressMonitor(progressDialog);
 						UI.getCurrent().removeWindow(progressDialog);
 						startButton.setEnabled(true);
-						stopButton.setEnabled(false);
 					}
 				});
 			}
@@ -322,21 +316,12 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		t.start();
 	}
 	
-	public void onStopSearchingInconsistency() {
-		incFinder.stop();
-	}
-	
+
 	private void showExplanations() {
 		clearExplanations();
-
-		ExplanationManager expMan = ORESession.getExplanationManager();
-		System.out.println(ORESession.getSparqlBasedInconsistencyFinder().getReasoner().isConsistent());
-		expMan.setReasoner(ORESession.getSparqlBasedInconsistencyFinder().getReasoner());
-
-		Set<Explanation<OWLAxiom>> explanations = expMan.getInconsistencyExplanations();
-
+		int i = 1;
 		for (Explanation<OWLAxiom> explanation : explanations) {
-			final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
+			final SPARQLBasedExplanationTable t = new SPARQLBasedExplanationTable(explanation, selectedAxioms);
 			ORESession.getRepairManager().addListener(t);
 //			t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());
 			explanationsPanel.addComponent(t);
@@ -354,19 +339,57 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 				}
 			});
 			tables.add(t);
+			if(i++ == ORESession.getSPARQLExplanationManager().getExplanationLimit()){
+				break;
+			}
 		}
-
 	}
 	
+	public void onStopSearchingInconsistency() {
+		incFinder.stop();
+	}
+	
+//	private void showExplanations() {
+//		clearExplanations();
+//
+//		ExplanationManager expMan = ORESession.getExplanationManager();
+//		System.out.println(ORESession.getSparqlBasedInconsistencyFinder().getReasoner().isConsistent());
+//		expMan.setReasoner(ORESession.getSparqlBasedInconsistencyFinder().getReasoner());
+//
+//		Set<Explanation<OWLAxiom>> explanations = expMan.getInconsistencyExplanations();
+//
+//		for (Explanation<OWLAxiom> explanation : explanations) {
+//			final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
+//			ORESession.getRepairManager().addListener(t);
+////			t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());
+//			explanationsPanel.addComponent(t);
+//			t.addValueChangeListener(new Property.ValueChangeListener() {
+//
+//				{
+//					table2Listener.put(t, this);
+//				}
+//
+//				@Override
+//				public void valueChange(ValueChangeEvent event) {
+//					selectedAxioms.removeAll(t.getExplanation().getAxioms());
+//					selectedAxioms.addAll((Collection<? extends OWLAxiom>) event.getProperty().getValue());
+//					onAxiomSelectionChanged();
+//				}
+//			});
+//			tables.add(t);
+//		}
+//
+//	}
+//	
 	private void onAxiomSelectionChanged(){
 //		propagateAxiomSelection();
 		//we have to remove here all listeners because
-		for(Entry<ExplanationTable, Property.ValueChangeListener> e : table2Listener.entrySet()){
+		for(Entry<SPARQLBasedExplanationTable, Property.ValueChangeListener> e : table2Listener.entrySet()){
 			e.getKey().removeValueChangeListener(e.getValue());
 		}
 		ORESession.getRepairManager().clearRepairPlan();
 		ORESession.getRepairManager().addAxiomsToRemove(selectedAxioms);
-		for(Entry<ExplanationTable, Property.ValueChangeListener> e : table2Listener.entrySet()){
+		for(Entry<SPARQLBasedExplanationTable, Property.ValueChangeListener> e : table2Listener.entrySet()){
 			e.getKey().addValueChangeListener(e.getValue());
 		}
 	}
@@ -392,7 +415,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 //		for(ExplanationTable t : tables){
 //			selectedAxioms.addAll((Collection<? extends OWLAxiom>) t.getValue());
 //		}
-		for(ExplanationTable t : tables){
+		for(SPARQLBasedExplanationTable t : tables){
 			t.removeValueChangeListener(table2Listener.get(t));
 			t.selectAxioms(selectedAxioms);
 			t.addValueChangeListener(table2Listener.get(t));

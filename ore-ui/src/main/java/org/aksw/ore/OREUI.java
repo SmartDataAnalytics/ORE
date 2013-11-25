@@ -9,6 +9,7 @@ import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.util.HelpManager;
+import org.aksw.ore.util.URLParameters;
 import org.aksw.ore.view.ConstraintValidationView;
 import org.aksw.ore.view.DebuggingView;
 import org.aksw.ore.view.EnrichmentView;
@@ -108,7 +109,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	}
     
     @Override
-    protected void init(VaadinRequest request) {
+    protected void init(VaadinRequest request) {System.out.println("init");
     	getPage().setTitle("ORE");
     	root.addStyleName("root");
         root.setSizeFull();
@@ -118,40 +119,31 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
         Component sidebar = createSidebar();
         root.addComponent(sidebar);
         
-        
-//        root.setExpandRatio(l, 1);
-        
         //create the main content panel
         content.setSizeFull();
         content.setStyleName("view-content");
         root.addComponent(content);
         root.setExpandRatio(content, 1f);
         
+        //initialize the ORE session
         ORESession.init();
-        
         
         // Create a navigator to control the views
         navigator = new Navigator(this, content);
         
         // Create and register the views
-        navigator.addView(view2Route.get(KnowledgebaseView.class), new KnowledgebaseView());
-//        for (String route : routes.keySet()) {
-//        	navigator.addView(route, routes.get(route));
-//        }
+        KnowledgebaseView knowledgebaseView = new KnowledgebaseView();
+        navigator.addView(view2Route.get(KnowledgebaseView.class), knowledgebaseView);
         
         updateAvailableViews();
         updateMenuButtons();
-        
-        String f = Page.getCurrent().getUriFragment();
-        if (f != null && f.startsWith("!")) {
-            f = f.substring(1);
-        }
+      
         //default view is knowledgebase view
-        if (f == null || f.equals("") || f.equals("/")) {
-        	f = view2Route.get(KnowledgebaseView.class);
-        }
-        navigator.navigateTo(f);
+        String f = view2Route.get(KnowledgebaseView.class);
+        
+//        navigator.navigateTo(f);
     	viewNameToMenuButton.get(f).addStyleName("selected");
+    	navigator.setErrorView(knowledgebaseView);
     	
     	helpManager = new HelpManager(this);
     	
@@ -383,6 +375,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	 */
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
+		ORESession.initialize(knowledgebase);
 		updateAvailableViews();
 		updateMenuButtons();
 	}

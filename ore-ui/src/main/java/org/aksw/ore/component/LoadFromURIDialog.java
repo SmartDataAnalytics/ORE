@@ -33,7 +33,8 @@ public class LoadFromURIDialog extends Window{
 	private Button okButton;
 	
 	public LoadFromURIDialog(String ontologyURI) {
-		initUI();
+		this();
+		
 		uriField.setValue(ontologyURI);
 		onLoadOntology(ontologyURI);
 		setResizeLazy(false);

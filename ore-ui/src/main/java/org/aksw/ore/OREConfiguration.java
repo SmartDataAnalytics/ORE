@@ -37,6 +37,7 @@ public class OREConfiguration {
 				Section baseSection = ini.get("base");
 				wordNetDirectory = baseSection.get("wordNetDir", String.class).trim();
 				posTaggerModelsDirectory = baseSection.get("posTaggerModelsDir", String.class).trim();
+				cacheDirectory = baseSection.get("cacheDir", String.class).trim();
 			}
 			
 			if(wordNetDirectory == null || wordNetDirectory.isEmpty()){
@@ -47,8 +48,10 @@ public class OREConfiguration {
 				posTaggerModelsDirectory = OREConfiguration.class.getClassLoader().getResource("postagger").getPath();
 			}
 			
-			//set cache directory
-			cacheDirectory = servletContext.getRealPath("cache");
+			if(cacheDirectory == null || cacheDirectory.isEmpty() || !cacheDirectory.startsWith("/")){
+				cacheDirectory = servletContext.getRealPath("cache");
+			}
+			
 		} catch (InvalidFileFormatException e2) {
 			e2.printStackTrace();
 		} catch (IOException e2) {

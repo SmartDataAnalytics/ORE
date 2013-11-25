@@ -24,6 +24,7 @@ import org.aksw.ore.component.RepairPlanTable;
 import org.aksw.ore.manager.ExplanationManager;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.aksw.ore.manager.ExplanationProgressMonitorExtended;
+import org.apache.log4j.Logger;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owl.explanation.api.ExplanationGenerator;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -60,6 +61,9 @@ import com.vaadin.ui.VerticalSplitPanel;
  */
 public class DebuggingView extends HorizontalSplitPanel implements View, ExplanationProgressMonitorExtended<OWLAxiom>, ExplanationManagerListener{
 	
+	
+	private static final Logger logger = Logger.getLogger(DebuggingView.class.getName());
+	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
 	private ExplanationsPanel explanationsPanel;
@@ -74,6 +78,8 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 	
 	private int currentLimit = 1;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
+	
+	private boolean firstViewVisit = true;
 	
 	public DebuggingView() {
 		addStyleName("dashboard-view");
@@ -227,9 +233,11 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 	 */
 	@Override
 	public void enter(ViewChangeEvent event) {
-		ORESession.getExplanationManager().addExplanationProgressMonitor(this);
-		loadUnsatisfiableClasses();
-//		getUnsatisfiableClassesData();
+		if(firstViewVisit){
+			ORESession.getExplanationManager().addExplanationProgressMonitor(this);
+			loadUnsatisfiableClasses();
+			firstViewVisit = false;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -256,7 +264,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 	}
 	
 	private void loadUnsatisfiableClasses(){
-		System.out.println("Loading unsatisfiable classes...");
+		logger.info("Loading unsatisfiable classes...");
 		
 		IndexedContainer c = new IndexedContainer();
 		c.addContainerProperty("class", String.class, null);
@@ -315,6 +323,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 					} 
 				}
 				ORESession.getExplanationManager().removeExplanationProgressMonitor(progressDialog);
+				UI.getCurrent().removeWindow(progressDialog);
 			}
 		}).start();
 	}

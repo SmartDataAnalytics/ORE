@@ -3,11 +3,14 @@ package org.aksw.ore.manager;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -70,7 +73,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 				((OWLOntologyKnowledgebase) knowledgebase).setConsistent(false);
 			}
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
-			
+			analyzeSPARQLEndpoint((SPARQLEndpointKnowledgebase) knowledgebase);
 		}
 //		ORESession.setReasoner(reasoner);
 //		ORESession.initialize(knowledgebase);
@@ -78,6 +81,30 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		fireKnowledgebaseAnalyzed();
 		
 		ORESession.initialize(knowledgebase);
+	}
+	
+	/**
+	 * Compute some statistics about the SPARQL endpoint.
+	 * TODO This should be made configurable in the UI as it is probably based on SPARQL queries and, thus,
+	 * might be also a question of performance.
+	 */
+	private void analyzeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
+		SparqlEndpoint endpoint = kb.getEndpoint();
+		QueryExecutionFactory qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
+		if(kb.getCache()!= null){
+			qef = new QueryExecutionFactoryCacheEx(qef, kb.getCache());
+		}
+		//get number of OWL classes
+		String query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
+		int clsCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+		//get number of OWL object properties
+		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
+		int opCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+		//get number of OWL data properties
+		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
+		int dpCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+		
+		kb.setStats(new SPARQLKnowledgebaseStats(clsCnt, opCnt, dpCnt));
 	}
 	
 	public void updateStatus(){

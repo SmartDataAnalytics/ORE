@@ -6392,9 +6392,13 @@ body .dashboard.v-app-loading {
 }
 
 .no-wrap .v-table-cell-wrapper{
- {   
   white-space: normal;   
  }  
+
+.dashboard .dashboard-view .learning-view .v-csslayout {
+	padding-left: 0px;
+	padding-right: 0px;
+}
 
 .wordwrap-table .v-table-cell-wrapper {
    white-space: normal;
@@ -6408,3 +6412,14 @@ div.footnote {
 .dashboard .dashboard-view .enrichment-options .v-horizontallayout {
 	padding: 40px 40px 40px 40px;	
 }
+
+.dashboard .dashboard-view .enrichment-options .v-horizontallayout-no-padding {
+	padding-left:0px;
+}
+
+.dashboard .dashboard-view .v-horizontallayout .no-padding {
+	padding-left:0px;
+}
+
+
+

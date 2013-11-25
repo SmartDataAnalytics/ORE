@@ -5,30 +5,45 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 
+import com.vaadin.event.Action;
+import com.vaadin.event.FieldEvents.BlurEvent;
+import com.vaadin.event.FieldEvents.BlurListener;
+import com.vaadin.event.FieldEvents.FocusEvent;
+import com.vaadin.event.FieldEvents.FocusListener;
+import com.vaadin.event.ShortcutAction;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class SPARQLEndpointDialog extends Window{
+public class SPARQLEndpointDialog extends Window implements Action.Handler{
 	
 	private static final String TITLE = "Set SPARQL endpoint";
 	
 	private TextField endpointURLField;
 	private TextField defaultGraphURIField;
 	
-	private Button okButton;
+	public Button okButton;
 	private Button cancelButton;
+
+	private ListSelect namedGraphList;
+	
+	Action remove_named_graph = new ShortcutAction("Remove named graph", ShortcutAction.KeyCode.DELETE, null);
 	
 	public SPARQLEndpointDialog() {
 		setCaption(TITLE);
@@ -37,29 +52,96 @@ public class SPARQLEndpointDialog extends Window{
 		setHeight(null);
 		
 		initUI();
+		
+		addActionHandler(this);
 	}
 	
 	public SPARQLEndpointDialog(String endpointURL, String defaultGraphURI) {
+		this();
+		
 		endpointURLField.setValue(endpointURL);
 		defaultGraphURIField.setValue(defaultGraphURI);
-		okButton.click();
 	}
 	
 	private void initUI(){
+		VerticalLayout main = new VerticalLayout();
+		main.setSizeFull();
+		main.setHeight(null);
+		main.setMargin(true);
+		setContent(main);
 		FormLayout form = new FormLayout();
+		main.addComponent(form);
 		form.setWidth("100%");
-		form.setWidth("80%");
-		setContent(form);
+//		form.setWidth("80%");
+//		form.setMargin(true);
+//		setContent(form);
 		
+		//endpoint URL
 		endpointURLField = new TextField("Endpoint URL");
 		endpointURLField.setRequired(true);
-		endpointURLField.setWidth("80%");
+		endpointURLField.setWidth("100%");
+		endpointURLField.setInputPrompt("Enter endpoint URL");
 		form.addComponent(endpointURLField);
 		
-		defaultGraphURIField = new TextField("Default graph URI");
-		defaultGraphURIField.setWidth("80%");
+		//default graph URI
+		defaultGraphURIField = new TextField("Default graph");
+		defaultGraphURIField.setInputPrompt("Enter default graph IRI");
+		defaultGraphURIField.setWidth("100%");
 		form.addComponent(defaultGraphURIField);
 		
+		//named graphs in a list
+		final TextField namedGraphURIField = new TextField();
+		namedGraphURIField.setDescription("Enter a named graph URI and click 'Add' or press 'Return' key to add it to the list below.");
+		namedGraphURIField.setWidth("100%");
+		namedGraphURIField.setInputPrompt("Enter named graph IRI");
+		namedGraphList = new ListSelect();
+		namedGraphList.setWidth("100%");
+		namedGraphList.setNullSelectionAllowed(false);
+		namedGraphList.setMultiSelect(true);
+		final Button addButton = new Button("Add");
+		addButton.setDescription("Add the named graph to the list.");
+		addButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(namedGraphURIField.getValue() != null){
+					//TODO check for valid URI
+					UrlValidator urlValidator = new UrlValidator();
+					if(urlValidator.isValid(namedGraphURIField.getValue())){
+						namedGraphList.addItem(namedGraphURIField.getValue());
+						namedGraphURIField.setValue("");
+					}
+				}
+			}
+		});
+		namedGraphURIField.addFocusListener(new FocusListener() {
+	        @Override
+	        public void focus(FocusEvent event) {
+	        	addButton.setClickShortcut(KeyCode.ENTER);
+	        }
+	    });
+		namedGraphURIField.addBlurListener(new BlurListener() {
+	        @Override
+	        public void blur(BlurEvent event) {
+	        	addButton.removeClickShortcut();
+	        }
+	    });
+		
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setWidth("100%");
+		hl.setSpacing(true);
+		hl.addComponent(namedGraphURIField);
+		hl.addComponent(addButton);
+		hl.setComponentAlignment(addButton, Alignment.BOTTOM_CENTER);
+		hl.setExpandRatio(namedGraphURIField, 1f);
+		VerticalLayout namedGraphInput = new VerticalLayout();
+		namedGraphInput.setSpacing(true);
+		namedGraphInput.addComponent(hl);
+		namedGraphInput.addComponent(namedGraphList);
+		namedGraphInput.setCaption("Named graph(s)");
+		form.addComponent(namedGraphInput);
+		
+		//buttons
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setWidth("100%");
 		buttons.setSpacing(true);
@@ -68,7 +150,7 @@ public class SPARQLEndpointDialog extends Window{
 		okButton.addClickListener(new ClickListener() {
 			
 			@Override
-			public void buttonClick(ClickEvent event) {
+			public void buttonClick(ClickEvent event) {System.out.println("button click");
 				try {
 					List<String> defaultGraphURIs = new ArrayList<String>();
 					if(defaultGraphURIField.getValue() != null){
@@ -78,7 +160,7 @@ public class SPARQLEndpointDialog extends Window{
 					
 					boolean isOnline = ORESession.getKnowledgebaseManager().isOnline(endpoint);
 					if(isOnline){
-						Notification.show("Endpoint is online.");
+//						Notification.show("Endpoint is online.");
 						ORESession.getKnowledgebaseManager().setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
 						close();
 					} else {
@@ -107,11 +189,30 @@ public class SPARQLEndpointDialog extends Window{
 		buttons.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
 		buttons.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
 		
-		form.addComponent(buttons);
+		main.addComponent(buttons);
+		main.setExpandRatio(form, 1f);
 		
 		endpointURLField.focus();
-		
-//		endpointURLField.setValue("http://live.dbpedia.org/sparql");
-//		defaultGraphURIField.setValue("http://dbpedia.org");
+	}
+
+	/* (non-Javadoc)
+	 * @see com.vaadin.event.Action.Handler#getActions(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Action[] getActions(Object target, Object sender) {
+		return new Action[]{remove_named_graph};
+	}
+
+	/* (non-Javadoc)
+	 * @see com.vaadin.event.Action.Handler#handleAction(com.vaadin.event.Action, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void handleAction(Action action, Object sender, Object target) {
+		if(namedGraphList.getValue() != null){
+			Set<Object> selectedItems = (Set<Object>) namedGraphList.getValue();
+			for (Object item : selectedItems) {
+				namedGraphList.removeItem(item);
+			}
+		}
 	}
 }

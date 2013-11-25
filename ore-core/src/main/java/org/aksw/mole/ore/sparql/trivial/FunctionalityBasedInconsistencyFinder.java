@@ -31,11 +31,17 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 	public FunctionalityBasedInconsistencyFinder(SparqlEndpointKS ks) {
 		super(ks);
 		
+//		query = "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+//				"CONSTRUCT " +
+//				"{?p a owl:FunctionalProperty. ?s ?p ?o1. ?s ?p ?o2.} " +
+//				"WHERE " +
+//				"{?p a owl:FunctionalProperty. ?s ?p ?o1. ?s ?p ?o2. FILTER(?o1 != ?o2)} ";
+		
 		query = "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
 				"CONSTRUCT " +
-				"{?p a owl:FunctionalProperty. ?s ?p ?o1. ?s ?p ?o2.} " +
+				"{?p a owl:FunctionalProperty. ?p a owl:DatatypeProperty. ?s ?p ?o1. ?s ?p ?o2.} " +
 				"WHERE " +
-				"{?p a owl:FunctionalProperty. ?s ?p ?o1. ?s ?p ?o2. FILTER(?o1 != ?o2)} ";
+				"{?p a owl:FunctionalProperty. ?p a owl:DatatypeProperty. ?s ?p ?o1. ?s ?p ?o2. FILTER(?o1 != ?o2)} ";
 		
 		
 //		query = "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
@@ -83,13 +89,13 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 		int offset = filterToOffset.containsKey(filter) ? filterToOffset.get(filter) : 0;
 		q.setOffset(offset);
 		Model model = executeConstructQuery(q);
-		StmtIterator stmtIterator = model.listStatements();
-		while(stmtIterator.hasNext()){
-			Statement next = stmtIterator.next();
-			if(next.getObject().toString().contains("http://dbpedia.org/datatype/usDollar")){
-				stmtIterator.remove();
-			}
-		}
+//		StmtIterator stmtIterator = model.listStatements();
+//		while(stmtIterator.hasNext()){
+//			Statement next = stmtIterator.next();
+//			if(next.getObject().toString().contains("http://dbpedia.org/datatype/usDollar")){
+//				stmtIterator.remove();
+//			}
+//		}
 		OWLOntology ontology = convert(model);
 		
 		Set<OWLAxiom> oldAxioms = ontology.getAxioms();

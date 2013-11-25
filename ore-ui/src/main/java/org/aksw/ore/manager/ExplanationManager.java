@@ -150,6 +150,20 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 		return rootClassFinder.getDerivedUnsatisfiableClasses();
 	}
 	
+	/**
+	 * @return the explanationLimit
+	 */
+	public int getExplanationLimit() {
+		return explanationLimit;
+	}
+	
+	/**
+	 * @return the explanationType
+	 */
+	public ExplanationType getExplanationType() {
+		return explanationType;
+	}
+	
 	public Set<Explanation<OWLAxiom>> getExplanations(OWLAxiom entailment, ExplanationType type, int limit){
 		this.currentExplanationType = type;
 		logger.info("Computing max. " + limit + " "  + type + " explanations for " + entailment + "...");
@@ -356,35 +370,10 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
-		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
-		String ontologyURL = "http://owl.cs.manchester.ac.uk/repository/download?ontology=http://www.co-ode.org/ontologies/pizza/pizza.owl&format=OWL/XML";
-//		ontologyURL = "file:/home/me/work/ORE_old/ore-core/dataset/BioPortal/inconsistent/Influenza+Ontology";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLDataFactory dataFactory = man.getOWLDataFactory();
-		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
-//		ontology = man.loadOntology(IRI.create("/home/me/Downloads/inc.owl"));
-		System.out.println(ontology.getLogicalAxiomCount());
-		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
-		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
-		
-		ExplanationManager manager = new ExplanationManager(reasoner, reasonerFactory);
-		manager.setExplanationLimit(2);
-		Set<Explanation<OWLAxiom>> inconsistencyExplanations = manager.getInconsistencyExplanations();
-		for (Explanation<OWLAxiom> explanation : inconsistencyExplanations) {
-			for (OWLAxiom axiom : explanation.getAxioms()) {
-				System.out.println(axiom);
-				for(OWLOntology importedOntology : ontology.getImports()){
-					if(importedOntology.containsAxiom(axiom, true)){
-						System.out.println(importedOntology);
-					} 
-				}
-				
-			}
-		}
-		
-	}
-
+	
+	 //Progress monitor interfaces
+	 
+	
 	/* (non-Javadoc)
 	 * @see org.semanticweb.owl.explanation.api.ExplanationProgressMonitor#foundExplanation(org.semanticweb.owl.explanation.api.ExplanationGenerator, org.semanticweb.owl.explanation.api.Explanation, java.util.Set)
 	 */
@@ -408,6 +397,41 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 			}
 		}
 		return false;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		ToStringRenderer.getInstance().setRenderer(new DLSyntaxObjectRenderer());
+		String ontologyURL = "http://protege.stanford.edu/plugins/owl/owl-library/koala.owl";
+//		ontologyURL = "file:/home/me/work/ORE_old/ore-core/dataset/BioPortal/inconsistent/Influenza+Ontology";
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLDataFactory dataFactory = man.getOWLDataFactory();
+		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+//		URL url = new URL("http://localhost:8088");
+//		OWLlinkReasonerConfiguration reasonerConfiguration = new OWLlinkReasonerConfiguration(url);
+//		OWLlinkHTTPXMLReasonerFactory f = new OWLlinkHTTPXMLReasonerFactory();
+//		f.createReasoner(ontology, reasonerConfiguration);
+//		ontology = man.loadOntology(IRI.create("/home/me/Downloads/inc.owl"));
+		System.out.println(ontology.getLogicalAxiomCount());
+		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
+		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
+		
+		ExplanationManager manager = new ExplanationManager(reasoner, reasonerFactory);
+		manager.setExplanationLimit(2);
+		manager.getRootUnsatisfiableClasses();
+		manager.getDerivedUnsatisfiableClasses();
+		Set<Explanation<OWLAxiom>> inconsistencyExplanations = manager.getInconsistencyExplanations();
+		for (Explanation<OWLAxiom> explanation : inconsistencyExplanations) {
+			for (OWLAxiom axiom : explanation.getAxioms()) {
+				System.out.println(axiom);
+				for(OWLOntology importedOntology : ontology.getImports()){
+					if(importedOntology.containsAxiom(axiom, true)){
+						System.out.println(importedOntology);
+					} 
+				}
+				
+			}
+		}
+		
 	}
 	
 }

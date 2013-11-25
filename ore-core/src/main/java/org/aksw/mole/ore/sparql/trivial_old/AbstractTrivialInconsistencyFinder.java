@@ -1,4 +1,4 @@
-package org.aksw.mole.ore.sparql.trivial;
+package org.aksw.mole.ore.sparql.trivial_old;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.mole.ore.sparql.InconsistencyFinder;
-import org.aksw.mole.ore.sparql.SPARQLBasedInconsistencyProgressMonitor;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.aksw.mole.ore.sparql.generator.AbstractSPARQLBasedAxiomGenerator;
 import org.dllearner.kb.SparqlEndpointKS;
@@ -19,16 +18,12 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
 
-public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiomGenerator implements InconsistencyFinder {
+public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiomGenerator implements InconsistencyFinder {
 	
 	protected String query;
 	protected String filter = "";
@@ -36,35 +31,44 @@ public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiom
 	protected OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 	protected boolean stopIfInconsistencyFound = true;
 	protected Set<Explanation<OWLAxiom>> explanations = new HashSet<>();
+	protected Set<Explanation<OWLAxiom>> allExplanations = new HashSet<>();
 	
 	private List<SPARQLBasedInconsistencyProgressMonitor> progressMonitors = new ArrayList<SPARQLBasedInconsistencyProgressMonitor>();
 	
 	protected final OWLAxiom inconsistencyEntailment = dataFactory.getOWLSubClassOfAxiom(dataFactory.getOWLThing(), dataFactory.getOWLNothing());
 	
+	protected boolean stop = false;
+	
 	public AbstractTrivialInconsistencyFinder(SparqlEndpointKS ks) {
 		super(ks);
 		filterToOffset.put("", 0);
+	}
+	
+	public void run(){
+		run(false);
+	}
+	public abstract void run(boolean cont);
+	
+	public void stop(){
+		stop = true;
+	}
+	
+	protected boolean terminationCriteriaSatisfied(){
+		return stop || isCancelled() || (stopIfInconsistencyFound && !explanations.isEmpty());
+	}
+	
+	protected boolean isCancelled(){
+		boolean cancelled = false;
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			cancelled = cancelled || mon.isCancelled();
+		}
+		return cancelled;
 	}
 
 	@Override
 	public Set<OWLAxiom> getInconsistentFragment() throws TimeOutException {
 		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
-		//add filter if exist
-		String queryString = query;
-		if(filter != null && !filter.isEmpty()){
-			queryString = query.trim();
-			queryString = query.substring(0, query.lastIndexOf('}'));
-			queryString += filter + "}";
-		}
-		Query q = QueryFactory.create(queryString);
-		q.setLimit(limit);
-		int offset = filterToOffset.containsKey(filter) ? filterToOffset.get(filter) : 0;
-		q.setOffset(offset);
-		Model model = executeConstructQuery(q);
-		OWLOntology ontology = convert(model);
-		axioms.addAll(ontology.getLogicalAxioms());
-		filterToOffset.put(filter, offset+limit);
-		System.out.println(q);
+		
 		return axioms;
 	}
 	
@@ -84,7 +88,7 @@ public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiom
 	}
 	
 	public Set<Explanation<OWLAxiom>> getExplanations(){
-		return explanations;
+		return allExplanations;
 	}
 	
 	public void addProgressMonitor(SPARQLBasedInconsistencyProgressMonitor mon) {
@@ -101,9 +105,21 @@ public class AbstractTrivialInconsistencyFinder extends AbstractSPARQLBasedAxiom
 		}
 	}
 	
-	protected void fireMessage(String message) {
+	protected void fireInfoMessage(String message) {
 		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
-			mon.message(message);
+			mon.info(message);
+		}
+	}
+	
+	protected void fireTraceMessage(String message) {
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			mon.trace(message);
+		}
+	}
+	
+	protected void fireProgressUpdate(int current, int total) {
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			mon.updateProgress(current, total);
 		}
 	}
 	

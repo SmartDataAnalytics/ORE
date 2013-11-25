@@ -15,6 +15,7 @@ import org.aksw.ore.component.LearningOptionsPanel;
 import org.aksw.ore.component.ProgressDialog;
 import org.aksw.ore.manager.LearningManager;
 import org.aksw.ore.model.Knowledgebase;
+import org.aksw.ore.model.LearningSetting;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.util.Renderer;
 import org.aksw.ore.util.Renderer.Syntax;
@@ -25,6 +26,11 @@ import org.dllearner.core.owl.NamedClass;
 import org.dllearner.core.owl.Thing;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.utilities.owl.OWLAPIConverter;
+import org.vaadin.peter.contextmenu.ContextMenu;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableFooterEvent;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableHeaderEvent;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableRowEvent;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -35,12 +41,13 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -70,8 +77,33 @@ public class LearningView extends HorizontalSplitPanel implements View{
 	NumberFormat percentFormat = NumberFormat.getPercentInstance();
 	{percentFormat.setMaximumFractionDigits(2);}
 	
+	private ContextMenuOpenedListener.TableListener openListener = new ContextMenuOpenedListener.TableListener() {
+
+		@Override
+		public void onContextMenuOpenFromRow(
+				ContextMenuOpenedOnTableRowEvent event) {
+			System.out.println(event.getItemId());
+//			event.getContextMenu().removeAllItems();
+//			event.getContextMenu().addItem("Item " + event.getItemId());
+		}
+
+		@Override
+		public void onContextMenuOpenFromHeader(
+				ContextMenuOpenedOnTableHeaderEvent event) {
+			event.getContextMenu().removeAllItems();
+			event.getContextMenu().addItem("Item " + event.getPropertyId());
+		}
+
+		@Override
+		public void onContextMenuOpenFromFooter(
+				ContextMenuOpenedOnTableFooterEvent event) {
+			event.getContextMenu().addItem("Item " + event.getPropertyId());
+		}
+	};
+	
 	public LearningView() {
 		addStyleName("dashboard-view");
+		addStyleName("learning-view");
 		initUI();
 	}
 	
@@ -199,6 +231,11 @@ public class LearningView extends HorizontalSplitPanel implements View{
         falsePositivesTable = new IndividualsTable();
         falsePositivesTable.setSizeFull();
         falsePositivesTable.setCaption("False positive examples");
+        ContextMenu tableContextMenu = new ContextMenu();
+		tableContextMenu.addContextMenuTableListener(openListener);
+		tableContextMenu.addItem("Explain why");
+		tableContextMenu.setAsTableContextMenu(falsePositivesTable);
+        
         
         falseNegativesTable = new IndividualsTable();
         falseNegativesTable.setSizeFull();
@@ -218,13 +255,26 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		};
 		classExpressionTable.setCaption("Suggested class expressions");
 		container = new IndexedContainer();
-		container.addContainerProperty("accuracy", Double.class, 0d);
-		container.addContainerProperty("class expression", Label.class, "");
+		container.addContainerProperty("Accuracy", Double.class, 0d);
+		container.addContainerProperty("Class Expression", Label.class, "");
+//		container.addContainerFilter(new Filter() {
+//			
+//			@Override
+//			public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+//				double threshold = optionsPanel.getThresholdInPercentage()/100;
+//				return ((Double) item.getItemProperty("Accuracy").getValue()).doubleValue() >= threshold;
+//			}
+//			
+//			@Override
+//			public boolean appliesToProperty(Object propertyId) {
+//				return propertyId.equals("Accuracy");
+//			}
+//		});
 		classExpressionTable.setContainerDataSource(container);
         classExpressionTable.setSelectable(true);
         classExpressionTable.setSizeFull();
         classExpressionTable.setImmediate(true);
-        classExpressionTable.setColumnWidth("accuracy", 100);
+        classExpressionTable.setColumnWidth("Accuracy", 100);
         classExpressionTable.addValueChangeListener(new Property.ValueChangeListener(){
 
 			@Override
@@ -261,72 +311,83 @@ public class LearningView extends HorizontalSplitPanel implements View{
 //		setLearningEnabled(false);
 		
 		final LearningManager manager = ORESession.getLearningManager();
-		manager.setClass2Describe((NamedClass) tree.getValue());
-		manager.setMaxNrOfResults(optionsPanel.getMaxNrOfResults());
-		manager.setMaxExecutionTimeInSeconds(optionsPanel.getMaxExecutionTimeInSeconds());
-		manager.setNoisePercentage(optionsPanel.getNoiseInPercentage()/100);
-		manager.setThreshold(optionsPanel.getThresholdInPercentage()/100);
-		manager.setUseHasValue(optionsPanel.useHasValueQuantifier());
-		manager.setUseExistentialQuantifier(optionsPanel.useExistentialQuantifier());
-		manager.setUseUniversalQuantifier(optionsPanel.useUniversalQuantifier());
-		manager.setUseNegation(optionsPanel.useNegation());
-		manager.setUseCardinality(optionsPanel.useCardinalityRestriction());
-		manager.setCardinalityLimit(optionsPanel.getCardinalityLimit());
 		
-		final ProgressDialog dialog = new ProgressDialog("Learning..."){
-			@Override
-			protected void onCancelled() {
-				manager.stopLearning();
-				super.onCancelled();
-			}
-		};
-		getUI().addWindow(dialog);
+		LearningSetting learningSetting = new LearningSetting(
+				(NamedClass) tree.getValue(), 
+				optionsPanel.getMaxNrOfResults(), 
+				optionsPanel.getMaxExecutionTimeInSeconds(), 
+				optionsPanel.getNoiseInPercentage()/100, 
+				optionsPanel.getThresholdInPercentage()/100, 
+				optionsPanel.useHasValueQuantifier(), 
+				optionsPanel.useExistentialQuantifier(), 
+				optionsPanel.useUniversalQuantifier(), 
+				optionsPanel.useNegation(), 
+				optionsPanel.useCardinalityRestriction(), 
+				optionsPanel.getCardinalityLimit());
+		manager.setLearningSetting(learningSetting);
 		
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				dialog.setMessage("Preparing learning environment...");
-				manager.prepareLearning();
-				dialog.setMessage("Generating class expressions...");
-				Timer timer = new Timer();
-				timer.schedule(new TimerTask() {
-					
-					@Override
-					public void run() {
-						final List<EvaluatedDescriptionClass> currentlyLearnedDescriptions = manager.getCurrentlyLearnedDescriptions();
-						getUI().access(new Runnable() {
-							
-							@Override
-							public void run() {
-								showClassExpressions(currentlyLearnedDescriptions);
-							}
-						});
+		//check if this setup was already used for learning
+		List<EvaluatedDescriptionClass> learnedDescriptions = manager.getCurrentlyLearnedDescriptionsCached();
+		if(learnedDescriptions != null){
+			showClassExpressions(learnedDescriptions);
+		} else {
+			final ProgressDialog dialog = new ProgressDialog("Learning..."){
+				@Override
+				protected void onCancelled() {
+					manager.stopLearning();
+					super.onCancelled();
+				}
+			};
+			getUI().addWindow(dialog);
+			
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					dialog.setMessage("Preparing learning environment...");
+					manager.prepareLearning();
+					dialog.setMessage("Generating class expressions...");
+					Timer timer = new Timer();
+					timer.schedule(new TimerTask() {
 						
-					}
-				}, 1000, 1000);
-				manager.startLearning();
-				timer.cancel();
-				final List<EvaluatedDescriptionClass> result = manager.getCurrentlyLearnedDescriptions();
-				getUI().access(new Runnable() {
-					
-					@Override
-					public void run() {
-						showClassExpressions(result);
-						dialog.close();
-						if(result.isEmpty()){
-							EvaluatedDescription bestSolution = manager.getBestLearnedDescriptions();
-							Notification notification = new Notification("Could not find any solution above the threshold!",
-									"<br/>Best solution found in " + optionsPanel.getMaxExecutionTimeInSeconds() + "s was <b>" + 
-											renderer.render(bestSolution.getDescription(), Syntax.MANCHESTER, false) +
-									"</b> with " + percentFormat.format(bestSolution.getAccuracy()), Type.WARNING_MESSAGE);
-							notification.setHtmlContentAllowed(true);
-							notification.show(Page.getCurrent());
+						@Override
+						public void run() {
+							final List<EvaluatedDescriptionClass> currentlyLearnedDescriptions = manager.getCurrentlyLearnedDescriptions();
+							getUI().access(new Runnable() {
+								
+								@Override
+								public void run() {
+									showClassExpressions(currentlyLearnedDescriptions);
+								}
+							});
+							
 						}
-					}
-				});
-			}
-		});
-		t.start();
+					}, 1000, 1000);
+					manager.startLearning();
+					timer.cancel();
+					final List<EvaluatedDescriptionClass> result = manager.getCurrentlyLearnedDescriptions();
+					getUI().access(new Runnable() {
+						
+						@Override
+						public void run() {
+							showClassExpressions(result);
+							dialog.close();
+							if(result.isEmpty()){
+								EvaluatedDescription bestSolution = manager.getBestLearnedDescriptions();
+								Notification notification = new Notification("Could not find any solution above the threshold!",
+										"<br/>Best solution found in " + optionsPanel.getMaxExecutionTimeInSeconds() + "s was <b>" + 
+												renderer.render(bestSolution.getDescription(), Syntax.MANCHESTER, false) +
+										"</b> with " + percentFormat.format(bestSolution.getAccuracy()), Type.WARNING_MESSAGE);
+								notification.setHtmlContentAllowed(true);
+								notification.show(Page.getCurrent());
+							}
+						}
+					});
+				}
+			});
+			t.start();
+		}
+		
+		
 
 	}
 	
@@ -334,8 +395,8 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		container.removeAllItems();
 		for(EvaluatedDescriptionClass ec : result){
 			Item item = container.addItem(ec);//container.getItem(container.addItem());
-			item.getItemProperty("class expression").setValue(new Label(renderer.render(ec.getDescription(), Syntax.MANCHESTER), Label.CONTENT_XHTML));
-			item.getItemProperty("accuracy").setValue(ec.getAccuracy());
+			item.getItemProperty("Class Expression").setValue(new Label(renderer.render(ec.getDescription(), Syntax.MANCHESTER), ContentMode.HTML));
+			item.getItemProperty("Accuracy").setValue(ec.getAccuracy());
 		}
 	}
 	
@@ -350,7 +411,6 @@ public class LearningView extends HorizontalSplitPanel implements View{
 	
 	private void setLearningEnabled(boolean enabled){
 		startBtn.setEnabled(enabled);
-//		stopBtn.setEnabled(!enabled);
 	}
 
 	/* (non-Javadoc)

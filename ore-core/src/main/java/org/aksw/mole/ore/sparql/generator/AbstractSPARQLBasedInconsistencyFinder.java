@@ -12,8 +12,10 @@ import java.util.concurrent.TimeUnit;
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
 import org.aksw.mole.ore.sparql.InconsistencyFinder;
 import org.aksw.mole.ore.sparql.LinkedDataDereferencer;
+import org.aksw.mole.ore.sparql.SPARQLBasedInconsistencyProgressMonitor;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.dllearner.kb.SparqlEndpointKS;
+import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -32,17 +34,6 @@ import com.jamonapi.MonitorFactory;
  */
 public abstract class AbstractSPARQLBasedInconsistencyFinder implements InconsistencyFinder{
 	
-	public interface SPARQLBasedInconsistencyProgressMonitor{
-		/**
-		 * This method is called if the underlying is expanded by new axioms returned by axiom generators.
-		 */
-		void fragmentExpanded();
-		/**
-		 * This method is called the first time an inconsistency is found, i.e. the retrieved fragment is inconsistent. 
-		 */
-		void inconsistencyFound();
-		boolean isCancelled();
-	}
 	
 	Stopwatch stopWatch = new Stopwatch();
 	Monitor consistencyMonitor = MonitorFactory.getTimeMonitor("consistency checks");
@@ -53,7 +44,7 @@ public abstract class AbstractSPARQLBasedInconsistencyFinder implements Inconsis
 	public abstract Set<OWLAxiom> getInconsistentFragment() throws TimeOutException;
 
 	protected volatile boolean stop = false;
-	private long maxRuntimeInMilliseconds = TimeUnit.MINUTES.toMillis(1);
+	private long maxRuntimeInMilliseconds = TimeUnit.MINUTES.toMillis(0);
 	protected boolean stopIfInconsistencyFound = true;
 	protected boolean useLinkedData = true;
 	protected Set<String> linkedDataNamespaces = new HashSet<String>();
@@ -119,18 +110,25 @@ public abstract class AbstractSPARQLBasedInconsistencyFinder implements Inconsis
 	}
 
 	protected void addAxioms(AxiomGenerator generator, Set<OWLAxiom> axioms) {
-		if(tracker != null){
-			tracker.track(generator, axioms);
+		try {
+			if(tracker != null){
+				tracker.track(generator, axioms);
+			}
+			Set<OWLAxiom> axiomsWithoutIgnored = new HashSet<OWLAxiom>(axioms);
+			axiomsWithoutIgnored.removeAll(axiomsToIgnore);
+			manager.addAxioms(fragment, axiomsWithoutIgnored);
+			fireFragmentExpanded();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		Set<OWLAxiom> axiomsWithoutIgnored = new HashSet<OWLAxiom>(axioms);
-		axiomsWithoutIgnored.removeAll(axiomsToIgnore);
-		manager.addAxioms(fragment, axiomsWithoutIgnored);
-		fireFragmentExpanded();
 	}
 
 	protected boolean timeExpired() {
-		boolean timeOut = stopWatch.elapsed(TimeUnit.MILLISECONDS) >= maxRuntimeInMilliseconds;
-		return timeOut;
+		if(maxRuntimeInMilliseconds <= 0){
+			return false;
+		} else {
+			return stopWatch.elapsed(TimeUnit.MILLISECONDS) >= maxRuntimeInMilliseconds;
+		}
 	}
 
 	protected boolean terminationCriteriaSatisfied() throws TimeOutException {
@@ -162,6 +160,40 @@ public abstract class AbstractSPARQLBasedInconsistencyFinder implements Inconsis
 		return false;
 	}
 	
+	protected boolean terminationCriteriaSatisfied(boolean trivial) throws TimeOutException {
+		if(stop || isCancelled()){
+			return true;
+		} else {
+			//check for timeout
+			boolean timeOut = timeExpired();
+			if(timeOut){
+				consistencyMonitor.start();
+				boolean consistent = isConsistent();
+				consistencyMonitor.stop();
+				if(!consistent){
+					fireInconsistencyFound();
+					return true;
+				}
+				throw new TimeOutException();
+			} else if(stopIfInconsistencyFound){
+				//check for consistency
+				boolean consistent;
+				if(trivial){
+					consistent = fragment.isEmpty();
+				} else {
+					consistencyMonitor.start();
+					consistent = isConsistent();
+					consistencyMonitor.stop();
+				}
+				if(!consistent){
+					fireInconsistencyFound();
+				}
+				return !consistent;
+			}
+		}
+		return false;
+	}
+	
 	protected abstract boolean isConsistent();
 
 	protected boolean isCancelled() {
@@ -183,6 +215,12 @@ public abstract class AbstractSPARQLBasedInconsistencyFinder implements Inconsis
 	protected void fireInconsistencyFound() {
 		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
 			mon.inconsistencyFound();
+		}
+	}
+	
+	protected void fireInconsistencyFound(Set<Explanation<OWLAxiom>> explanations) {
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			mon.inconsistencyFound(explanations);
 		}
 	}
 

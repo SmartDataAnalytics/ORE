@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.ore.cache.LearningResultsCache;
+import org.aksw.ore.model.LearningSetting;
+import org.apache.log4j.Logger;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedDescription;
@@ -30,6 +33,9 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class LearningManager {
 	
+	
+	private static final Logger logger = Logger.getLogger(LearningManager.class.getName());
+	
 	public enum LearningType {
 		EQUIVALENT, SUPER
 	};
@@ -40,19 +46,7 @@ public class LearningManager {
 	private CELOE la;
 	private PelletReasoner reasoner;
 
-	private NamedClass class2Describe;
-
-	private int maxExecutionTimeInSeconds = 10;
-	private double noisePercentage;
-	private double threshold;
-	private int maxNrOfResults = 10;
-	private int minInstanceCount;
-	private boolean useExistentialQuantifier;
-	private boolean useUniversalQuantifier;
-	private boolean useNegation;
-	private boolean useHasValue;
-	private boolean useCardinality;
-	private int cardinalityLimit;
+	private LearningSetting learningSetting;
 
 	private boolean learningInProgress = false;
 	
@@ -61,6 +55,7 @@ public class LearningManager {
 	
 	public List<EvaluatedDescriptionClass> result;
 
+	public LearningResultsCache learningCache = new LearningResultsCache();
 
 	public LearningManager(PelletReasoner reasoner) {
 		this.reasoner = reasoner;
@@ -78,15 +73,24 @@ public class LearningManager {
 		return reasoner;
 	}
 	
+	/**
+	 * @param learningSetting the learningSetting to set
+	 */
+	public void setLearningSetting(LearningSetting learningSetting) {
+		this.learningSetting = learningSetting;
+	}
+	
 	public void prepareLearning(){
 		preparing = true;
+		//initialization of the reasoner has to be done only once we have a new knowledge base
+		//TODO how to handle changes of the ontology?
 		if(!prepared){
-			System.out.println("Initializing internal reasoner...");
+			logger.info("Initializing internal reasoner...");
 			long startTime = System.currentTimeMillis();
 			prepared = true;
 			reasoner.realise();
 			reasoner.dematerialise();
-			System.out.println("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
+			logger.info("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
 		}
 		initLearningProblem();
 		initLearningAlgorithm();
@@ -106,33 +110,33 @@ public class LearningManager {
 	}
 
 	public void initLearningProblem() {
-		System.out.println("Initializing learning problem...");
+		logger.info("Initializing learning problem...");
 		long startTime = System.currentTimeMillis();
 		lp = new ClassLearningProblem(reasoner);
 		try {
 			lp.setEquivalence(learningType == LearningType.EQUIVALENT);
-			lp.setClassToDescribe(new NamedClass(class2Describe.toString()));
+			lp.setClassToDescribe(learningSetting.getClassToDescribe());
 			lp.setCheckConsistency(false);
 			lp.init();
 		} catch (ComponentInitException e) {
 			e.printStackTrace();
 		} 
-		System.out.println("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
+		logger.info("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
 
 	public void initLearningAlgorithm() {
-		System.out.println("Initializing learning algorithm...");
+		logger.info("Initializing learning algorithm...");
 		long startTime = System.currentTimeMillis();
 		la = new CELOE(lp, reasoner);
 		
 		RhoDRDown op = new RhoDRDown();
 		op.setReasoner(reasoner);
-		op.setUseNegation(useNegation);
-		op.setUseHasValueConstructor(useHasValue);
-		op.setUseAllConstructor(useUniversalQuantifier);
-		op.setUseExistsConstructor(useExistentialQuantifier);
-		op.setUseCardinalityRestrictions(useCardinality);
-		op.setCardinalityLimit(cardinalityLimit);
+		op.setUseNegation(learningSetting.isUseNegation());
+		op.setUseHasValueConstructor(learningSetting.isUseHasValue());
+		op.setUseAllConstructor(learningSetting.isUseUniversalQuantifier());
+		op.setUseExistsConstructor(learningSetting.isUseExistentialQuantifier());
+		op.setUseCardinalityRestrictions(learningSetting.isUseCardinality());
+		op.setCardinalityLimit(learningSetting.getCardinalityLimit());
 		try {
 			op.init();
 		} catch (ComponentInitException e1) {
@@ -140,9 +144,9 @@ public class LearningManager {
 		}
 		la.setOperator(op);
 		
-		la.setMaxExecutionTimeInSeconds(maxExecutionTimeInSeconds);
-		la.setNoisePercentage(noisePercentage);
-		la.setMaxNrOfResults(maxNrOfResults);
+		la.setMaxExecutionTimeInSeconds(learningSetting.getMaxExecutionTimeInSeconds());
+		la.setNoisePercentage(learningSetting.getNoise());
+		la.setMaxNrOfResults(learningSetting.getMaxNrOfResults());
 
 		try {
 			la.init();
@@ -151,28 +155,9 @@ public class LearningManager {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
-		System.out.println("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
-		
+		logger.info("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
 
-	public boolean learnAsynchronously() {
-		if (learningInProgress) {
-			return false;
-		}
-//		initLearningProblem();
-//		initLearningAlgorithm();
-		learningInProgress = true;
-
-		Thread currentLearningThread = new Thread(new LearningRunner(), "Learning Thread");
-		currentLearningThread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-			public void uncaughtException(Thread thread, Throwable throwable) {
-
-			}
-		});
-		currentLearningThread.start();
-		return true;
-	}
-	
 	public boolean startLearning() {
 		if (learningInProgress) {
 			return false;
@@ -183,6 +168,7 @@ public class LearningManager {
 
 		try {
 			la.start();
+			learningCache.putEvaluatedDescriptions(learningSetting, getCurrentlyLearnedDescriptions());
 		} finally {
 			learningInProgress = false;
 		}
@@ -211,11 +197,15 @@ public class LearningManager {
 	public synchronized List<EvaluatedDescriptionClass> getCurrentlyLearnedDescriptions() {
 		if (la != null) {
 			result = Collections.unmodifiableList((List<EvaluatedDescriptionClass>) la
-					.getCurrentlyBestEvaluatedDescriptions(maxNrOfResults, threshold, true));
+					.getCurrentlyBestEvaluatedDescriptions(learningSetting.getMaxNrOfResults(), learningSetting.getThreshold(), true));
 		} else {
 			result = Collections.emptyList();
 		}
 		return result;
+	}
+	
+	public synchronized List<EvaluatedDescriptionClass> getCurrentlyLearnedDescriptionsCached() {
+		return learningCache.getEvaluatedDescriptions(learningSetting);
 	}
 	
 	public synchronized EvaluatedDescription getBestLearnedDescriptions() {
@@ -225,92 +215,12 @@ public class LearningManager {
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public synchronized List<EvaluatedDescriptionClass> getCurrentlyLearnedDescriptions(NamedClass class2Describe, int maxNrOfResults, double treshold) {
-		if (la != null) {
-			result = Collections.unmodifiableList((List<EvaluatedDescriptionClass>) la
-					.getCurrentlyBestEvaluatedDescriptions(maxNrOfResults, threshold, true));
-		} else {
-			result = Collections.emptyList();
-		}
-		return result;
-	}
-	
-	
 	public void setClass2Describe(NamedClass nc) {
-		class2Describe = nc;
+		learningSetting.setClassToDescribe(nc);
 	}
 
 	public NamedClass getClass2Describe() {
-		return class2Describe;
-	}
-
-	public void setMaxExecutionTimeInSeconds(int maxExecutionTimeInSeconds) {
-		this.maxExecutionTimeInSeconds = maxExecutionTimeInSeconds;
-	}
-	
-	public int getMaxExecutionTimeInSeconds() {
-		return maxExecutionTimeInSeconds;
-	}
-
-	public void setNoisePercentage(double noisePercentage) {
-		this.noisePercentage = noisePercentage;
-	}
-
-	public void setMaxNrOfResults(int maxNrOfResults) {
-		this.maxNrOfResults = maxNrOfResults;
-	}
-
-	public void setThreshold(double threshold) {
-		this.threshold = threshold;
-	}
-	
-	public void setMinInstanceCount(int minInstanceCount){
-		this.minInstanceCount = minInstanceCount;
-	}
-	
-	public int getMinInstanceCount(){
-		return minInstanceCount;
-	}
-	
-	public void setUseExistentialQuantifier(boolean useExistentialQuantifier) {
-		this.useExistentialQuantifier = useExistentialQuantifier;
-	}
-
-	public void setUseUniversalQuantifier(boolean useUniversalQuantifier) {
-		this.useUniversalQuantifier = useUniversalQuantifier;
-	}
-
-	public void setUseNegation(boolean useNegation) {
-		this.useNegation = useNegation;
-	}
-
-	public void setUseHasValue(boolean useHasValue) {
-		this.useHasValue = useHasValue;
-	}
-
-	public void setUseCardinality(boolean useCardinality) {
-		this.useCardinality = useCardinality;
-	}
-
-	public void setCardinalityLimit(int cardinalityLimit) {
-		this.cardinalityLimit = cardinalityLimit;
-	}
-
-	public boolean isRunning(){
-		return la.isRunning();
-	}
-
-	private class LearningRunner implements Runnable {
-
-		@Override
-		public void run() {
-			try {
-				la.start();
-			} finally {
-				learningInProgress = false;
-			}
-		}
+		return learningSetting.getClassToDescribe();
 	}
 	
 	public Set<Individual> getFalsePositives(int index){

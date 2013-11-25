@@ -48,7 +48,7 @@ public class ExplanationsPanel extends VerticalLayout{
 		}
 	}
 	
-	public void addExplanation(Explanation explanation){
+	public void addExplanation(Explanation<OWLAxiom> explanation){
 		final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
 		if(explanation.getEntailment() != null){
 //			t.setCaption(((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().toString());

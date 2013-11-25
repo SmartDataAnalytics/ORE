@@ -10,6 +10,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.ProgressIndicator;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -22,16 +24,22 @@ public class ProgressDialog extends Window {
 	
 	protected volatile boolean cancelled = false;
 	protected Label messageLabel;
+	protected Label traceMessageLabel;
+	private ProgressBar progressBar;
 
 	public ProgressDialog() {
 		this("");
 	}
 	
 	public ProgressDialog(String title) {
+		this(title, false);
+	}
+	
+	public ProgressDialog(String title, boolean showProgressBar) {
 		super(title);
 		
 		VerticalLayout l = new VerticalLayout();
-        l.setWidth("400px");
+        l.setWidth("500px");
         l.setMargin(true);
         l.setSpacing(true);
         setContent(l);
@@ -46,6 +54,17 @@ public class ProgressDialog extends Window {
         messageLabel.setImmediate(true);
         messageLabel.setContentMode(ContentMode.HTML);
         l.addComponent(messageLabel);
+        
+        traceMessageLabel = new Label();
+        traceMessageLabel.setImmediate(true);
+        traceMessageLabel.setContentMode(ContentMode.HTML);
+        l.addComponent(traceMessageLabel);
+        
+        if(showProgressBar){
+        	progressBar = new ProgressBar();
+        	l.addComponent(progressBar);
+        	l.setComponentAlignment(progressBar, Alignment.MIDDLE_CENTER);
+        }
 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setWidth("100%");
@@ -73,12 +92,35 @@ public class ProgressDialog extends Window {
 	
 	public void setMessage(final String messageText){
 		UI.getCurrent().access(new Runnable() {
-			
 			@Override
 			public void run() {
 				messageLabel.setValue(messageText);
 			}
 		});
 		
+	}
+	
+	public void setTraceMessage(final String message){
+		UI.getCurrent().access(new Runnable() {
+			@Override
+			public void run() {
+				traceMessageLabel.setValue(message);
+			}
+		});
+		
+	}
+	
+	public void setProgress(final float progress){
+		UI.getCurrent().access(new Runnable() {
+			@Override
+			public void run() {
+				progressBar.setValue(progress);
+			}
+		});
+		
+	}
+	
+	public void setProgress(int current, int total){
+		setProgress((float)current/total);
 	}
 }

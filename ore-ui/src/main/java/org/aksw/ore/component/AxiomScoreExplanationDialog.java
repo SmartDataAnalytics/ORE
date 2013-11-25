@@ -14,16 +14,15 @@ import org.semanticweb.owlapi.model.AxiomType;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.VerticalLayout;
@@ -36,21 +35,15 @@ public class AxiomScoreExplanationDialog extends Window{
 	public AxiomScoreExplanationDialog(AxiomType axiomType, EvaluatedAxiom axiom) {
 		super("Explanation why " + axiom.getAxiom().toString() + " was learned.");
 		setHeight("600px");
-		setWidth("400px");
+		setWidth("600px");
 		setCloseShortcut(KeyCode.ESCAPE, null);
 		setClosable(false);
 		
-		VerticalLayout mainLayout = new VerticalLayout();
-		setContent(mainLayout);
-		
 		VerticalLayout content = new VerticalLayout();
 		content.setSizeFull();
-		content.setHeight(null);
-		
-		Panel p = new Panel(content);
-		p.setSizeFull();
-		mainLayout.addComponent(p);
-		mainLayout.setExpandRatio(p, 1f);
+		content.setSpacing(true);
+		content.setMargin(new MarginInfo(false, true, false, true));
+		setContent(content);
 		
 		//show the total score of the axiom
 		Label label = new Label("<h2>Score: " + df.format(axiom.getScore().getAccuracy()) + "</h2>", ContentMode.HTML);
@@ -59,7 +52,6 @@ public class AxiomScoreExplanationDialog extends Window{
 		
 		//show the explanation text
 		label = new Label(ScoreExplanationPattern.getAccuracyDescription(axiomType, axiom), ContentMode.HTML);
-		label.setWidth("90%");
 		content.addComponent(label);
 		content.setExpandRatio(label, 0f);
 		
@@ -78,8 +70,7 @@ public class AxiomScoreExplanationDialog extends Window{
 			content.setExpandRatio(label, 0f);
 			if(!positives.isEmpty()){
 				final Table positiveExamplesTable = new Table();
-				positiveExamplesTable.setWidth("90%");
-				positiveExamplesTable.setHeight("100%");
+				positiveExamplesTable.setSizeFull();
 				positiveExamplesTable.addContainerProperty("element", String.class, null);
 				positiveExamplesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 				for (KBElement element : positives) {
@@ -123,8 +114,7 @@ public class AxiomScoreExplanationDialog extends Window{
 			content.setExpandRatio(label, 0f);
 			if(!negatives.isEmpty()){
 				Table negativeExamplesTable = new Table();
-				negativeExamplesTable.setWidth("90%");
-				negativeExamplesTable.setHeight("100%");
+				negativeExamplesTable.setSizeFull();
 				negativeExamplesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 				negativeExamplesTable.addContainerProperty("element", String.class, null);
 				for (KBElement element : negatives) {
@@ -156,23 +146,18 @@ public class AxiomScoreExplanationDialog extends Window{
 				content.setExpandRatio(negativeExamplesTable, 1f);
 			}
 		}
-		HorizontalLayout footer = new HorizontalLayout();
-	    footer.addStyleName("footer");
-	    footer.setWidth("100%");
-	    footer.setMargin(true);
 
-	    Button ok = new Button("Close");
-	    ok.addStyleName("wide");
-	    ok.addStyleName("default");
-	    ok.addClickListener(new ClickListener() {
+	    Button closeButton = new Button("Close");
+	    closeButton.addStyleName("wide");
+	    closeButton.addStyleName("default");
+	    closeButton.addClickListener(new ClickListener() {
 	        @Override
 	        public void buttonClick(ClickEvent event) {
 	            close();
 	        }
 	    });
-	    footer.addComponent(ok);
-	    footer.setComponentAlignment(ok, Alignment.TOP_RIGHT);
-	    mainLayout.addComponent(footer);
+	    content.addComponent(closeButton);
+	    content.setComponentAlignment(closeButton, Alignment.MIDDLE_CENTER);
 	}
 	
 
