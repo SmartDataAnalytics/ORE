@@ -24,6 +24,7 @@ import org.aksw.ore.manager.ExplanationManagerListener;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.vaadin.risto.stepper.IntStepper;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -32,6 +33,8 @@ import com.vaadin.data.Validator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -41,6 +44,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Panel;
@@ -52,7 +56,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
-public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, ExplanationManagerListener{
+public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, ExplanationManagerListener, ValueChangeListener{
 	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
@@ -64,6 +68,9 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	private CheckBox useLinkedDataCheckBox;
 	private CheckBox assumeUNA;
 	private CheckBox stopIfInconsistencyFoundCheckBox;
+	
+	private CheckBox limitExplanationCountCheckbox;
+	private IntStepper limitSpinner;
 	
 	private ListSelect uriList;
 	
@@ -90,7 +97,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		super.attach();
 		ORESession.getRepairManager().addListener(repairPlanTable);
 		ORESession.getSPARQLExplanationManager().addListener(this);
-		rebuiltData();
+//		rebuiltData();
 	}
 	
 	/* (non-Javadoc)
@@ -132,15 +139,18 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	private Component createConfigForm(){
 		VerticalLayout form = new VerticalLayout();
 		form.setSizeFull();
-		form.setSpacing(true);
+//		form.setSpacing(true);
 		form.addStyleName("sparql-debug-options-form");
+//		form.setMargin(new MarginInfo(false, false, true, false));
 		
 		stopIfInconsistencyFoundCheckBox = new CheckBox("Stop if inconsistency found");
 		stopIfInconsistencyFoundCheckBox.setValue(true);
 		stopIfInconsistencyFoundCheckBox.setImmediate(true);
+		stopIfInconsistencyFoundCheckBox.setDescription("If enabled, the algorithm stops immediately once reasons for inconsistency are found.");
 		form.addComponent(stopIfInconsistencyFoundCheckBox);
 		
 		assumeUNA = new CheckBox("Assume Unique Name Assumption");
+		assumeUNA.setDescription("If enabled, resources with different names are supposed to be different entities.");
 		assumeUNA.setValue(false);
 		assumeUNA.setImmediate(true);
 		form.addComponent(assumeUNA);
@@ -154,6 +164,8 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		useLinkedDataCheckBox = new CheckBox();
 		useLinkedDataCheckBox.setValue(false);
 		useLinkedDataCheckBox.setCaption("Use Linked Data");
+		useLinkedDataCheckBox.setDescription("If enabled, additional data is fetched by dereferencing the URIs of resources starting with namespaces from the "
+				+ "list below.");
 		useLinkedDataCheckBox.setImmediate(true);
 		useLinkedDataCheckBox.addValueChangeListener(new ValueChangeListener() {
 			
@@ -168,6 +180,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		form.setExpandRatio(linkedDataOptions, 1f);
 		
 		startButton = new Button("Start");
+		startButton.setDescription("Click to start the detection of possible inconsistency causes.");
 		startButton.setDisableOnClick(true);
 		startButton.addClickListener(new ClickListener() {
 			
@@ -203,10 +216,33 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		l.setSizeFull();
 		l.setCaption("Explanations");
 		
+		limitExplanationCountCheckbox = new CheckBox("Limit explanation count to");
+		limitExplanationCountCheckbox.setValue(true);
+		limitExplanationCountCheckbox.addValueChangeListener(this);
+		limitExplanationCountCheckbox.setImmediate(true);
+		limitExplanationCountCheckbox.setWidth(null);
+		
+		limitSpinner = new IntStepper();
+		limitSpinner.setImmediate(true);
+		limitSpinner.setValue(1);
+		limitSpinner.setStepAmount(1);
+		limitSpinner.setMinValue(1);
+		limitSpinner.addValueChangeListener(this);
+		
+		HorizontalLayout limit = new HorizontalLayout();
+		limit.addComponent(limitExplanationCountCheckbox);
+		limit.addComponent(limitSpinner);
+		limit.setExpandRatio(limitSpinner, 1f);
+		limit.setComponentAlignment(limitSpinner, Alignment.MIDDLE_LEFT);
+		limit.setComponentAlignment(limitExplanationCountCheckbox, Alignment.MIDDLE_CENTER);
+		limit.addStyleName("explanation-options");
+//		l.addComponent(limit);
+		limit.setWidth(null);
+		
 		//put the options in the header of the portal
-		optionsPanel = new ExplanationOptionsPanel();
-		optionsPanel.setWidth(null);
-		l.addComponent(optionsPanel);
+//		optionsPanel = new ExplanationOptionsPanel();
+//		optionsPanel.setWidth(null);
+//		l.addComponent(optionsPanel);
 		
 		
 		explanationsPanel = new ExplanationsPanel();
@@ -218,8 +254,8 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		l.addComponent(panel);
 		l.setExpandRatio(panel, 1.0f);
 		
-		WhitePanel configurablePanel = new WhitePanel(explanationsPanel);
-		configurablePanel.addComponent(optionsPanel);
+		WhitePanel configurablePanel = new WhitePanel(l);
+		configurablePanel.addComponent(limit);
 		return configurablePanel;
 	}
 	
@@ -246,7 +282,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		wrapper.addComponent(executeRepairButton);
 		wrapper.setComponentAlignment(executeRepairButton, Alignment.MIDDLE_RIGHT);
 		
-		return new ConfigurablePanel(wrapper);
+		return new WhitePanel(wrapper);
 		
 	}
 	
@@ -447,14 +483,16 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			setSizeFull();
 //			addStyleName("naming-view");
 			
+			
 			uriList = new ListSelect();
 	        uriList.setRows(0);
 	        uriList.setMultiSelect(true);
 	        uriList.setImmediate(true); 
 	        uriList.setSizeFull();
 	        
-	        Button addButton = new NativeButton("Add");
-//	        addButton.addStyleName("add-linked-data-uri-button");
+	        Button addButton = new Button("Add");
+	        addButton.setDescription("Add a new namespace URI to the list below.");
+	        addButton.addStyleName("small");
 	        addButton.addClickListener(new Button.ClickListener() {
 				
 				@Override
@@ -509,9 +547,11 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			        UI.getCurrent().addWindow(w);
 				}
 			});
-	        addButton.setWidth(null);
-	        Button removeButton = new NativeButton("Remove");
-//	        removeButton.addStyleName("remove-linked-data-uri-button");
+	        addButton.setSizeUndefined();
+	        addButton.setWidth("100%");
+	        Button removeButton = new Button("Remove");
+	        removeButton.setDescription("Remove the selected resources from the list below.");
+	        removeButton.addStyleName("small");
 	        removeButton.addClickListener(new Button.ClickListener() {
 				
 				@Override
@@ -524,16 +564,21 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 					}
 				}
 			});
-	        removeButton.setWidth(null);
+	        removeButton.setSizeUndefined();
+	        removeButton.setWidth("100%");
 			
 			HorizontalLayout buttonLayout = new HorizontalLayout();
-			buttonLayout.setWidth(null);
-			buttonLayout.setHeight(null);
+//			buttonLayout.addComponent(new Label("Namespaces:", ContentMode.HTML));
+			buttonLayout.setWidth("100%");
 			buttonLayout.addComponent(addButton);
 			buttonLayout.addComponent(removeButton);
-			buttonLayout.addStyleName("toolbar");
+//			buttonLayout.addStyleName("toolbar");
+			buttonLayout.setComponentAlignment(removeButton, Alignment.BOTTOM_RIGHT);
+			buttonLayout.setExpandRatio(addButton, 1f);
+			buttonLayout.setExpandRatio(removeButton, 1f);
 			
 			addComponent(buttonLayout);
+			setComponentAlignment(buttonLayout, Alignment.BOTTOM_RIGHT);
 			addComponent(uriList);
 			
 			setExpandRatio(uriList, 1f);
@@ -547,6 +592,26 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	 */
 	@Override
 	public void enter(ViewChangeEvent event) {
+	}
+
+	/* (non-Javadoc)
+	 * @see com.vaadin.data.Property.ValueChangeListener#valueChange(com.vaadin.data.Property.ValueChangeEvent)
+	 */
+	@Override
+	public void valueChange(ValueChangeEvent event) {
+		if(event.getProperty() == limitExplanationCountCheckbox){
+			boolean limitExplanations = (Boolean)event.getProperty().getValue();
+			limitSpinner.setEnabled(limitExplanations);
+			if(limitExplanations){
+				ORESession.getSPARQLExplanationManager().setExplanationLimit((Integer)limitSpinner.getValue());
+			} else {
+				ORESession.getSPARQLExplanationManager().setExplanationLimit(-1);
+				limitSpinner.setEnabled(false);
+			}
+		} else if(event.getProperty() == limitSpinner){
+			ORESession.getSPARQLExplanationManager().setExplanationLimit((Integer)event.getProperty().getValue());
+			
+		}
 	}
 	
 

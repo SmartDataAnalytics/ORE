@@ -37,7 +37,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -70,7 +69,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 	private AxiomTypesField axiomTypesField;
 	
 	private Button startButton;
-	private Button stopButton;
 	
 	private VerticalLayout axiomsPanel;
 	
@@ -145,6 +143,17 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		leftSide.addComponent(p);
 		leftSide.setExpandRatio(p, 1f);
 		
+		startButton = new Button("Start");
+		startButton.setDescription("Click to start the learning process.");
+//		startButton.setDisableOnClick(true);
+		startButton.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				onLearning();
+			}
+		});
+		
 		leftSide.addComponent(startButton);
 		leftSide.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
@@ -155,11 +164,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		VerticalLayout form = new VerticalLayout();
 		form.setWidth("100%");
 		form.setHeight(null);
+		form.setSizeFull();
 		form.setSpacing(true);
 		form.addStyleName("enrichment-options");
 		
 		resourceURIField = new TextField();
-		resourceURIField.setWidth("90%");
+		resourceURIField.setInputPrompt("Enter resource URI");
+		resourceURIField.setWidth("100%");
 		resourceURIField.setCaption("Resource URI");
 		form.addComponent(resourceURIField);
 		
@@ -173,52 +184,37 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		maxExecutionTimeSpinner = new IntStepper();
 		maxExecutionTimeSpinner.setValue(10);
 		maxExecutionTimeSpinner.setStepAmount(1);
-		maxExecutionTimeSpinner.setWidth("90%");
+		maxExecutionTimeSpinner.setWidth("100%");
 		maxExecutionTimeSpinner.setCaption("Max. execution time");
+		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
 		form.addComponent(maxExecutionTimeSpinner);
 		
 		maxNrOfReturnedAxiomsSpinner = new IntStepper();
 		maxNrOfReturnedAxiomsSpinner.setValue(10);
 		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
-		maxNrOfReturnedAxiomsSpinner.setWidth("90%");
+		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
 		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
+		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "
+				+ "axiom type with a confidence score above the chosen threshold below.");
 		form.addComponent(maxNrOfReturnedAxiomsSpinner);
 		
 		thresholdSlider = new Slider(1, 100);
-		thresholdSlider.setWidth("90%");
+		thresholdSlider.setWidth("100%");
 		thresholdSlider.setImmediate(true);
 		thresholdSlider.setCaption("Threshold");
+		thresholdSlider.setDescription("The minimum confidence score for the learned axioms.");
 		form.addComponent(thresholdSlider);
 		
 		axiomTypesField = new AxiomTypesField();
+		axiomTypesField.setSizeFull();
 		form.addComponent(axiomTypesField);
-		
-		startButton = new Button("Start");
-		startButton.setDisableOnClick(true);
-		startButton.addClickListener(new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				onLearning();
-			}
-		});
-//		form.getFooter().addComponent(startButton);
-		
-		stopButton = new Button("Stop");
-		stopButton.addClickListener(new ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				
-			}
-		});
+		form.setExpandRatio(axiomTypesField, 1f);
 		
 		return form;
 	}
 	
 	private void onLearning(){
 		axiomsPanel.removeAllComponents();
-		enableLearning(false);
 		tables = new HashSet<EvaluatedAxiomsTable>();
 		
 		final EnrichmentManager man = ORESession.getEnrichmentManager();
@@ -352,11 +348,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(type));
 	}
 	
-	private void enableLearning(boolean enable){
-		startButton.setEnabled(enable);
-		stopButton.setEnabled(!enable);
-	}
-	
 	/* (non-Javadoc)
 	 * @see com.vaadin.navigator.View#enter(com.vaadin.navigator.ViewChangeListener.ViewChangeEvent)
 	 */
@@ -384,7 +375,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		
 		public AxiomTypesField() {
 			setCaption("Axiom types");
-			setHeight(null);
+			setDescription("Choose the axiom types for which axiom suggestions will be generated.");
+			setSizeFull();
 			//(de)select all checkbox
 			CheckBox allCheckBox = new CheckBox("All");
 			allCheckBox.addStyleName("select-all-axiomtypes-checkbox");
@@ -404,10 +396,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 			addComponent(allCheckBox);
 			//table
 			axiomTypesTable = new Table();
-			axiomTypesTable.setHeight(null);
-			axiomTypesTable.setWidth("90%");
+			axiomTypesTable.setSizeFull();
 			axiomTypesTable.setImmediate(true);
-			axiomTypesTable.setPageLength(0);
+//			axiomTypesTable.setPageLength(0);
 			axiomTypesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 			axiomTypesContainer = new BeanItemContainer<AxiomType<OWLAxiom>>(AxiomType.class);
 			this.visibleAxiomTypes = ORESession.getEnrichmentManager().getAxiomTypes(ResourceType.UNKNOWN);

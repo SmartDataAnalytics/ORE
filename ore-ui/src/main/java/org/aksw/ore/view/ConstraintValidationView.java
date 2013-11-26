@@ -4,11 +4,14 @@
 package org.aksw.ore.view;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Set;
 
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.ConstraintViolationExplanationWindow;
+import org.aksw.ore.component.ProgressDialog;
+import org.aksw.ore.component.WhitePanel;
 import org.coode.owlapi.functionalparser.OWLFunctionalSyntaxOWLParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLParserException;
@@ -18,12 +21,14 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.UnloadableImportException;
 
+import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -32,6 +37,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
@@ -52,6 +58,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 	
 	private OWLAxiom currentConstraint;
 	private Button validateButton;
+	private Label resultInfoLabel;
 	
 	public ConstraintValidationView() {
 		addStyleName("dashboard-view");
@@ -60,7 +67,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 		setMargin(true);
 		
 		//constraint panel
-		ConfigurablePanel panel = new ConfigurablePanel(createConstraintsPanel());
+		WhitePanel panel = new WhitePanel(createConstraintsPanel());
 		addComponent(panel);
 		setExpandRatio(panel, 1f);
 		
@@ -81,7 +88,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 		setComponentAlignment(validateButton, Alignment.MIDDLE_CENTER);
 		
 		//violations panel
-		panel = new ConfigurablePanel(createConstraintViolationsPanel());
+		panel = new WhitePanel(createConstraintViolationsPanel());
 		addComponent(panel);
 		setExpandRatio(panel, 1f);
 		
@@ -89,7 +96,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 	
 	private Component createConstraintsPanel(){
 		HorizontalLayout l = new HorizontalLayout();
-		l.setCaption("Constraints:");
+		l.setCaption("Constraints");
 		l.setSizeFull();
 		l.setSpacing(true);
 		
@@ -126,9 +133,13 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 	}
 	
 	private Component createConstraintViolationsPanel(){
-		HorizontalLayout l = new HorizontalLayout();
-		l.setCaption("Violations:");
+		VerticalLayout l = new VerticalLayout();
+		l.setSpacing(true);
+		l.setCaption("Violations");
 		l.setSizeFull();
+		
+		resultInfoLabel = new Label();
+		l.addComponent(resultInfoLabel);
 		
 		violationsTable = new Table();
 		violationsTable.setPageLength(10);
@@ -141,19 +152,81 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 			@Override
 			public void itemClick(ItemClickEvent event) {
 				String uri = (String) event.getItemId();
-				showViolationExplanation(currentConstraint, uri);
+//				showViolationExplanation(currentConstraint, uri);
 			}
 		});
+		
 		l.addComponent(violationsTable);
 		l.setExpandRatio(violationsTable, 1f);
 		
 		return l;
 	}
 	
-	private void validate(OWLAxiom constraint){
-		Set<String> violations = ORESession.getConstraintValidationManager().validateWithExplanations(constraint);
-		for (String uri : violations) {
-			violationsTable.addItem(uri).getItemProperty("individual").setValue(uri);
+	private void validate(final OWLAxiom constraint){
+		final ProgressDialog progressDialog = new ProgressDialog("Searching for violating resources...");
+		getUI().addWindow(progressDialog);
+		Thread t = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					final Set<String> violatingResources = ORESession.getConstraintValidationManager().getViolatingResources(constraint);
+					UI.getCurrent().access(new Runnable() {
+						
+						@Override
+						public void run() {
+							showViolations(violatingResources);
+						}
+					});
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				UI.getCurrent().access(new Runnable() {
+					
+					@Override
+					public void run() {
+						getUI().removeWindow(progressDialog);
+					}
+				});
+			}
+		});
+		t.start();
+		
+//		Set<String> violations = ORESession.getConstraintValidationManager().validateWithExplanations(constraint);
+//		for (String uri : violations) {
+//			violationsTable.addItem(uri).getItemProperty("individual").setValue(uri);
+//		}
+	}
+	
+	private void showViolations(Set<String> violatingResources){
+		violationsTable.removeAllItems();
+		if(violatingResources.isEmpty()){
+			resultInfoLabel.setValue("Found no violating resources.");
+		} else {
+			resultInfoLabel.setValue("Found " + violatingResources.size() + " violating resources:");
+			for (String uri : violatingResources) {
+				violationsTable.addItem(uri).getItemProperty("individual").setValue(uri);
+			}
+			violationsTable.addGeneratedColumn("individual", new Table.ColumnGenerator() {
+	            public Component generateCell(Table source, Object itemId,
+	                    Object columnId) {
+	                Item item = violationsTable.getItem(itemId);
+	                if(item != null){
+	                	String uri = (String) item.getItemProperty("individual").getValue();
+	                    String decodedURI = uri;
+	                    try {
+	    					decodedURI = URLDecoder.decode(uri, "UTF-8");
+	    				} catch (UnsupportedEncodingException e) {
+	    					e.printStackTrace();
+	    				}
+	                    Link link = new Link(decodedURI, new ExternalResource(uri));
+	                    link.setTargetName("_blank");
+	                    return link;
+	                }
+	                return null;
+	            }
+
+	        });
 		}
 	}
 	
@@ -187,16 +260,6 @@ public class ConstraintValidationView extends VerticalLayout implements View{
         buttons.setSpacing(true);
         l.addComponent(buttons);
 
-        Button cancel = new Button("Cancel");
-        cancel.addStyleName("small");
-        cancel.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                alert.close();
-            }
-        });
-        buttons.addComponent(cancel);
-
         Button ok = new Button("Add");
         ok.addStyleName("default");
         ok.addStyleName("small");
@@ -220,8 +283,19 @@ public class ConstraintValidationView extends VerticalLayout implements View{
             }
         });
         buttons.addComponent(ok);
-        buttons.setComponentAlignment(cancel, Alignment.MIDDLE_RIGHT);
-        buttons.setComponentAlignment(ok, Alignment.MIDDLE_LEFT);
+        
+        Button cancel = new Button("Cancel");
+        cancel.addStyleName("small");
+        cancel.addClickListener(new ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                alert.close();
+            }
+        });
+        buttons.addComponent(cancel);
+        
+        buttons.setComponentAlignment(ok, Alignment.MIDDLE_RIGHT);
+        buttons.setComponentAlignment(cancel, Alignment.MIDDLE_LEFT);
         ok.focus();
 
         alert.addShortcutListener(new ShortcutListener("Cancel",

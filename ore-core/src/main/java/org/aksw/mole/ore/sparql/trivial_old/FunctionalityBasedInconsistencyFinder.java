@@ -120,13 +120,16 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 						ax1 = dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object1);
 						ax2 = dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object2);
 						justification = Sets.newHashSet(ax1, ax2, dataFactory.getOWLFunctionalDataPropertyAxiom(property));
-						explanations.add(new Explanation<OWLAxiom>(inconsistencyEntailment, justification));
-						cnt++;
+						if(explanations.add(new Explanation<OWLAxiom>(inconsistencyEntailment, justification))){
+							cnt++;
+						};
+						
 					}
 				}
 				qe.close();
 				iterator.remove();
 				fireProgressUpdate(++i, total);
+				fireNumberOfConflictsFound(explanations.size());
 				fireTraceMessage("Found " + cnt + " conflicts.");
 			}
 		}

@@ -116,6 +116,7 @@ public class IrreflexivityBasedInconsistencyFinder extends AbstractTrivialIncons
 				qe.close();
 				iterator.remove();
 				fireProgressUpdate(++i, total);
+				fireNumberOfConflictsFound(explanations.size());
 			}
 		}
 		allExplanations.addAll(explanations);

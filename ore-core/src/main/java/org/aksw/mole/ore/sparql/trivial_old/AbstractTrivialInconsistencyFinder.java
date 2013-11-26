@@ -123,6 +123,12 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 		}
 	}
 	
+	protected void fireNumberOfConflictsFound(int nrOfConflictsFound) {
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			mon.numberOfConflictsFound(nrOfConflictsFound);
+		}
+	}
+	
 	/**
 	 * @param stopIfInconsistencyFound the stopIfInconsistencyFound to set
 	 */

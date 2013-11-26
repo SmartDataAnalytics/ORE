@@ -26,6 +26,7 @@ public class ProgressDialog extends Window {
 	protected Label messageLabel;
 	protected Label traceMessageLabel;
 	private ProgressBar progressBar;
+	protected VerticalLayout content;
 
 	public ProgressDialog() {
 		this("");
@@ -50,20 +51,26 @@ public class ProgressDialog extends Window {
         addStyleName("dialog");
         setClosable(false);
 
+        
+        content = new VerticalLayout();
+        content.setSizeFull();
+        content.setSpacing(true);
+        l.addComponent(content);
+        
         messageLabel = new Label();
         messageLabel.setImmediate(true);
         messageLabel.setContentMode(ContentMode.HTML);
-        l.addComponent(messageLabel);
+        content.addComponent(messageLabel);
         
         traceMessageLabel = new Label();
         traceMessageLabel.setImmediate(true);
         traceMessageLabel.setContentMode(ContentMode.HTML);
-        l.addComponent(traceMessageLabel);
+        content.addComponent(traceMessageLabel);
         
         if(showProgressBar){
         	progressBar = new ProgressBar();
-        	l.addComponent(progressBar);
-        	l.setComponentAlignment(progressBar, Alignment.MIDDLE_CENTER);
+        	content.addComponent(progressBar);
+        	content.setComponentAlignment(progressBar, Alignment.MIDDLE_CENTER);
         }
 
         HorizontalLayout buttons = new HorizontalLayout();
@@ -71,18 +78,22 @@ public class ProgressDialog extends Window {
         buttons.setSpacing(true);
         l.addComponent(buttons);
 
-        Button cancel = new Button("Stop");
-        cancel.addStyleName("small");
-        cancel.addClickListener(new ClickListener() {
+        Button stopButton = new Button("Stop");
+        stopButton.addStyleName("small");
+        stopButton.addClickListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
             	onCancelled();
             }
         });
-        buttons.addComponent(cancel);
-        buttons.setComponentAlignment(cancel, Alignment.MIDDLE_CENTER);
+        buttons.addComponent(stopButton);
+        buttons.setComponentAlignment(stopButton, Alignment.MIDDLE_CENTER);
 
-        cancel.focus();
+        stopButton.focus();
+	}
+	
+	private void initUI(){
+		
 	}
 	
 	protected void onCancelled(){

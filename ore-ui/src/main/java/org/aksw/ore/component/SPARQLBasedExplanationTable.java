@@ -128,7 +128,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 			@Override
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
 				if(propertyId != null && propertyId.equals("Frequency")){
-					return "The axiom occurs in " + getItem(itemId).getItemProperty("Frequency") + " explanations.";
+					return "The axiom occurs in " + getItem(itemId).getItemProperty("Frequency").getValue() + " explanations.";
 				}
 				return null;
 			}

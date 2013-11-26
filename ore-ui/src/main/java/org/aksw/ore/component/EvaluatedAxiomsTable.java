@@ -44,6 +44,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
@@ -54,6 +55,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.Reindeer;
 
 public class EvaluatedAxiomsTable extends Table{
 	
@@ -125,18 +127,10 @@ public class EvaluatedAxiomsTable extends Table{
 				accuracyLabel.setWidth("100%");
 				cell.setExpandRatio(accuracyLabel, 1f);
 				
-				VerticalLayout buttons = new VerticalLayout();
-				buttons.setHeight("100%");
-				buttons.addStyleName("buttons");
-				Button explainButton = new Button();
-				explainButton.addStyleName("explain-button");
-				ThemeResource icon = new ThemeResource("icons/questionmark.png");
-				explainButton.setIcon(icon);
-				explainButton.setWidth("16px");
-				explainButton.setHeight("16px");
-				explainButton.addStyleName(BaseTheme.BUTTON_LINK);
-				explainButton.setDescription("Explain the score.");
-				explainButton.addClickListener(new Button.ClickListener() {
+				Button explain = new Button("?");
+				explain.addStyleName(BaseTheme.BUTTON_LINK);
+				explain.setDescription("Explain the score.");
+				explain.addClickListener(new Button.ClickListener() {
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
@@ -145,9 +139,9 @@ public class EvaluatedAxiomsTable extends Table{
 						dialog.center();
 					}
 				});
-//				buttons.addComponent(explainButton);
-//				cell.addComponent(buttons);
-				cell.addComponent(explainButton);
+				cell.addComponent(explain);
+				cell.setComponentAlignment(explain, Alignment.MIDDLE_RIGHT);
+				
 				return cell;
 			}
 		});

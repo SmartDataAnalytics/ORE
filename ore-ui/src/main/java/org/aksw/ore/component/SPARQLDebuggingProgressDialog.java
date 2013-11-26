@@ -3,15 +3,15 @@
  */
 package org.aksw.ore.component;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedInconsistencyProgressMonitor;
-import org.aksw.ore.ORESession;
 import org.semanticweb.owl.explanation.api.Explanation;
-import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
 /**
  * @author Lorenz Buehmann
@@ -20,11 +20,14 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public class SPARQLDebuggingProgressDialog extends ProgressDialog implements SPARQLBasedInconsistencyProgressMonitor{
 
 	private OWLOntology fragment;
+	private Label nrOfConflictsLabel;
 	
 	public SPARQLDebuggingProgressDialog() {
 		super("Searching for inconsistency...", true);
 //		fragment = ORESession.getSparqlBasedInconsistencyFinder().getReasoner().getRootOntology();
 		setMessage("</br></br></br></br>");
+		nrOfConflictsLabel = new Label("Number of conflicts:");
+		content.addComponent(nrOfConflictsLabel);
 	}
 
 	/* (non-Javadoc)
@@ -94,6 +97,22 @@ public class SPARQLDebuggingProgressDialog extends ProgressDialog implements SPA
 	@Override
 	public void updateProgress(int current, int total) {
 		setProgress(current, total);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedInconsistencyProgressMonitor#numberOfConflictsFound(int)
+	 */
+	@Override
+	public void numberOfConflictsFound(final int nrOfConflictsFound) {
+		System.out.println(nrOfConflictsFound);
+		UI.getCurrent().access(new Runnable() {
+			
+			@Override
+			public void run() {
+				nrOfConflictsLabel.setValue("Number of conflicts:" + nrOfConflictsFound);
+			}
+		});
+		
 	}
 
 	

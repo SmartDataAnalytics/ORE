@@ -121,6 +121,7 @@ public class AsymmetryBasedInconsistencyFinder extends AbstractTrivialInconsiste
 				iterator.remove();
 				fireProgressUpdate(++i, total);
 				fireTraceMessage("Found " + cnt + " conflicts.");
+				fireNumberOfConflictsFound(explanations.size());
 			}
 		}
 		allExplanations.addAll(explanations);

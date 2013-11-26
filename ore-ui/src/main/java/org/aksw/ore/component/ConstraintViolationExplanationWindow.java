@@ -6,6 +6,7 @@ package org.aksw.ore.component;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -38,7 +39,7 @@ public class ConstraintViolationExplanationWindow extends Window{
 	    addStyleName("no-vertical-drag-hints");
 	    addStyleName("no-horizontal-drag-hints");
 
-	    Label explanation = new Label(explanationString);
+	    Label explanation = new Label(explanationString, ContentMode.PREFORMATTED);
 	    l.addComponent(explanation);
 	    
 	    HorizontalLayout footer = new HorizontalLayout();

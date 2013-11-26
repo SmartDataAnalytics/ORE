@@ -72,6 +72,7 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 		for(AbstractTrivialInconsistencyFinder checker : finders){
 			try {
 				checker.run(resume);
+				fireNumberOfConflictsFound(checker.getExplanations().size());
 				if(checker.terminationCriteriaSatisfied()){
 					break;
 				}
@@ -84,7 +85,7 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 	public static void main(String[] args) throws Exception {
 		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia(), "cache");
 		SPARQLBasedTrivialInconsistencyFinder incFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
-//		incFinder.setStopIfInconsistencyFound(false);
+		incFinder.setStopIfInconsistencyFound(false);
 		incFinder.addProgressMonitor(new SPARQLBasedInconsistencyProgressMonitor() {
 			
 			@Override
@@ -113,6 +114,11 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 			@Override
 			public void updateProgress(int current, int total) {
 				System.out.println(current + "/" + total);
+			}
+
+			@Override
+			public void numberOfConflictsFound(int nrOfConflictsFound) {
+				System.out.println("Conflicts found: " + nrOfConflictsFound);
 			}
 		});
 		incFinder.run();

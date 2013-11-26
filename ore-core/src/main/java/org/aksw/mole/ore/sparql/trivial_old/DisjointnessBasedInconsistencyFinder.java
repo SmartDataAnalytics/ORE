@@ -87,6 +87,7 @@ public class DisjointnessBasedInconsistencyFinder extends AbstractTrivialInconsi
 				currentState = State.CLASS_ASSERTION;
 			}
 			fireProgressUpdate(++i, total);
+			fireNumberOfConflictsFound(explanations.size());
 		}
 	}
 	

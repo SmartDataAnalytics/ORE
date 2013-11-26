@@ -3,6 +3,7 @@
  */
 package org.aksw.ore.manager;
 
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QuerySolution;
@@ -37,6 +39,9 @@ public class ConstraintValidationManager {
 	
 	private QueryExecutionFactory qef;
 	private Model model;
+	
+	OWLAxiomConstraintToSPARQLConstructConverter conv = new OWLAxiomConstraintToSPARQLConstructConverter();
+	OWLAxiomConstraintToSPARQLConverter conv2 = new OWLAxiomConstraintToSPARQLConverter();
 
 	public ConstraintValidationManager(SparqlEndpointKS ks, CacheEx cache) {
 		if(ks.isRemote()){
@@ -55,8 +60,7 @@ public class ConstraintValidationManager {
 	
 	public Set<String> validateWithExplanations(OWLAxiom constraint){
 		Set<String> violations = new HashSet<String>();
-		OWLAxiomConstraintToSPARQLConstructConverter conv = new OWLAxiomConstraintToSPARQLConstructConverter();
-		OWLAxiomConstraintToSPARQLConverter conv2 = new OWLAxiomConstraintToSPARQLConverter();
+		
 		Query query = conv.asQuery("?s", constraint);query.setLimit(100);
 		System.out.println(query);
 		QueryExecution qe = qef.createQueryExecution(query);
@@ -75,16 +79,41 @@ public class ConstraintValidationManager {
 		return violations;
 	}
 	
+	public Set<String> getViolatingResources(OWLAxiom constraint){
+		Set<String> violations = new HashSet<String>();
+		
+		Query query = conv2.asQuery("?s", constraint);
+		System.out.println(query);
+		QueryExecution qe = qef.createQueryExecution(query);
+		ResultSet rs = qe.execSelect();
+		QuerySolution qs;
+		while(rs.hasNext()){
+			qs = rs.next();
+			violations.add(qs.getResource("s").getURI());
+		}
+		qe.close();
+		return violations;
+	}
+	
 	public String getViolationExplanation(OWLAxiom constraint, String uri){
 		StringBuilder explanation = new StringBuilder();
-		StmtIterator iter = model.listStatements(model.createResource(uri), null, (RDFNode)null);
-		Statement st;
-		while(iter.hasNext()){
-			st = iter.next();
-			explanation.append(st.toString() + "\n");
-		}
-		iter.close();
-		return explanation.toString();
+		StringWriter sw = new StringWriter();
+		Query query = conv.asQuery("?s", constraint);
+		ParameterizedSparqlString ps = new ParameterizedSparqlString(query.toString());
+		ps.setIri("s", uri);
+		QueryExecution qe = new QueryExecutionFactoryModel(model).createQueryExecution(ps.asQuery());
+		Model explanationModel = qe.execConstruct();
+		explanationModel.write(sw, "TURTLE");
+		return sw.toString();
+//		StmtIterator iter = model.listStatements(model.createResource(uri), null, (RDFNode)null);
+//		Statement st;
+//		while(iter.hasNext()){
+//			st = iter.next();
+//			explanation.append(st.asTriple().toString() + "\n");
+//		}
+//		iter.close();
+//		
+//		return explanation.toString();
 	}
 
 	public Set<String> validate(OWLAxiom constraint){
