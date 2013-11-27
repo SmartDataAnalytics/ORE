@@ -32,6 +32,13 @@ public class InverseFunctionalityBasedInconsistencyFinder extends AbstractTrivia
 		super(ks);
 	}
 	
+	/**
+	 * @param ks
+	 */
+	public InverseFunctionalityBasedInconsistencyFinder(SparqlEndpointKS ks, Set<Explanation<OWLAxiom>> explanations) {
+		super(ks, explanations);
+	}
+	
 	private void init(){
 		if(!initialized){
 			propertyCandidates = generatePropertyCandidates();
@@ -87,7 +94,7 @@ public class InverseFunctionalityBasedInconsistencyFinder extends AbstractTrivia
 	 */
 	@Override
 	public void run(boolean resume) {
-		explanations = new HashSet<>();
+//		explanations = new HashSet<>();
 		fireInfoMessage("Analyzing inverse functionality...");
 		init();
 		
@@ -126,6 +133,6 @@ public class InverseFunctionalityBasedInconsistencyFinder extends AbstractTrivia
 				fireProgressUpdate(++i, total);
 			}
 		}
-		allExplanations.addAll(explanations);
+//		allExplanations.addAll(explanations);
 	}
 }

@@ -17,4 +17,5 @@ public interface SPARQLBasedInconsistencyProgressMonitor{
 		void trace(String message);
 		void updateProgress(int current, int total);
 		void numberOfConflictsFound(int nrOfConflictsFound);
+		void finished();
 	}

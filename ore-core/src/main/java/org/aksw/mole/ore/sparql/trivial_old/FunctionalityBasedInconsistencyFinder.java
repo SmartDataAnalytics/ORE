@@ -11,7 +11,7 @@ import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -26,12 +26,19 @@ import com.hp.hpl.jena.query.ResultSet;
 public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialInconsistencyFinder {
 	
 	private boolean initialized;
-	private Set<OWLDataProperty> propertyCandidates;
+	private Set<OWLEntity> propertyCandidates;
 	
 	private ParameterizedSparqlString template = new ParameterizedSparqlString("SELECT * WHERE {?s ?p ?o1. ?s ?p ?o2. FILTER(?o1 != ?o2)}");
 
 	public FunctionalityBasedInconsistencyFinder(SparqlEndpointKS ks) {
 		super(ks);
+	}
+	
+	/**
+	 * @param ks
+	 */
+	public FunctionalityBasedInconsistencyFinder(SparqlEndpointKS ks, Set<Explanation<OWLAxiom>> explanations) {
+		super(ks, explanations);
 	}
 	
 	private void init(){
@@ -50,9 +57,9 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 		
 	}
 	
-	private Set<OWLDataProperty> generatePropertyCandidates(){
+	private Set<OWLEntity> generatePropertyCandidates(){
 		fireTraceMessage("Searching for property candidates...");
-		Set<OWLDataProperty> candidates = new TreeSet<>();
+		Set<OWLEntity> candidates = new TreeSet<>();
 		
 		String query = "SELECT ?p WHERE {?p a <http://www.w3.org/2002/07/owl#FunctionalProperty>. ?p a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
 		QueryExecution qe = qef.createQueryExecution(query);
@@ -63,6 +70,18 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 			candidates.add(dataFactory.getOWLDataProperty(IRI.create(qs.getResource("p").getURI())));
 		}
 		qe.close();
+		
+		//if we apply a UNA we also get the object properties
+		if(isApplyUniqueNameAssumption()){
+			query = "SELECT ?p WHERE {?p a <http://www.w3.org/2002/07/owl#FunctionalProperty>. ?p a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
+			qe = qef.createQueryExecution(query);
+			rs = qe.execSelect();
+			while (rs.hasNext()) {
+				qs = rs.next();
+				candidates.add(dataFactory.getOWLObjectProperty(IRI.create(qs.getResource("p").getURI())));
+			}
+			qe.close();
+		}
 		fireTraceMessage("Found " + candidates.size() + " property candidates.");
 		return candidates;
 	}
@@ -89,14 +108,14 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 	 */
 	@Override
 	public void run(boolean resume) {
-		explanations = new HashSet<>();
+//		explanations = new HashSet<>();
 		fireInfoMessage("Analyzing functionality...");
 		init();
 		
 		int i = 0;
 		int total = propertyCandidates.size();
-		for (Iterator<OWLDataProperty> iterator = propertyCandidates.iterator(); iterator.hasNext();) {
-			OWLDataProperty property = iterator.next();
+		for (Iterator<OWLEntity> iterator = propertyCandidates.iterator(); iterator.hasNext();) {
+			OWLEntity property = iterator.next();
 			if(!terminationCriteriaSatisfied()){
 				fireTraceMessage("Checking " + property.toStringID());
 				template.setIri("p", property.toStringID());
@@ -105,6 +124,8 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 				ResultSet rs = qe.execSelect();
 				QuerySolution qs;
 				OWLIndividual subject;
+				OWLIndividual objectInd1;
+				OWLIndividual objectInd2;;
 				OWLLiteral object1;
 				OWLLiteral object2;
 				OWLAxiom ax1;
@@ -114,17 +135,29 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 				while (rs.hasNext()) {
 					qs = rs.next();
 					subject = dataFactory.getOWLNamedIndividual(IRI.create(qs.getResource("s").getURI()));
-					object1 = getOWLLiteral(qs.getLiteral("o1"));
-					object2 = getOWLLiteral(qs.getLiteral("o2"));
-					if(!object1.equals(object2)){
-						ax1 = dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object1);
-						ax2 = dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object2);
-						justification = Sets.newHashSet(ax1, ax2, dataFactory.getOWLFunctionalDataPropertyAxiom(property));
+					if(property.isOWLDataProperty()){
+						object1 = getOWLLiteral(qs.getLiteral("o1"));
+						object2 = getOWLLiteral(qs.getLiteral("o2"));
+						if(!object1.equals(object2)){
+							ax1 = dataFactory.getOWLDataPropertyAssertionAxiom(property.asOWLDataProperty(), subject, object1);
+							ax2 = dataFactory.getOWLDataPropertyAssertionAxiom(property.asOWLDataProperty(), subject, object2);
+							justification = Sets.newHashSet(ax1, ax2, dataFactory.getOWLFunctionalDataPropertyAxiom(property.asOWLDataProperty()));
+							if(explanations.add(new Explanation<OWLAxiom>(inconsistencyEntailment, justification))){
+								cnt++;
+							};
+							
+						}
+					} else {
+						objectInd1 = dataFactory.getOWLNamedIndividual(IRI.create(qs.getResource("o1").getURI()));
+						objectInd2 = dataFactory.getOWLNamedIndividual(IRI.create(qs.getResource("o2").getURI()));
+						ax1 = dataFactory.getOWLObjectPropertyAssertionAxiom(property.asOWLObjectProperty(), subject, objectInd1);
+						ax2 = dataFactory.getOWLObjectPropertyAssertionAxiom(property.asOWLObjectProperty(), subject, objectInd2);
+						justification = Sets.newHashSet(ax1, ax2, dataFactory.getOWLFunctionalObjectPropertyAxiom(property.asOWLObjectProperty()));
 						if(explanations.add(new Explanation<OWLAxiom>(inconsistencyEntailment, justification))){
 							cnt++;
 						};
-						
 					}
+					
 				}
 				qe.close();
 				iterator.remove();
@@ -133,6 +166,6 @@ public class FunctionalityBasedInconsistencyFinder extends AbstractTrivialIncons
 				fireTraceMessage("Found " + cnt + " conflicts.");
 			}
 		}
-		allExplanations.addAll(explanations);
+//		allExplanations.addAll(explanations);
 	}
 }

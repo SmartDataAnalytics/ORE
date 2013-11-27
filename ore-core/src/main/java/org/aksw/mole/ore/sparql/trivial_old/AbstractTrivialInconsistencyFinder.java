@@ -31,7 +31,7 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 	protected OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 	protected boolean stopIfInconsistencyFound = true;
 	protected Set<Explanation<OWLAxiom>> explanations = new HashSet<>();
-	protected Set<Explanation<OWLAxiom>> allExplanations = new HashSet<>();
+//	protected Set<Explanation<OWLAxiom>> allExplanations = new HashSet<>();
 	
 	private List<SPARQLBasedInconsistencyProgressMonitor> progressMonitors = new ArrayList<SPARQLBasedInconsistencyProgressMonitor>();
 	
@@ -39,8 +39,16 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 	
 	protected boolean stop = false;
 	
+	private boolean applyUniqueNameAssumption = false;
+	
 	public AbstractTrivialInconsistencyFinder(SparqlEndpointKS ks) {
 		super(ks);
+		filterToOffset.put("", 0);
+	}
+	
+	public AbstractTrivialInconsistencyFinder(SparqlEndpointKS ks, Set<Explanation<OWLAxiom>> explanations) {
+		super(ks);
+		this.explanations = explanations;
 		filterToOffset.put("", 0);
 	}
 	
@@ -88,7 +96,7 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 	}
 	
 	public Set<Explanation<OWLAxiom>> getExplanations(){
-		return allExplanations;
+		return explanations;
 	}
 	
 	public void addProgressMonitor(SPARQLBasedInconsistencyProgressMonitor mon) {
@@ -129,6 +137,12 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 		}
 	}
 	
+	protected void fireFinished() {
+		for (SPARQLBasedInconsistencyProgressMonitor mon : progressMonitors) {
+			mon.finished();
+		}
+	}
+	
 	/**
 	 * @param stopIfInconsistencyFound the stopIfInconsistencyFound to set
 	 */
@@ -142,5 +156,19 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 
 	@Override
 	public void setAxiomsToIgnore(Set<OWLAxiom> axiomsToIgnore) {
+	}
+
+	/**
+	 * @return the applyUniqueNameAssumption
+	 */
+	public boolean isApplyUniqueNameAssumption() {
+		return applyUniqueNameAssumption;
+	}
+
+	/**
+	 * @param applyUniqueNameAssumption the applyUniqueNameAssumption to set
+	 */
+	public void setApplyUniqueNameAssumption(boolean applyUniqueNameAssumption) {
+		this.applyUniqueNameAssumption = applyUniqueNameAssumption;
 	}
 }

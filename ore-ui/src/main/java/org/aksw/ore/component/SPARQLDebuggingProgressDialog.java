@@ -81,6 +81,7 @@ public class SPARQLDebuggingProgressDialog extends ProgressDialog implements SPA
 	@Override
 	public void info(String message) {
 		setMessage(message);
+		setTraceMessage("");
 	}
 
 	/* (non-Javadoc)
@@ -104,7 +105,6 @@ public class SPARQLDebuggingProgressDialog extends ProgressDialog implements SPA
 	 */
 	@Override
 	public void numberOfConflictsFound(final int nrOfConflictsFound) {
-		System.out.println(nrOfConflictsFound);
 		UI.getCurrent().access(new Runnable() {
 			
 			@Override
@@ -112,6 +112,14 @@ public class SPARQLDebuggingProgressDialog extends ProgressDialog implements SPA
 				nrOfConflictsLabel.setValue("Number of conflicts:" + nrOfConflictsFound);
 			}
 		});
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedInconsistencyProgressMonitor#finished()
+	 */
+	@Override
+	public void finished() {
 		
 	}
 

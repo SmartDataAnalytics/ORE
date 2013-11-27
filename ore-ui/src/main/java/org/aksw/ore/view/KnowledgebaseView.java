@@ -7,11 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
 
-import org.aksw.mole.ore.dataset.TONESDataset;
 import org.aksw.mole.ore.repository.tones.TONESRepository;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
@@ -26,7 +22,6 @@ import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.aksw.ore.util.URLParameters;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -36,13 +31,13 @@ import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
 import org.vaadin.hene.popupbutton.PopupButton;
 
+import com.google.common.base.Joiner;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -52,7 +47,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
@@ -264,12 +258,15 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private void visualizeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
 		SparqlEndpoint endpoint = kb.getEndpoint();
 		SPARQLKnowledgebaseStats stats = kb.getStats();
+		String url = endpoint.getURL().toString();
 		String htmlTable = 
 				"<table>" +
-				"<tr class=\"even\"><td>URL</td><td>" + endpoint.getURL().toString() + "</td></tr>";
+				"<tr class=\"even\"><td>URL</td><td><a href=\"" + url + "\">" + url + "</td></tr>";
 		if(!endpoint.getDefaultGraphURIs().isEmpty()){
-			htmlTable += "<tr class=\"odd\"><td>Default Graph URI</td><td>" + endpoint.getDefaultGraphURIs().iterator().next() + "</td></tr>";
-		
+			htmlTable += "<tr class=\"odd\"><td>Default Graph</td><td>" + endpoint.getDefaultGraphURIs().iterator().next() + "</td></tr>";
+		}
+		if(!endpoint.getNamedGraphURIs().isEmpty()){
+			htmlTable += "<tr class=\"odd\"><td>Named Graph(s)</td><td>" + Joiner.on(", ").join(endpoint.getNamedGraphURIs()) + "</td></tr>";
 		}
 		if(stats != null){
 			if(stats.getOwlClassCnt() != -1){
@@ -377,7 +374,13 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	 */
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
-		refresh();
+		UI.getCurrent().access(new Runnable() {
+			
+			@Override
+			public void run() {
+				refresh();
+			}
+		});
 	}
 
 	/* (non-Javadoc)

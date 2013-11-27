@@ -32,6 +32,13 @@ public class AsymmetryBasedInconsistencyFinder extends AbstractTrivialInconsiste
 		super(ks);
 	}
 	
+	/**
+	 * @param ks
+	 */
+	public AsymmetryBasedInconsistencyFinder(SparqlEndpointKS ks, Set<Explanation<OWLAxiom>> explanations) {
+		super(ks, explanations);
+	}
+	
 	private void init(){
 		if(!initialized){
 			propertyCandidates = generatePropertyCandidates();
@@ -87,7 +94,7 @@ public class AsymmetryBasedInconsistencyFinder extends AbstractTrivialInconsiste
 	 */
 	@Override
 	public void run(boolean resume) {
-		explanations = new HashSet<>();
+//		explanations = new HashSet<>();
 		fireInfoMessage("Analyzing asymmetry...");
 		init();
 		
@@ -124,6 +131,6 @@ public class AsymmetryBasedInconsistencyFinder extends AbstractTrivialInconsiste
 				fireNumberOfConflictsFound(explanations.size());
 			}
 		}
-		allExplanations.addAll(explanations);
+//		allExplanations.addAll(explanations);
 	}
 }

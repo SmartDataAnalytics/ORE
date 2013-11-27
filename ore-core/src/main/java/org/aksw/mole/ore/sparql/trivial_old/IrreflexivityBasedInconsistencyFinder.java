@@ -23,15 +23,25 @@ import com.hp.hpl.jena.query.ResultSet;
 
 public class IrreflexivityBasedInconsistencyFinder extends AbstractTrivialInconsistencyFinder {
 	
+	/**
+	 * @param ks
+	 */
+	public IrreflexivityBasedInconsistencyFinder(SparqlEndpointKS ks) {
+		super(ks);
+	}
+	
+	/**
+	 * @param ks
+	 */
+	public IrreflexivityBasedInconsistencyFinder(SparqlEndpointKS ks, Set<Explanation<OWLAxiom>> explanations) {
+		super(ks, explanations);
+	}
+
 	private boolean initialized;
 	private Set<OWLObjectProperty> propertyCandidates;
 	
 	private ParameterizedSparqlString template = new ParameterizedSparqlString("SELECT * WHERE {?s ?p ?s.}");
 
-	public IrreflexivityBasedInconsistencyFinder(SparqlEndpointKS ks) {
-		super(ks);
-	}
-	
 	private void init(){
 		if(!initialized){
 			propertyCandidates = generatePropertyCandidates();
@@ -87,7 +97,7 @@ public class IrreflexivityBasedInconsistencyFinder extends AbstractTrivialIncons
 	 */
 	@Override
 	public void run(boolean resume) {
-		explanations = new HashSet<>();
+//		explanations = new HashSet<>();
 		fireInfoMessage("Analyzing irreflexivity...");
 		init();
 		
@@ -119,6 +129,6 @@ public class IrreflexivityBasedInconsistencyFinder extends AbstractTrivialIncons
 				fireNumberOfConflictsFound(explanations.size());
 			}
 		}
-		allExplanations.addAll(explanations);
+//		allExplanations.addAll(explanations);
 	}
 }

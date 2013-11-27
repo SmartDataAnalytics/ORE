@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.mole.ore.explanation.api.ExplanationType;
+import org.aksw.mole.ore.sparql.trivial_old.ConsoleSPARQLBasedInconsistencyProgressMonitor;
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.ExplanationOptionsPanel;
 import org.aksw.ore.component.ExplanationsPanel;
 import org.aksw.ore.component.RepairPlanTable;
@@ -33,8 +33,6 @@ import com.vaadin.data.Validator;
 import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -44,9 +42,9 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.NativeButton;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
@@ -63,7 +61,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	private ExplanationsPanel explanationsPanel;
 	
 	private Button startButton;
-	private Button stopButton;
 	
 	private CheckBox useLinkedDataCheckBox;
 	private CheckBox assumeUNA;
@@ -149,7 +146,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		stopIfInconsistencyFoundCheckBox.setDescription("If enabled, the algorithm stops immediately once reasons for inconsistency are found.");
 		form.addComponent(stopIfInconsistencyFoundCheckBox);
 		
-		assumeUNA = new CheckBox("Assume Unique Name Assumption");
+		assumeUNA = new CheckBox("Use Unique Name Assumption");
 		assumeUNA.setDescription("If enabled, resources with different names are supposed to be different entities.");
 		assumeUNA.setValue(false);
 		assumeUNA.setImmediate(true);
@@ -296,8 +293,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	
 	public void reset(){
 		optionsPanel.reset();
-		startButton.setEnabled(true);
-		stopButton.setEnabled(false);
 		clearExplanations();
 	}
 	
@@ -308,9 +303,9 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	}
 	
 	private void onSearchInconsistency(){
-		startButton.setEnabled(false);
 		incFinder = ORESession.getSparqlBasedInconsistencyFinder();
 		incFinder.setStopIfInconsistencyFound(stopIfInconsistencyFoundCheckBox.getValue());
+		incFinder.setApplyUniqueNameAssumption(assumeUNA.getValue());
 //		incFinder.setUseLinkedData((Boolean) useLinkedDataCheckBox.getValue());
 		Set<String> namespaces = new HashSet<String>();
 		for(Object item : uriList.getItemIds()){
@@ -319,6 +314,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 //		incFinder.setLinkedDataNamespaces(namespaces);
 		final SPARQLDebuggingProgressDialog progressDialog = new SPARQLDebuggingProgressDialog();
 		incFinder.addProgressMonitor(progressDialog);
+		incFinder.addProgressMonitor(new ConsoleSPARQLBasedInconsistencyProgressMonitor());
 		getUI().addWindow(progressDialog);
 		Thread t = new Thread(new Runnable() {
 			
@@ -326,6 +322,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			public void run() {
 				incFinder.run();
 				explanations = incFinder.getExplanations();
+				
 				ORESession.getSPARQLExplanationManager().setExplanations(explanations);
 				if(!explanations.isEmpty()){
 					UI.getCurrent().access(new Runnable() {
@@ -336,6 +333,10 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 						}
 
 					});
+				} else {
+					if(incFinder.isCompleted()){
+						Notification.show("No inconsistency detected.", "Could not detect any reasons for inconsistency in the knowledge base", Type.HUMANIZED_MESSAGE);
+					}
 				}
 				
 				UI.getCurrent().access(new Runnable() {
@@ -344,7 +345,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 					public void run() {
 						incFinder.removeProgressMonitor(progressDialog);
 						UI.getCurrent().removeWindow(progressDialog);
-						startButton.setEnabled(true);
 					}
 				});
 			}

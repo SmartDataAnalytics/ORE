@@ -13,23 +13,64 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 
 public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialInconsistencyFinder {
 	
-	private List<AbstractTrivialInconsistencyFinder> finders = new ArrayList<AbstractTrivialInconsistencyFinder>();
-	
-	public SPARQLBasedTrivialInconsistencyFinder(SparqlEndpointKS ks) {
-		super(ks);
-		finders.add(new FunctionalityBasedInconsistencyFinder(ks));
-//		finders.add(new InverseFunctionalityBasedInconsistencyFinder(ks));
-		finders.add(new AsymmetryBasedInconsistencyFinder(ks));
-		finders.add(new IrreflexivityBasedInconsistencyFinder(ks));
-		finders.add(new DisjointnessBasedInconsistencyFinder(ks));
+	/**
+	 * The different basic types of inconsistency reasons. Note that inverse functionality can only lead to inconsistency
+	 * if the Unique Name Assumption holds.
+	 * @author Lorenz Buehmann
+	 *
+	 */
+	enum InconsistencyType {
+		FUNCTIONALITY, IRREFLEXIVITY, ASYMMETRY, INVERSE_FUNCTIONALITY, DISJOINTNESS
 	}
 	
-	public Set<Explanation<OWLAxiom>> getExplanations() {
-		Set<Explanation<OWLAxiom>> explanations = new HashSet<>();
-		for(AbstractTrivialInconsistencyFinder checker : finders){
-			explanations.addAll(checker.getExplanations());
+	private List<AbstractTrivialInconsistencyFinder> incFinders = new ArrayList<AbstractTrivialInconsistencyFinder>();
+	
+	private boolean completed = false;
+	
+	public SPARQLBasedTrivialInconsistencyFinder(SparqlEndpointKS ks) {
+		this(ks, InconsistencyType.values());
+	}
+	
+	public SPARQLBasedTrivialInconsistencyFinder(SparqlEndpointKS ks, InconsistencyType... inconsistencyTypes) {
+		super(ks);
+		setInconsistencyTypes(inconsistencyTypes);
+	}
+	
+	public void setInconsistencyTypes(InconsistencyType... inconsistencyTypes){
+		incFinders.clear();
+		for (InconsistencyType inconsistencyType : inconsistencyTypes) {
+			switch (inconsistencyType) {
+			case DISJOINTNESS:incFinders.add(new DisjointnessBasedInconsistencyFinder(ks, getExplanations()));break;
+			case FUNCTIONALITY:incFinders.add(new FunctionalityBasedInconsistencyFinder(ks, getExplanations()));break;
+			case INVERSE_FUNCTIONALITY:incFinders.add(new InverseFunctionalityBasedInconsistencyFinder(ks, getExplanations()));break;
+			case IRREFLEXIVITY:incFinders.add(new IrreflexivityBasedInconsistencyFinder(ks, getExplanations()));break;
+			case ASYMMETRY:incFinders.add(new AsymmetryBasedInconsistencyFinder(ks, getExplanations()));break;
+			default:
+				break;
+			}
 		}
-		return explanations;
+	}
+	
+//	/**
+//	 * Return all found explanations for inconsistency.
+//	 */
+//	public Set<Explanation<OWLAxiom>> getExplanations() {
+//		Set<Explanation<OWLAxiom>> explanations = new HashSet<>();
+//		for(AbstractTrivialInconsistencyFinder checker : incFinders){
+//			explanations.addAll(checker.getExplanations());
+//		}
+//		return explanations;
+//	}
+	
+	/* (non-Javadoc)
+	 * @see org.aksw.mole.ore.sparql.trivial_old.AbstractTrivialInconsistencyFinder#setApplyUniqueNameAssumption(boolean)
+	 */
+	@Override
+	public void setApplyUniqueNameAssumption(boolean applyUniqueNameAssumption) {
+		super.setApplyUniqueNameAssumption(applyUniqueNameAssumption);
+		for (AbstractTrivialInconsistencyFinder incFinder : incFinders) {
+			incFinder.setApplyUniqueNameAssumption(applyUniqueNameAssumption);
+		}
 	}
 	
 	
@@ -39,16 +80,15 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 	@Override
 	public void setStopIfInconsistencyFound(boolean stopIfInconsistencyFound) {
 		super.setStopIfInconsistencyFound(stopIfInconsistencyFound);
-		for (InconsistencyFinder incFinder : finders) {
+		for (InconsistencyFinder incFinder : incFinders) {
 			incFinder.setStopIfInconsistencyFound(stopIfInconsistencyFound);
 		}
 	}
 	
-
 	@Override
 	public void setAxiomsToIgnore(Set<OWLAxiom> axiomsToIgnore) {
 		super.setAxiomsToIgnore(axiomsToIgnore);
-		for (InconsistencyFinder finder : finders) {
+		for (InconsistencyFinder finder : incFinders) {
 			finder.setAxiomsToIgnore(axiomsToIgnore);
 		}
 	}
@@ -59,7 +99,7 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 	@Override
 	public void addProgressMonitor(SPARQLBasedInconsistencyProgressMonitor mon) {
 		super.addProgressMonitor(mon);
-		for (AbstractTrivialInconsistencyFinder incFinder : finders) {
+		for (AbstractTrivialInconsistencyFinder incFinder : incFinders) {
 			incFinder.addProgressMonitor(mon);
 		}
 	}
@@ -69,59 +109,42 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 	 */
 	@Override
 	public void run(boolean resume) {
-		for(AbstractTrivialInconsistencyFinder checker : finders){
-			try {
-				checker.run(resume);
-				fireNumberOfConflictsFound(checker.getExplanations().size());
-				if(checker.terminationCriteriaSatisfied()){
-					break;
+		for(AbstractTrivialInconsistencyFinder checker : incFinders){
+			//apply inverse functionality checker only if UNA is applied
+			if(!(checker instanceof InverseFunctionalityBasedInconsistencyFinder) || isApplyUniqueNameAssumption()){
+				try {
+					checker.run(resume);
+					fireNumberOfConflictsFound(checker.getExplanations().size());
+					if(checker.terminationCriteriaSatisfied()){
+						break;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+			
 		}
+		if(!terminationCriteriaSatisfied()){
+			fireFinished();
+			completed = true;
+		}
+	}
+	
+	/**
+	 * @return the completed
+	 */
+	public boolean isCompleted() {
+		return completed;
 	}
 	
 	public static void main(String[] args) throws Exception {
 		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia(), "cache");
 		SPARQLBasedTrivialInconsistencyFinder incFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
 		incFinder.setStopIfInconsistencyFound(false);
-		incFinder.addProgressMonitor(new SPARQLBasedInconsistencyProgressMonitor() {
-			
-			@Override
-			public void trace(String message) {
-				System.out.println(message);
-			}
-			
-			@Override
-			public boolean isCancelled() {
-				return false;
-			}
-			
-			@Override
-			public void info(String message) {
-				System.out.println(message);
-			}
-			
-			@Override
-			public void inconsistencyFound(Set<Explanation<OWLAxiom>> explanations) {
-			}
-			
-			@Override
-			public void inconsistencyFound() {
-			}
-
-			@Override
-			public void updateProgress(int current, int total) {
-				System.out.println(current + "/" + total);
-			}
-
-			@Override
-			public void numberOfConflictsFound(int nrOfConflictsFound) {
-				System.out.println("Conflicts found: " + nrOfConflictsFound);
-			}
-		});
+		incFinder.setApplyUniqueNameAssumption(true);
+		incFinder.addProgressMonitor(new ConsoleSPARQLBasedInconsistencyProgressMonitor());
 		incFinder.run();
 		System.out.println(incFinder.getExplanations().size());
+		System.out.println(incFinder.getExplanations().iterator().next().getAxioms());
 	}
 }
