@@ -250,7 +250,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
         //the constraint input field
         final TextArea constraintInput = new TextArea();
         constraintInput.setWidth("90%");
-		constraintInput.setValue("FunctionalDataProperty(<http://dbpedia.org/ontology/birthDate>)");//"Enter constraint(s) here.");
+//		constraintInput.setValue("FunctionalDataProperty(<http://dbpedia.org/ontology/birthDate>)");//"Enter constraint(s) here.");
 		l.addComponent(constraintInput);
 		l.setExpandRatio(constraintInput, 1f);
 		l.setComponentAlignment(constraintInput, Alignment.MIDDLE_CENTER);

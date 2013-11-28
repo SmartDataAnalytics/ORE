@@ -253,6 +253,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		//wrapper for scrolling
 		Panel panel = new Panel(explanationsPanel);
 		panel.setSizeFull();
+//		panel.setCaption("Explanations");
 		l.addComponent(panel);
 		l.setExpandRatio(panel, 1.0f);
 		

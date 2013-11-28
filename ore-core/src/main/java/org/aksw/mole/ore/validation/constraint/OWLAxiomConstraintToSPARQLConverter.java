@@ -177,7 +177,7 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 		String propertyURI = axiom.getProperty().asOWLObjectProperty().toStringID();
 		sparql += 	root + " <" + propertyURI + "> ?o1." +
 					root + " <" + propertyURI + "> ?o2." +
-					"FILTER(?o1 != ?o2)";
+					"FILTER(str(?o1) != str(?o2))";
 	}
 
 	@Override
@@ -201,7 +201,7 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor{
 		String propertyURI = axiom.getProperty().asOWLDataProperty().toStringID();
 		sparql += 	root + " <" + propertyURI + "> ?o1." +
 					root + " <" + propertyURI + "> ?o2." +
-					"FILTER(?o1 != ?o2)";
+					"FILTER(str(?o1) != str(?o2))";
 	}
 
 	@Override

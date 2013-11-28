@@ -36,7 +36,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		this.explanation = explanation;
 		selectedObjects.addAll(selectedAxioms);
 		
-		setSizeFull();
+		setWidth("100%");
 		setPageLength(0);
 		setHeight(null);
 		setColumnWidth("Selected", 30);
