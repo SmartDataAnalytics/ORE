@@ -206,8 +206,8 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	}
 	
 	public void setExplanations(Set<Explanation<OWLAxiom>> explanations){
-//		ExplanationCache cache = explanationType2Cache.get(explanationType);
-//		cache.addExplanations(inconsistencyEntailment, explanations);
+		ExplanationCache cache = explanationType2Cache.get(explanationType);
+		cache.addExplanations(inconsistencyEntailment, explanations);
 		this.explanations = explanations;
 	}
 	
