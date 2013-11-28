@@ -155,8 +155,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		resourceURIField.focus();
 		
 		reset();
-		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
-		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
+//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
 	}
 	
 	private Component createAxiomsPanel(){
