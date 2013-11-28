@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2.FormattedExplanation;
 import org.aksw.ore.ORESession;
+import org.aksw.ore.manager.RepairManager;
 import org.aksw.ore.manager.RepairManager.RepairManagerListener;
 import org.aksw.ore.util.Renderer;
 import org.aksw.ore.util.Renderer.Syntax;
@@ -152,6 +153,10 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 
 	public Explanation<OWLAxiom> getExplanation() {
 		return explanation;
+	}
+	
+	public Set<OWLAxiom> getSelectedAxioms(){
+		return (Set<OWLAxiom>)getValue();
 	}
 	
 	

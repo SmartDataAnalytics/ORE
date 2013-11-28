@@ -178,6 +178,8 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			//repair manager
 			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
+			
+			repMan.addListener(expMan);
 		}
 	}
 	

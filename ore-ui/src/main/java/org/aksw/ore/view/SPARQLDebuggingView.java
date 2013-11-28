@@ -283,14 +283,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-				Set<OWLOntologyChange> changes = ORESession.getRepairManager().getRepairPlan();
-				if(!changes.isEmpty()){
-//					ORESession.getRepairManager().addToRepairPlan(changes);
-					ORESession.getKnowledgebaseManager().addChanges(changes);
-					Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
-					ORESession.getRepairManager().execute();
-				}
-//				rebuiltData();
+				onApplyRepairPlan();
 			}
 		});
 		buttons.addComponent(addToKbButton);
@@ -314,12 +307,29 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		
 	}
 	
+	private void onApplyRepairPlan(){
+		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+		for (SPARQLBasedExplanationTable t : tables) {
+			axioms.addAll(t.getSelectedAxioms());
+		}
+		ORESession.getSPARQLExplanationManager().filterOutExplanations(axioms);
+		ORESession.getRepairManager().addAxiomsToRemove(axioms);
+		Set<OWLOntologyChange> changes = ORESession.getRepairManager().getRepairPlan();
+		if(!changes.isEmpty()){
+			ORESession.getKnowledgebaseManager().addChanges(changes);
+			Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
+			ORESession.getRepairManager().execute();
+		}
+		rebuiltData();
+		showExplanations();
+	}
+	
 	private void rebuiltData(){
 		clearExplanations();
 		selectedAxioms.clear();
 		tables.clear();
 		table2Listener.clear();
-		ORESession.getExplanationManager().clearCache();
+//		ORESession.getExplanationManager().clearCache();
 	}
 	
 	public void reset(){
@@ -387,7 +397,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 	private void showExplanations() {
 		clearExplanations();
 		int i = 1;
-		for (Explanation<OWLAxiom> explanation : explanations) {
+		for (Explanation<OWLAxiom> explanation : ORESession.getSPARQLExplanationManager().getExplanations()) {
 			final SPARQLBasedExplanationTable t = new SPARQLBasedExplanationTable(explanation, selectedAxioms);
 			ORESession.getRepairManager().addListener(t);
 //			t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());

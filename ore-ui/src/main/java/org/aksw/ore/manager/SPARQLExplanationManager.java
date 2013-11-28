@@ -3,6 +3,7 @@ package org.aksw.ore.manager;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2.FormattedExplanation;
 import org.aksw.mole.ore.explanation.impl.laconic.RemainingAxiomPartsGenerator;
+import org.aksw.ore.ORESession;
+import org.aksw.ore.manager.RepairManager.RepairManagerListener;
 import org.apache.log4j.Logger;
 import org.dllearner.core.owl.Individual;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
@@ -29,15 +32,18 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 import com.clarkparsia.owlapi.explanation.GlassBoxExplanation;
+import com.google.common.collect.Sets;
 
-public class SPARQLExplanationManager {
+public class SPARQLExplanationManager implements RepairManagerListener{
 	
 	private final Logger logger = Logger.getLogger(SPARQLExplanationManager.class);
 	
@@ -65,6 +71,7 @@ public class SPARQLExplanationManager {
 
 	protected final OWLAxiom inconsistencyEntailment = dataFactory.getOWLSubClassOfAxiom(dataFactory.getOWLThing(), dataFactory.getOWLNothing());
 	
+	private Set<Explanation<OWLAxiom>> explanations;
 
 	private Set<Explanation<OWLAxiom>> currentlyFoundExplanations;
 	
@@ -199,8 +206,9 @@ public class SPARQLExplanationManager {
 	}
 	
 	public void setExplanations(Set<Explanation<OWLAxiom>> explanations){
-		ExplanationCache cache = explanationType2Cache.get(explanationType);
-		cache.addExplanations(inconsistencyEntailment, explanations);
+//		ExplanationCache cache = explanationType2Cache.get(explanationType);
+//		cache.addExplanations(inconsistencyEntailment, explanations);
+		this.explanations = explanations;
 	}
 	
 	public int getAxiomFrequency(OWLAxiom axiom){
@@ -259,6 +267,33 @@ public class SPARQLExplanationManager {
 	private void fireExplanationTypeChanged(){
 		for(ExplanationManagerListener l : listeners){
 			l.explanationTypeChanged(explanationType);
+		}
+	}
+	
+	public Set<Explanation<OWLAxiom>> getExplanations(){
+		return explanations;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.RepairManager.RepairManagerListener#repairPlanChanged()
+	 */
+	@Override
+	public void repairPlanChanged() {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.RepairManager.RepairManagerListener#repairPlanExecuted()
+	 */
+	@Override
+	public void repairPlanExecuted() {
+	}
+	
+	public void filterOutExplanations(Set<OWLAxiom> ignoredAxioms){
+		for (Iterator<Explanation<OWLAxiom>> iterator = explanations.iterator(); iterator.hasNext();) {
+			Explanation<OWLAxiom> explanation = iterator.next();
+			if(!Sets.intersection(ignoredAxioms, explanation.getAxioms()).isEmpty()){
+				iterator.remove();
+			}
 		}
 	}
 }
