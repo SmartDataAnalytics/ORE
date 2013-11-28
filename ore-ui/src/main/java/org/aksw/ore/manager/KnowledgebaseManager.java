@@ -1,7 +1,9 @@
 package org.aksw.ore.manager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
@@ -14,11 +16,13 @@ import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.QueryExecution;
 
 public class KnowledgebaseManager implements OWLOntologyLoaderListener{
@@ -31,10 +35,13 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		void knowledgebaseAnalyzed(Knowledgebase knowledgebase);
 		void knowledgebaseStatusChanged(Knowledgebase knowledgebase);
 		void message(String message);
+		void knowledgebaseModified(Set<OWLOntologyChange> changes);
 	}
 	
 	private Knowledgebase knowledgebase;
 	private OWLReasoner reasoner;
+	
+	private Set<OWLOntologyChange> changes;
 	
 	private List<KnowledgebaseLoadingListener> listeners;
 	
@@ -45,6 +52,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	public void setKnowledgebase(Knowledgebase knowledgebase) {
 		logger.debug("Set knowledgebase to " + knowledgebase);
 		this.knowledgebase = knowledgebase;
+		changes = Sets.newLinkedHashSet();
 //		analyzeKnowledgebase();
 		fireKnowledgebaseChanged();
 	}
@@ -76,11 +84,11 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 			analyzeSPARQLEndpoint((SPARQLEndpointKnowledgebase) knowledgebase);
 		}
 //		ORESession.setReasoner(reasoner);
-//		ORESession.initialize(knowledgebase);
+		ORESession.initialize(knowledgebase);
 		
 		fireKnowledgebaseAnalyzed();
 		
-		ORESession.initialize(knowledgebase);
+//		ORESession.initialize(knowledgebase);
 	}
 	
 	/**
@@ -105,6 +113,28 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		int dpCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
 		
 		kb.setStats(new SPARQLKnowledgebaseStats(clsCnt, opCnt, dpCnt));
+	}
+	
+	public void addChange(OWLOntologyChange change){
+		changes.add(change);
+		fireKnowledgebaseModified();
+	}
+	
+	public void removeChange(OWLOntologyChange change){
+		changes.remove(change);
+		fireKnowledgebaseModified();
+	}
+	
+	public void addChanges(Collection<OWLOntologyChange> changes){
+		this.changes.addAll(changes);
+		fireKnowledgebaseModified();
+	}
+	
+	/**
+	 * @return the changes
+	 */
+	public Set<OWLOntologyChange> getChanges() {
+		return changes;
 	}
 	
 	public void updateStatus(){
@@ -151,6 +181,12 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	private void fireKnowledgebaseStatusChanged(){
 		for (KnowledgebaseLoadingListener l : listeners) {
 			l.knowledgebaseStatusChanged(knowledgebase);
+		}
+	}
+	
+	private void fireKnowledgebaseModified(){
+		for (KnowledgebaseLoadingListener l : listeners) {
+			l.knowledgebaseModified(changes);
 		}
 	}
 

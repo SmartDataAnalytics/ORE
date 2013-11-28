@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.util.HelpManager;
-import org.aksw.ore.util.URLParameters;
 import org.aksw.ore.view.ConstraintValidationView;
 import org.aksw.ore.view.DebuggingView;
 import org.aksw.ore.view.EnrichmentView;
@@ -19,6 +19,7 @@ import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.NamingView;
 import org.aksw.ore.view.SPARQLDebuggingView;
 import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
 
@@ -31,7 +32,6 @@ import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -109,7 +109,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	}
     
     @Override
-    protected void init(VaadinRequest request) {System.out.println("init");
+    protected void init(VaadinRequest request) {
     	getPage().setTitle("ORE");
     	root.addStyleName("root");
         root.setSizeFull();
@@ -307,6 +307,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
             menu.addComponent(b);
             viewNameToMenuButton.put(route, b);
 		}
+    	
 //    	for (final String view : new String[]{"knowledgebase", "enrichment"}) {
 //    		String caption = view.equals("knowledgebase") ? "knowledge base" : view;
 //            Button b = new NativeButton(caption);
@@ -356,6 +357,16 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
         menu.setHeight("100%");
     }
     
+    private void showKnowledgebaseModified(boolean modified){
+    	if(modified){
+    		viewNameToMenuButton.get(view2Route.get(KnowledgebaseView.class)).setHtmlContentAllowed(true);
+        	viewNameToMenuButton.get(view2Route.get(KnowledgebaseView.class)).setCaption("Knowledge Base<span class=\"badge\">!</span>");
+    	} else {
+    		viewNameToMenuButton.get(view2Route.get(KnowledgebaseView.class)).setHtmlContentAllowed(false);
+        	viewNameToMenuButton.get(view2Route.get(KnowledgebaseView.class)).setCaption("Knowledge Base");
+    	}
+    }
+    
     private void clearMenuSelection() {
     	for (Button b : viewNameToMenuButton.values()) {
     		b.removeStyleName("selected");
@@ -375,7 +386,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	 */
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
-		ORESession.initialize(knowledgebase);
+//		ORESession.initialize(knowledgebase);
 		updateAvailableViews();
 		updateMenuButtons();
 	}
@@ -392,6 +403,14 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	 */
 	@Override
 	public void message(String message) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener#knowledgebaseModified(java.util.List)
+	 */
+	@Override
+	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
+		showKnowledgebaseModified(!changes.isEmpty());
 	}
     
 }

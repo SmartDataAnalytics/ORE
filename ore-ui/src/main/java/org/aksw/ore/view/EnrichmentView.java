@@ -14,6 +14,7 @@ import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.ResourceType;
+import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.dllearner.core.EvaluatedAxiom;
 import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -39,8 +40,11 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
@@ -75,6 +79,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 	private List<AxiomType<OWLAxiom>> pendingAxiomTypes;
 	
 	private Set<EvaluatedAxiomsTable> tables;
+	private Button addToKbButton;
+	private Button dumpSPARULButton;
 
 	public EnrichmentView() {
 		initUI();
@@ -98,9 +104,41 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		rightSide.addComponent(axiomsPanel);
 		rightSide.setExpandRatio(axiomsPanel, 1f);
 		
-		Button dumpSPARULButton = new Button("Dump as SPARUL");
+		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.setWidth(null);
+		rightSide.addComponent(buttons);
+		rightSide.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
+		
+		addToKbButton = new Button("Add");
+		addToKbButton.setHeight(null);
+		addToKbButton.setImmediate(true);
+		addToKbButton.setDescription("Add the selected axioms temporarily to the knowledge base.(visible in 'Knowledge Base' view)");
+		addToKbButton.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				OWLOntology ontology = ((SPARQLEndpointKnowledgebase)ORESession.getKnowledgebaseManager().getKnowledgebase()).getBaseOntology();
+				List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+				for(EvaluatedAxiomsTable table : tables){
+					Set<Object> selectedObjects = table.getSelectedObjects();
+					for(Object o : selectedObjects){
+						changes.add(new AddAxiom(ontology, OWLAPIConverter.getOWLAPIAxiom(((EvaluatedAxiom)o).getAxiom())));
+					}
+				}
+				if(!changes.isEmpty()){
+					ORESession.getRepairManager().addToRepairPlan(changes);
+					ORESession.getKnowledgebaseManager().addChanges(changes);
+					Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
+				}
+			}
+		});
+		buttons.addComponent(addToKbButton);
+		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
+		
+		dumpSPARULButton = new Button("Dump as SPARUL");
 		dumpSPARULButton.setHeight(null);
 		dumpSPARULButton.setImmediate(true);
+		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL Update statements.");
 		dumpSPARULButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -108,8 +146,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 				onDumpSPARUL();
 			}
 		});
-		rightSide.addComponent(dumpSPARULButton);
-		rightSide.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_CENTER);
+		buttons.addComponent(dumpSPARULButton);
+		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
+		
+//		addToKbButton.setEnabled(false);
+//		dumpSPARULButton.setEnabled(false);
 		
 		resourceURIField.focus();
 		
@@ -289,9 +330,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 			}
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.translate(changes);
+				String sparulString = translator.translate(changes, AddAxiom.class);
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
-				final Window window = new Window("SPARUL statements", content);
+				final Window window = new Window("SPARQL Update statements", content);
 				window.setWidth("1000px");
 				window.setHeight("400px");
 				window.center();

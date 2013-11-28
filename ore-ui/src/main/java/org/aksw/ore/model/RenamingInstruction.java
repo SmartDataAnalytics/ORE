@@ -42,5 +42,19 @@ public class RenamingInstruction {
 	public String toString() {
 		return getNLRepresentation();
 	}
+	
+	/**
+	 * @return the originalName
+	 */
+	public String getOriginalName() {
+		return originalName;
+	}
+	
+	/**
+	 * @return the newName
+	 */
+	public String getNewName() {
+		return newName;
+	}
 
 }

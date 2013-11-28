@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ProgressDialog;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.KnowledgebaseManager;
+import org.aksw.ore.model.EntityRenaming;
 import org.aksw.ore.model.NamingPattern;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.RenamingInstruction;
@@ -40,6 +42,7 @@ import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.w3c.dom.Document;
@@ -47,6 +50,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.google.common.collect.Sets;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.vaadin.data.Property;
@@ -401,9 +405,12 @@ public class NamingView extends VerticalLayout implements View{
 			e1.printStackTrace();
 		}
 	    //remove all renaming instance nodes not selected
+	    Set<OWLOntologyChange> changes = Sets.newLinkedHashSet();
 		for(RenamingInstruction i : instructionsContainer.getItemIds()){
 			if(!i.isSelected()){
 				parent.removeChild(i.getNode());
+			} else {
+				changes.add(new EntityRenaming(currentlyLoadedOntology, i.getOriginalName(), i.getNewName()));
 			}
 		}
 		try {
@@ -423,6 +430,7 @@ public class NamingView extends VerticalLayout implements View{
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+			ORESession.getKnowledgebaseManager().addChanges(changes);
 			Notification.show("Transformation was successful.");
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
@@ -511,7 +519,17 @@ public class NamingView extends VerticalLayout implements View{
 			OntologyPatternDetectionImpl detection = new OntologyPatternDetectionImpl(transformation.getDictionaryPath(), transformation.getModelsPath());		
 					
 			//detection and transformation instructions generation:
-			return detection.queryPatternStructuralAspect2(tp1, currentOntologyURI, false, currentNamingPattern.isUseReasoning());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			OWLOntologyManager man = currentlyLoadedOntology.getOWLOntologyManager();
+			try {
+				man.saveOntology(currentlyLoadedOntology, new RDFXMLOntologyFormat(), baos);
+				InputStream is = new ByteArrayInputStream(baos.toByteArray());
+				return detection.queryPatternStructuralAspect2(tp1, is, false, currentNamingPattern.isUseReasoning());
+			} catch (OWLOntologyStorageException e) {
+				e.printStackTrace();
+			}
+			return new ArrayList<String>();
+//			return detection.queryPatternStructuralAspect2(tp1, currentOntologyURI, false, currentNamingPattern.isUseReasoning());
 	    }
 	  }
 	

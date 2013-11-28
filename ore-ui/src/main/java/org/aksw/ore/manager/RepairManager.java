@@ -13,6 +13,8 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
+import com.google.common.collect.Sets;
+
 public class RepairManager {
 	
 	public interface RepairManagerListener {
@@ -20,7 +22,7 @@ public class RepairManager {
 		void repairPlanExecuted();
 	}
 	
-	private Collection<OWLOntologyChange> repairPlan;
+	private Set<OWLOntologyChange> repairPlan;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
@@ -38,7 +40,7 @@ public class RepairManager {
 	}
 	
 	public Collection<OWLAxiom> getAxiomsScheduledToRemove(){
-		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+		Set<OWLAxiom> axioms = Sets.newLinkedHashSet();
 		for(OWLOntologyChange change: repairPlan){
 			if(change instanceof RemoveAxiom){
 				axioms.add(change.getAxiom());
@@ -102,7 +104,7 @@ public class RepairManager {
 		fireRepairPlanChanged();
 	}
 	
-	public Collection<OWLOntologyChange> getRepairPlan() {
+	public Set<OWLOntologyChange> getRepairPlan() {
 		return repairPlan;
 	}
 	

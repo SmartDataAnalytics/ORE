@@ -13,6 +13,7 @@ import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.mole.ore.sparql.trivial_old.ConsoleSPARQLBasedInconsistencyProgressMonitor;
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.ORESession;
+import org.aksw.ore.component.EvaluatedAxiomsTable;
 import org.aksw.ore.component.ExplanationOptionsPanel;
 import org.aksw.ore.component.ExplanationsPanel;
 import org.aksw.ore.component.RepairPlanTable;
@@ -21,8 +22,13 @@ import org.aksw.ore.component.SPARQLDebuggingProgressDialog;
 import org.aksw.ore.component.SPARULDialog;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManagerListener;
+import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.dllearner.core.EvaluatedAxiom;
+import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owl.explanation.api.Explanation;
+import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.vaadin.risto.stepper.IntStepper;
 
@@ -178,7 +184,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		
 		startButton = new Button("Start");
 		startButton.setDescription("Click to start the detection of possible inconsistency causes.");
-		startButton.setDisableOnClick(true);
 		startButton.addClickListener(new ClickListener() {
 			
 			@Override
@@ -265,19 +270,45 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 		wrapper.addComponent(repairPlanTable);
 		wrapper.setExpandRatio(repairPlanTable, 1.0f);
 		
-		Button executeRepairButton = new Button("Dump as SPARUL");
-		executeRepairButton.setHeight(null);
-		executeRepairButton.addClickListener(new Button.ClickListener() {
+		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.setWidth(null);
+		wrapper.addComponent(buttons);
+		wrapper.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
+		
+		Button addToKbButton = new Button("Apply");
+		addToKbButton.setHeight(null);
+		addToKbButton.setImmediate(true);
+		addToKbButton.setDescription("Apply the changes virtually.(visible in 'Knowledge Base' view)");
+		addToKbButton.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Set<OWLOntologyChange> changes = ORESession.getRepairManager().getRepairPlan();
+				if(!changes.isEmpty()){
+//					ORESession.getRepairManager().addToRepairPlan(changes);
+					ORESession.getKnowledgebaseManager().addChanges(changes);
+					Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
+					ORESession.getRepairManager().execute();
+				}
+//				rebuiltData();
+			}
+		});
+		buttons.addComponent(addToKbButton);
+		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
+		
+		Button dumpSPARULButton = new Button("Dump as SPARUL");
+		dumpSPARULButton.setHeight(null);
+		dumpSPARULButton.setImmediate(true);
+		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL Update statements.");
+		dumpSPARULButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
 				onDumpSPARUL();
-//				ORESession.getRepairManager().execute();
-				rebuiltData();
 			}
 		});
-		wrapper.addComponent(executeRepairButton);
-		wrapper.setComponentAlignment(executeRepairButton, Alignment.MIDDLE_RIGHT);
+		buttons.addComponent(dumpSPARULButton);
+		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
 		
 		return new WhitePanel(wrapper);
 		
@@ -570,6 +601,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			HorizontalLayout buttonLayout = new HorizontalLayout();
 //			buttonLayout.addComponent(new Label("Namespaces:", ContentMode.HTML));
 			buttonLayout.setWidth("100%");
+			buttonLayout.setHeight(null);
 			buttonLayout.addComponent(addButton);
 			buttonLayout.addComponent(removeButton);
 //			buttonLayout.addStyleName("toolbar");

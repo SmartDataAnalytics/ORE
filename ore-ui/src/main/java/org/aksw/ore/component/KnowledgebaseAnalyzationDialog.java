@@ -3,9 +3,11 @@
  */
 package org.aksw.ore.component;
 
-import org.aksw.ore.ORESession;
+import java.util.Set;
+
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 
 import com.vaadin.ui.UI;
 
@@ -57,6 +59,13 @@ public class KnowledgebaseAnalyzationDialog extends ProgressDialog implements Kn
 				setMessage(message);
 			}
 		});
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener#knowledgebaseModified(java.util.List)
+	 */
+	@Override
+	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
 	}
 
 	

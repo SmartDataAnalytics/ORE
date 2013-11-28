@@ -7,15 +7,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.aksw.mole.ore.repository.tones.TONESRepository;
+import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.FileUploadDialog;
 import org.aksw.ore.component.KnowledgebaseAnalyzationDialog;
+import org.aksw.ore.component.KnowledgebaseChangesTable;
 import org.aksw.ore.component.LoadFromURIDialog;
 import org.aksw.ore.component.OntologyRepositoryDialog;
 import org.aksw.ore.component.SPARQLEndpointDialog;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -23,8 +26,12 @@ import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.aksw.ore.util.URLParameters;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
@@ -51,6 +58,9 @@ import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 
 /**
  * @author Lorenz Buehmann
@@ -59,8 +69,11 @@ import com.vaadin.ui.VerticalLayout;
 public class KnowledgebaseView extends VerticalLayout implements View, KnowledgebaseLoadingListener {
 	
 	private Label kbInfo;
-	private Button saveOntologyButton;
 	private OntologyRepositoryDialog repositoryDialog;
+	private KnowledgebaseChangesTable table;
+	private VerticalLayout kbInfoPanel;
+	private VerticalLayout changesPanel;
+	private Button applyChangesButton;
 	
 	public KnowledgebaseView() {
 		addStyleName("dashboard-view");
@@ -72,12 +85,13 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 //		buttons = createMenu();
 		addComponent(buttons);
 		
-		ConfigurablePanel knowledgeBaseInfo = new ConfigurablePanel(createKnowledgeBaseInfo());
+		WhitePanel knowledgeBaseInfo = new WhitePanel(createKnowledgeBaseInfo());
 		addComponent(knowledgeBaseInfo);
 		
 		setExpandRatio(knowledgeBaseInfo, 1f);
 		
 		ORESession.getKnowledgebaseManager().addListener(this);
+		ORESession.getKnowledgebaseManager().addListener(table);
 		
 		refresh();
 	}
@@ -164,8 +178,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		buttons.addComponent(endpointButton);
 		buttons.setComponentAlignment(endpointButton, Alignment.MIDDLE_LEFT);
 		
-		buttons.addComponent(createSaveOntologyButton());
-		
 		return buttons;
 	}
 	
@@ -193,8 +205,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		getUI().addWindow(repositoryDialog);
 	}
 	
-	private Button createSaveOntologyButton(){
-		Button button = new Button("Save ontology");
+	private void onSaveOntology(){
 		StreamResource res = new StreamResource(new StreamSource() {
 			
 			@Override
@@ -205,7 +216,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 						final OWLOntology ontology = ((OWLOntologyKnowledgebase) knowledgebase).getOntology();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						ByteArrayInputStream bais;
-						try {System.out.println(ontology);
+						try {
 							ontology.getOWLOntologyManager().saveOntology(ontology, new RDFXMLOntologyFormat(), baos);
 							bais = new ByteArrayInputStream(baos.toByteArray());
 							baos.close();
@@ -221,9 +232,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			}
 		},"ontology.owl");
 		FileDownloader downloader = new FileDownloader(res);
-		downloader.extend(button);
-		
-		return button;
+		downloader.extend(applyChangesButton);
 	}
 	
 	private void onSetSPARQLEndpoint(){
@@ -242,17 +251,87 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		if(knowledgebase != null){
 			if(knowledgebase instanceof OWLOntologyKnowledgebase){
 				visualizeOntology((OWLOntologyKnowledgebase) knowledgebase);
+				applyChangesButton.setDescription("Export modified ontology.");
+				onSaveOntology();
 			} else {
 				visualizeSPARQLEndpoint((SPARQLEndpointKnowledgebase) knowledgebase);
+				applyChangesButton.setDescription("Export changes as SPARQL Update statements.");
 			}
 		}
+		changesPanel.setVisible(false);
 	}
 	
 	private Component createKnowledgeBaseInfo(){
+		kbInfoPanel = new VerticalLayout();
+		kbInfoPanel.setSizeFull();
+		kbInfoPanel.setSpacing(true);
+		
 		kbInfo = new Label("</br>");
 		kbInfo.setContentMode(ContentMode.HTML);
+		kbInfoPanel.addComponent(kbInfo);
 		
-		return kbInfo;
+		changesPanel = new VerticalLayout();
+		changesPanel.setSizeFull();
+		Label label = new Label("<h3>Changes:</h3>", ContentMode.HTML);
+		changesPanel.addComponent(label);
+		
+		table = new KnowledgebaseChangesTable();
+		table.setSizeFull();
+		changesPanel.addComponent(table);
+		changesPanel.setExpandRatio(table, 1f);
+		
+		applyChangesButton = new Button("Export");
+		applyChangesButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				onExport();
+			}
+		});
+		changesPanel.addComponent(applyChangesButton);
+		changesPanel.setComponentAlignment(applyChangesButton, Alignment.MIDDLE_RIGHT);
+		
+		kbInfoPanel.addComponent(changesPanel);
+		kbInfoPanel.setExpandRatio(changesPanel, 1f);
+		
+		return kbInfoPanel;
+	}
+	
+	private void onExport(){
+		if(ORESession.getKnowledgebaseManager().getKnowledgebase() instanceof SPARQLEndpointKnowledgebase){
+			onDumpSPARUL();
+		} else {
+			
+		}
+	}
+	
+	private void onDumpSPARUL(){
+		try {
+			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+			OWLOntology ontology = man.createOntology();
+			SPARULTranslator translator = new SPARULTranslator(man, ontology, false);
+			Set<OWLOntologyChange> changes = ORESession.getKnowledgebaseManager().getChanges();
+			if(!changes.isEmpty()){
+				VerticalLayout content = new VerticalLayout();
+				String sparulString = translator.translate(changes);
+				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
+				final Window window = new Window("SPARQL Update statements", content);
+				window.setWidth("1000px");
+				window.setHeight("400px");
+				window.center();
+				window.addCloseListener(new CloseListener() {
+					
+					@Override
+					public void windowClose(CloseEvent e) {
+						getUI().removeWindow(window);
+					}
+				});
+				getUI().addWindow(window);
+				window.focus();
+			}
+		} catch (OWLOntologyCreationException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void visualizeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
@@ -281,7 +360,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		
 		}
 		htmlTable += "</table>";	
-		kbInfo.setCaption("SPARQL Endpoint");
+		kbInfoPanel.setCaption("SPARQL Endpoint");
 		kbInfo.setValue(htmlTable);
 	}
 	
@@ -311,7 +390,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		}
 		
 		htmlTable += "</table>";
-		kbInfo.setCaption("OWL Ontology");
+		kbInfoPanel.setCaption("OWL Ontology");
 		kbInfo.setValue(htmlTable);
 	}
 
@@ -319,7 +398,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	 * @see com.vaadin.navigator.View#enter(com.vaadin.navigator.ViewChangeListener.ViewChangeEvent)
 	 */
 	@Override
-	public void enter(ViewChangeEvent event) {System.out.println("enter " + this);
+	public void enter(ViewChangeEvent event) {
 		handleURLRequestParameters();
 	}
 	
@@ -397,6 +476,12 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	public void message(String message) {
 	}
 
-	
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener#knowledgebaseModified(java.util.List)
+	 */
+	@Override
+	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
+		changesPanel.setVisible(!changes.isEmpty());
+	}
 
 }

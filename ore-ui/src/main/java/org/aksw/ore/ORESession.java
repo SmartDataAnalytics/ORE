@@ -3,7 +3,7 @@
  */
 package org.aksw.ore;
 
-import java.sql.SQLException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
@@ -30,6 +30,7 @@ import org.dllearner.reasoning.PelletReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -121,6 +122,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	}
 	
 	public static void initialize(Knowledgebase knowledgebase){
+		System.out.println("init kb");
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		if(knowledgebase instanceof OWLOntologyKnowledgebase){
 			OWLOntologyKnowledgebase ontologyKB = (OWLOntologyKnowledgebase) knowledgebase;
@@ -231,7 +233,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	 */
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
-		initialize(knowledgebase);
+//		initialize(knowledgebase);
 	}
 
 	/* (non-Javadoc)
@@ -246,6 +248,13 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	 */
 	@Override
 	public void message(String message) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener#knowledgebaseModified(java.util.List)
+	 */
+	@Override
+	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
 	}
 
 }
