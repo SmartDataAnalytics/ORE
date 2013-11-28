@@ -100,9 +100,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		rightSide.setCaption("Learned axioms");
 		addComponent(new WhitePanel(rightSide));
 		
-		createAxiomsPanel();
-		rightSide.addComponent(axiomsPanel);
-		rightSide.setExpandRatio(axiomsPanel, 1f);
+		Component panel = createAxiomsPanel();
+		rightSide.addComponent(panel);
+		rightSide.setExpandRatio(panel, 1f);
 		
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setWidth(null);
@@ -155,8 +155,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		resourceURIField.focus();
 		
 		reset();
-//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
-//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
+		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
 	}
 	
 	private Component createAxiomsPanel(){
@@ -167,7 +167,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		axiomsPanel.addStyleName("enrichment-axioms-panel");
 		axiomsPanel.setHeight(null);
 		
-		return axiomsPanel;
+		Panel panel = new Panel(axiomsPanel);
+		panel.setSizeFull();
+		return panel;
 	}
 	
 	private VerticalLayout createLeftSide(){
