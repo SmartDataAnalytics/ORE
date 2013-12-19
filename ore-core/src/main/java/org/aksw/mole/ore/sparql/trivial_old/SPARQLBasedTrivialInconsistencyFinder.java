@@ -1,14 +1,12 @@
 package org.aksw.mole.ore.sparql.trivial_old;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.aksw.mole.ore.sparql.InconsistencyFinder;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialInconsistencyFinder {
@@ -49,6 +47,7 @@ public class SPARQLBasedTrivialInconsistencyFinder extends AbstractTrivialIncons
 				break;
 			}
 		}
+		incFinders.add(new PropertyRestrictionBasedInconsistencyFinder(ks));
 	}
 	
 //	/**

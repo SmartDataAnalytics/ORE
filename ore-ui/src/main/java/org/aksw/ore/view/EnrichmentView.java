@@ -215,6 +215,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 		resourceURIField.setInputPrompt("Enter resource URI");
 		resourceURIField.setWidth("100%");
 		resourceURIField.setCaption("Resource URI");
+		resourceURIField.setRequired(true);
 		form.addComponent(resourceURIField);
 		
 		resourceTypeField = new ResourceTypeField();

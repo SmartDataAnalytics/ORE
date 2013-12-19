@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.aksw.ore.cache.LearningResultsCache;
 import org.aksw.ore.model.LearningSetting;
@@ -16,20 +17,26 @@ import org.dllearner.core.owl.Description;
 import org.dllearner.core.owl.Individual;
 import org.dllearner.core.owl.Intersection;
 import org.dllearner.core.owl.NamedClass;
+import org.dllearner.core.owl.Thing;
 import org.dllearner.core.owl.Union;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.reasoning.PelletReasoner;
 import org.dllearner.refinementoperators.RhoDRDown;
+import org.dllearner.utilities.owl.OWLAPIConverter;
+import org.dllearner.utilities.owl.OWLAPIDescriptionConvertVisitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.google.common.collect.Sets;
 
 public class LearningManager {
 	
@@ -104,6 +111,38 @@ public class LearningManager {
 		for(NamedClass nc : reasoner.getAtomicConceptsList()){
 			if(reasoner.getIndividuals(nc).size() >= 2){
 				classes.add(nc);
+			}
+		}
+		return classes;
+	}
+	
+	/**
+	 * Returns all classes that are direct subclasses of owl:Thing.
+	 * @return
+	 */
+	public SortedSet<NamedClass> getTopLevelClasses(){
+		SortedSet<NamedClass> classes = Sets.newTreeSet();
+		com.clarkparsia.pellet.owlapiv3.PelletReasoner pelletReasoner = reasoner.getReasoner();
+		Set<OWLClass> directSubClasses = pelletReasoner.getSubClasses(reasoner.getOWLDataFactory().getOWLThing(), true).getFlattened();
+		for (OWLClass cls : directSubClasses) {
+			if(!cls.isBuiltIn() && !cls.getIRI().isReservedVocabulary()){
+				classes.add(new NamedClass(cls.toStringID()));
+			}
+		}
+		return classes;
+	}
+	
+	/**
+	 * Returns all direct subclasses.
+	 * @return
+	 */
+	public SortedSet<NamedClass> getDirectSubClasses(NamedClass nc){
+		SortedSet<NamedClass> classes = Sets.newTreeSet();
+		com.clarkparsia.pellet.owlapiv3.PelletReasoner pelletReasoner = reasoner.getReasoner();
+		Set<OWLClass> directSubClasses = pelletReasoner.getSubClasses(OWLAPIConverter.getOWLAPIDescription(nc), true).getFlattened();
+		for (OWLClass cls : directSubClasses) {
+			if(!cls.isBuiltIn() && !cls.getIRI().isReservedVocabulary()){
+				classes.add(new NamedClass(cls.toStringID()));
 			}
 		}
 		return classes;
@@ -266,7 +305,7 @@ public class LearningManager {
 	
 	public static void main(String[] args) throws Exception {
 		
-		String ontologyURL = "http://www.cs.ox.ac.uk/isg/ontologies/UID/00082.owl";
+		String ontologyURL = "file:/tmp/dl-learner-sample-with-classes-pco.rdf";
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory dataFactory = man.getOWLDataFactory();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
@@ -275,9 +314,10 @@ public class LearningManager {
 		PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
 		pelletReasoner.init();
 		LearningManager learningManager = new LearningManager(pelletReasoner);
-		learningManager.setClass2Describe(new NamedClass("http://mged.sourceforge.net/ontologies/MGEDOntology.owl#DeprecationReason"));
-		learningManager.prepareLearning();
-		learningManager.startLearning();
+		SortedSet<NamedClass> topLevelClasses = learningManager.getTopLevelClasses();
+		System.out.println(topLevelClasses);
+		SortedSet<NamedClass> directSubClasses = learningManager.getDirectSubClasses(new NamedClass("http://purl.org/goodrelations/v1#Offering"));
+		System.out.println(directSubClasses);
 	}
 	
 }

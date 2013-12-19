@@ -144,20 +144,24 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);
 		ontologyButton.setContent(popupLayout);
-		popupLayout.addComponent(new Button("From file", new ClickListener() {
+		Button button = new Button("From file", new ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
 				onLoadOntologyFromFile();
 			}
-		}));
-		popupLayout.addComponent(new Button("From URI", new ClickListener() {
+		});
+		popupLayout.addComponent(button);
+		button.setWidth("100%");
+		button = new Button("From URI", new ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
 				onLoadOntologyFromURI();
 			}
-		}));
+		});
+		button.setWidth("100%");
+		popupLayout.addComponent(button);
 		popupLayout.addComponent(new Button("Ontology repository", new ClickListener() {
 			
 			@Override

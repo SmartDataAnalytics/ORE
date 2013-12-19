@@ -14,12 +14,14 @@ import org.junit.Test;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 
 /**
  * @author Lorenz Buehmann
@@ -40,6 +42,7 @@ public class SPARQLBasedTrivialInconsistencyFinderTest {
 		OntClass clsA2 = model.createClass(NS + "A2");
 		OntClass clsB1 = model.createClass(NS + "B1");
 		OntClass clsB2 = model.createClass(NS + "B2");
+		Property prop = model.createProperty(NS, "p");
 		clsA.addSubClass(clsA1);
 		clsA1.addSubClass(clsA2);
 		clsB.addSubClass(clsB1);
@@ -47,6 +50,12 @@ public class SPARQLBasedTrivialInconsistencyFinderTest {
 		clsA.addDisjointWith(clsB);
 		Individual ind = model.createIndividual(NS + "a", clsA2);
 		ind.addOntClass(clsB);
+		Individual ind2 = model.createIndividual(NS + "b", clsA2);
+		
+		//x a [rdf:type owl:Restriction; owl:onProperty P; owl:cardinality 0^^xsd:integer.] x P o
+		CardinalityRestriction restriction = model.createCardinalityRestriction(null, prop, 0);
+		ind.addOntClass(restriction);
+		ind.addProperty(prop, ind2);
 //		
 //		StringWriter sw = new StringWriter();
 //		model.write(sw, "TURTLE");
@@ -55,6 +64,7 @@ public class SPARQLBasedTrivialInconsistencyFinderTest {
 		ks = new LocalModelBasedSparqlEndpointKS(model);
 		
 		incFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
+		incFinder.setStopIfInconsistencyFound(false);
 		incFinder.addProgressMonitor(new ConsoleSPARQLBasedInconsistencyProgressMonitor());
 	}
 

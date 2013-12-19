@@ -3,6 +3,7 @@ package org.aksw.ore;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -110,6 +111,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     
     @Override
     protected void init(VaadinRequest request) {
+    	UI.getCurrent().setLocale(Locale.ENGLISH);
     	getPage().setTitle("ORE");
     	root.addStyleName("root");
         root.setSizeFull();

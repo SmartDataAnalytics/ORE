@@ -1,5 +1,9 @@
 package org.aksw.ore.manager;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -11,12 +15,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
@@ -25,6 +36,8 @@ import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.util.UnsortedManchesterSyntaxRendererImpl;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
+import org.apache.jena.riot.checker.CheckerLiterals;
+import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.dllearner.algorithms.DisjointClassesLearner;
 import org.dllearner.algorithms.SimpleSubclassLearner;
 import org.dllearner.algorithms.celoe.CELOE;
@@ -47,25 +60,65 @@ import org.dllearner.algorithms.properties.SubObjectPropertyOfAxiomLearner;
 import org.dllearner.algorithms.properties.SymmetricObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.TransitiveObjectPropertyAxiomLearner;
 import org.dllearner.core.AbstractAxiomLearningAlgorithm;
+import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.AnnComponentManager;
 import org.dllearner.core.AxiomLearningAlgorithm;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedAxiom;
+import org.dllearner.core.EvaluatedDescription;
+import org.dllearner.core.KnowledgeSource;
 import org.dllearner.core.LearningAlgorithm;
+import org.dllearner.core.Score;
 import org.dllearner.core.config.ConfigHelper;
+import org.dllearner.core.owl.Axiom;
 import org.dllearner.core.owl.DatatypeProperty;
 import org.dllearner.core.owl.Entity;
+import org.dllearner.core.owl.EquivalentClassesAxiom;
+import org.dllearner.core.owl.Individual;
 import org.dllearner.core.owl.KBElement;
 import org.dllearner.core.owl.NamedClass;
 import org.dllearner.core.owl.ObjectProperty;
+import org.dllearner.core.owl.SubClassAxiom;
+import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.kb.SparqlEndpointKS;
+import org.dllearner.kb.sparql.ConciseBoundedDescriptionGenerator;
+import org.dllearner.kb.sparql.ConciseBoundedDescriptionGeneratorImpl;
 import org.dllearner.kb.sparql.SPARQLTasks;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.dllearner.learningproblems.ClassLearningProblem;
+import org.dllearner.learningproblems.Heuristics.HeuristicType;
+import org.dllearner.reasoning.FastInstanceChecker;
 import org.dllearner.reasoning.SPARQLReasoner;
+import org.dllearner.utilities.Helper;
 import org.dllearner.utilities.PrefixCCMap;
+import org.dllearner.utilities.datastructures.SortedSetTuple;
+import org.dllearner.utilities.examples.AutomaticNegativeExampleFinderSPARQL2;
 import org.dllearner.utilities.owl.OWLAPIConverter;
+import org.dllearner.utilities.owl.OWLEntityTypeAdder;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
+import com.clarkparsia.owlapiv3.XSD;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.google.common.collect.Sets;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class EnrichmentManager {
 	
@@ -148,6 +201,8 @@ public class EnrichmentManager {
 	private boolean isRunning = false;
 	
 	private Map<AxiomType, AbstractAxiomLearningAlgorithm> learningAlgorithmInstances = new HashMap<AxiomType, AbstractAxiomLearningAlgorithm>();
+	private int maxNrOfPositiveExamples = 10;
+	private int maxNrOfNegativeExamples = 20;
 	
 	public EnrichmentManager(SparqlEndpoint endpoint, CacheEx cache) {
 		this.endpoint = endpoint;
@@ -470,46 +525,237 @@ public class EnrichmentManager {
 	}
 	
 	private List<EvaluatedAxiom> applyLearningAlgorithm2(AxiomType axiomType, SparqlEndpointKS ks, Entity entity) throws ComponentInitException {
-		
-		Class<? extends LearningAlgorithm> algorithmClass = axiomType2Class.get(axiomType);
-		AxiomLearningAlgorithm learner = null;
-		try {
-			learner = (AxiomLearningAlgorithm)algorithmClass.getConstructor(
-					SparqlEndpointKS.class).newInstance(ks);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if(classAlgorithms.contains(algorithmClass)) {
-			ConfigHelper.configure(learner, "classToDescribe", entity);
+		if(axiomType == AxiomType.EQUIVALENT_CLASSES){
+			return applyCELOE(ks, (NamedClass)entity, true);
 		} else {
-			ConfigHelper.configure(learner, "propertyToDescribe", entity);
-		}
-		ConfigHelper.configure(learner, "maxExecutionTimeInSeconds",
-				maxExecutionTimeInSeconds);
-//		if(reasoner != null){
-			((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
-//		}
-			((AbstractAxiomLearningAlgorithm)learner).setForceSPARQL_1_0_Mode(queryMode == QueryMode.ITERATIVE);
-		learner.init();
-		String algName = AnnComponentManager.getName(learner);
-		System.out.print("Applying " + algName + " on " + entity + " ... ");
-		long startTime = System.currentTimeMillis();
-		try {
-			learner.start();
-		} catch (Exception e) {
-			if(e.getCause() instanceof SocketTimeoutException){
-				System.out.println("Query timed out (endpoint possibly too slow).");
+			Class<? extends LearningAlgorithm> algorithmClass = axiomType2Class.get(axiomType);
+			AxiomLearningAlgorithm learner = null;
+			try {
+				learner = (AxiomLearningAlgorithm)algorithmClass.getConstructor(
+						SparqlEndpointKS.class).newInstance(ks);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(classAlgorithms.contains(algorithmClass)) {
+				ConfigHelper.configure(learner, "classToDescribe", entity);
 			} else {
+				ConfigHelper.configure(learner, "propertyToDescribe", entity);
+			}
+			ConfigHelper.configure(learner, "maxExecutionTimeInSeconds",
+					maxExecutionTimeInSeconds);
+//			if(reasoner != null){
+				((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
+//			}
+				((AbstractAxiomLearningAlgorithm)learner).setForceSPARQL_1_0_Mode(queryMode == QueryMode.ITERATIVE);
+			learner.init();
+			String algName = AnnComponentManager.getName(learner);
+			System.out.print("Applying " + algName + " on " + entity + " ... ");
+			long startTime = System.currentTimeMillis();
+			try {
+				learner.start();
+			} catch (Exception e) {
+				if(e.getCause() instanceof SocketTimeoutException){
+					System.out.println("Query timed out (endpoint possibly too slow).");
+				} else {
+					e.printStackTrace();
+				}
+			}
+			long runtime = System.currentTimeMillis() - startTime;
+			System.out.println("done in " + runtime + " ms");
+			List<EvaluatedAxiom> learnedAxioms = learner
+					.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
+			System.out.println(prettyPrint(learnedAxioms));
+			learningAlgorithmInstances.put(axiomType, (AbstractAxiomLearningAlgorithm)learner);
+			return learnedAxioms;
+		}
+	}
+	
+	private List<EvaluatedAxiom> applyCELOE(SparqlEndpointKS ks, NamedClass nc, boolean equivalence) throws ComponentInitException {
+		// get instances of class as positive examples
+		System.out.print("finding positives ... ");
+		long startTime = System.currentTimeMillis();
+		SortedSet<Individual> posExamples = reasoner.getIndividuals(nc, maxNrOfPositiveExamples);
+		long runTime = System.currentTimeMillis() - startTime;
+		if(posExamples.isEmpty()){
+			System.out.println("Skipping CELOE because class " + nc.toString() + " is empty.");
+			return Collections.emptyList();
+		}
+		SortedSet<String> posExStr = Helper.getStringSet(posExamples);
+		System.out.println("done (" + posExStr.size()+ " examples found in " + runTime + " ms)");
+		
+		// use own implementation of negative example finder
+		System.out.print("finding negatives ... ");
+		startTime = System.currentTimeMillis();
+		AutomaticNegativeExampleFinderSPARQL2 finder = new AutomaticNegativeExampleFinderSPARQL2(reasoner, "http://dbpedia.org/ontology");
+		SortedSet<Individual> negExamples = finder.getNegativeExamples(nc, posExamples, maxNrOfNegativeExamples);
+		SortedSetTuple<Individual> examples = new SortedSetTuple<Individual>(posExamples, negExamples);
+		runTime = System.currentTimeMillis() - startTime;
+		System.out.println("done (" + negExamples.size()+ " examples found in " + runTime + " ms)");
+		
+		AbstractReasonerComponent rc;
+		KnowledgeSource ksFragment;
+		System.out.print("extracting fragment ... ");//com.hp.hpl.jena.shared.impl.JenaParameters.enableEagerLiteralValidation = true;
+		startTime = System.currentTimeMillis();
+		Model model = getFragmentMultithreaded(ks, Sets.union(posExamples, negExamples));
+		filter(model);
+		OWLEntityTypeAdder.addEntityTypes(model);
+		
+		runTime = System.currentTimeMillis() - startTime;
+		System.out.println("done (" + model.size()+ " triples found in " + runTime + " ms)");
+		OWLOntology ontology = asOWLOntology(model);
+		if(reasoner.getClassHierarchy() != null){
+			ontology.getOWLOntologyManager().addAxioms(ontology, reasoner.getClassHierarchy().toOWLAPIAxioms());
+		}
+		ksFragment = new OWLAPIOntology(ontology);
+//		ksFragment.init();
+		rc = new FastInstanceChecker(ksFragment);
+		rc.init();
+//		rc.setSubsumptionHierarchy(reasoner.getClassHierarchy());
+		
+//		for (Individual ind : posExamples) {
+//			System.out.println(ResultSetFormatter.asText(com.hp.hpl.jena.query.QueryExecutionFactory.create("SELECT * WHERE {<" + ind.getName() + "> ?p ?o. OPTIONAL{?o a ?o_type}}",model).execSelect()));
+//		}
+		
+        ClassLearningProblem lp = new ClassLearningProblem(rc);
+		lp.setClassToDescribe(nc);
+        lp.setEquivalence(equivalence);
+        lp.setHeuristic(HeuristicType.FMEASURE);
+        lp.setUseApproximations(false);
+        lp.setMaxExecutionTimeInSeconds(10);
+        lp.init();
+
+        CELOE la = new CELOE(lp, rc);
+        la.setMaxExecutionTimeInSeconds(10);
+        la.setNoisePercentage(25);
+        la.setMaxNrOfResults(100);
+        la.init();
+//        ((RhoDRDown)la.getOperator()).setUseNegation(false);
+        startTime = System.currentTimeMillis();
+        System.out.print("running CELOE (for " + (equivalence ? "equivalent classes" : "sub classes") + ") ... ");
+        la.start();
+        runTime = System.currentTimeMillis() - startTime;
+        System.out.println("done in " + runTime + " ms");	
+
+        // convert the result to axioms (to make it compatible with the other algorithms)
+        List<? extends EvaluatedDescription> learnedDescriptions = la.getCurrentlyBestEvaluatedDescriptions(threshold);
+        List<EvaluatedAxiom> learnedAxioms = new LinkedList<EvaluatedAxiom>();
+        for(EvaluatedDescription learnedDescription : learnedDescriptions) {
+        	Axiom axiom;
+        	if(equivalence) {
+        		axiom = new EquivalentClassesAxiom(nc, learnedDescription.getDescription());
+        	} else {
+        		axiom = new SubClassAxiom(nc, learnedDescription.getDescription());
+        	}
+        	Score score = lp.computeScore(learnedDescription.getDescription());
+        	learnedAxioms.add(new EvaluatedAxiom(axiom, score)); 
+        }
+        System.out.println(prettyPrint(learnedAxioms));	
+        	
+		return learnedAxioms;
+	}
+	
+	private void filter(Model model) {
+		// filter out triples with String literals, as therein often occur
+		// some syntax errors and they are not relevant for learning
+		List<Statement> statementsToRemove = new ArrayList<Statement>();
+		List<Statement> statementsToAdd = new ArrayList<Statement>();
+		for (Iterator<Statement> iter = model.listStatements().toList().iterator(); iter.hasNext();) {
+			Statement st = iter.next();
+			RDFNode subject = st.getSubject();
+			RDFNode object = st.getObject();
+			
+			if(object.isAnon()){
+				if(!model.listStatements(object.asResource(), null, (RDFNode)null).hasNext()){
+					statementsToRemove.add(st);
+				}
+			} else if(st.getPredicate().equals(RDF.type) && 
+					(object.equals(RDFS.Class.asNode()) || object.equals(OWL.Class.asNode()) || object.equals(RDFS.Literal.asNode()))){
+				//remove statements like <x a owl:Class>
+					statementsToRemove.add(st);
+			} else {
+				// fix URIs with spaces
+				Resource newSubject = (Resource) subject;
+				RDFNode newObject = object;
+				boolean validTriple = true;
+				if (subject.isURIResource()) {
+					String uri = subject.asResource().getURI();
+					if (uri.contains(" ")) {
+						newSubject = model.createResource(uri.replace(" ", ""));
+					}
+				}
+				if (object.isURIResource()) {
+					String uri = object.asResource().getURI();
+					if (uri.contains(" ")) {
+						newObject = model.createResource(uri.replace(" ", ""));
+					}
+				}
+				if (object.isLiteral()) {
+					Literal lit = object.asLiteral();
+					if (lit.getDatatype() == null || lit.getDatatype().equals(XSD.STRING)) {
+						newObject = model.createLiteral("shortened", "en");
+					}
+					validTriple = CheckerLiterals.checkLiteral(object.asNode(), ErrorHandlerFactory.errorHandlerNoLogging, 1l, 1l);
+				}
+				if(validTriple){
+					statementsToAdd.add(model.createStatement(newSubject, st.getPredicate(), newObject));
+				}
+				statementsToRemove.add(st);
+			}
+
+		}
+		model.remove(statementsToRemove);
+		model.add(statementsToAdd);
+	}
+	
+	private OWLOntology asOWLOntology(Model model) {
+		try {
+			FileOutputStream fos = null;
+			try {
+				fos = new FileOutputStream("bug.ttl");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			model.write(baos, "TURTLE", null);
+			model.write(fos, "TURTLE", null);
+			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+			OWLOntology ontology = man.loadOntologyFromOntologyDocument(new ByteArrayInputStream(baos.toByteArray()));
+			return ontology;
+		} catch (OWLOntologyCreationException e) {
+			e.printStackTrace();
+			try {
+				model.write(new FileOutputStream("parse-error.ttl"), "TURTLE", null);
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	private Model getFragmentMultithreaded(final SparqlEndpointKS ks, Set<Individual> individuals){
+		Model model = ModelFactory.createDefaultModel();
+		ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		List<Future<Model>> futures = new ArrayList<Future<Model>>();
+		for (final Individual ind : individuals) {
+			futures.add(threadPool.submit(new Callable<Model>() {
+				@Override
+				public Model call() throws Exception {
+					ConciseBoundedDescriptionGenerator cbdGen = new ConciseBoundedDescriptionGeneratorImpl(ks.getEndpoint(), "enrichment-cache", 2);
+					return cbdGen.getConciseBoundedDescription(ind.getName());
+				}
+			}));
+		}
+		for (Future<Model> future : futures) {
+			try {
+				model.add(future.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
-		long runtime = System.currentTimeMillis() - startTime;
-		System.out.println("done in " + runtime + " ms");
-		List<EvaluatedAxiom> learnedAxioms = learner
-				.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
-		System.out.println(prettyPrint(learnedAxioms));
-		learningAlgorithmInstances.put(axiomType, (AbstractAxiomLearningAlgorithm)learner);
-		return learnedAxioms;
+		threadPool.shutdown();
+		return model;
 	}
 	
 	public Set<KBElement> getPositives(AxiomType axiomType, EvaluatedAxiom axiom){
@@ -596,8 +842,4 @@ public class EnrichmentManager {
 		}
 		return renderedString;
 	}
-	
-	
-	
-
 }

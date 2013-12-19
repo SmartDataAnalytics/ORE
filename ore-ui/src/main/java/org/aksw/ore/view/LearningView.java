@@ -2,6 +2,9 @@ package org.aksw.ore.view;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -20,10 +23,8 @@ import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.util.Renderer;
 import org.aksw.ore.util.Renderer.Syntax;
 import org.dllearner.core.EvaluatedDescription;
-import org.dllearner.core.owl.Description;
 import org.dllearner.core.owl.Individual;
 import org.dllearner.core.owl.NamedClass;
-import org.dllearner.core.owl.Thing;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.vaadin.peter.contextmenu.ContextMenu;
@@ -41,7 +42,6 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -54,6 +54,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.CollapseEvent;
 import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -151,11 +152,14 @@ public class LearningView extends HorizontalSplitPanel implements View{
 	}
 	
 	private void setRootClasses(){
-		SortedSet<Description> children = ORESession.getLearningManager().getReasoner().getSubClasses(Thing.instance);
-    	for(Description sub : children){
-    		tree.addItem(sub).getItemProperty("label").setValue(renderer.render(sub, Syntax.MANCHESTER, false));
-    		if(!(ORESession.getLearningManager().getReasoner().getSubClasses(sub).size() > 1)){
-    			tree.setChildrenAllowed(sub, false);
+		SortedSet<NamedClass> topLevelClasses = ORESession.getLearningManager().getTopLevelClasses();
+    	for(NamedClass topClass : topLevelClasses){
+    		tree.addItem(topClass).getItemProperty("label").setValue(renderer.render(topClass, Syntax.MANCHESTER, false));
+//    		if(!(ORESession.getLearningManager().getDirectSubClasses(topClass).size() > 1)){
+//    			tree.setChildrenAllowed(topClass, false);
+//    		}
+    		if(ORESession.getLearningManager().getDirectSubClasses(topClass).isEmpty()){
+    			tree.setChildrenAllowed(topClass, false);
     		}
     	}
 	}
@@ -174,17 +178,49 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		tree.addExpandListener(new Tree.ExpandListener() {
 
 		    public void nodeExpand(ExpandEvent event) {
-		    	SortedSet<Description> children = ORESession.getLearningManager().getReasoner().getSubClasses((Description)event.getItemId());
-		    	for(Description sub : children){
-		    		tree.addItem(sub).getItemProperty("label").setValue(renderer.render(sub, Syntax.MANCHESTER, false));
-		    		if(!(ORESession.getLearningManager().getReasoner().getSubClasses(sub).size() > 1)){
-		    			tree.setChildrenAllowed(sub, false);
+		    	SortedSet<NamedClass> subClasses = ORESession.getLearningManager().getDirectSubClasses((NamedClass)event.getItemId());
+		    	
+		    	Item item;
+		    	for(NamedClass sub : subClasses){
+		    		item = tree.addItem(sub);
+		    		if(item != null){
+		    			item.getItemProperty("label").setValue(renderer.render(sub, Syntax.MANCHESTER, false));
+			    		if(ORESession.getLearningManager().getDirectSubClasses(sub).isEmpty()){
+			    			tree.setChildrenAllowed(sub, false);
+			    		}
+		                tree.setParent(sub, event.getItemId());
 		    		}
-	                tree.setParent(sub, event.getItemId());
 		    	}
 		        
 		    }
 		});
+//		tree.addCollapseListener(new Tree.CollapseListener() {
+//
+//			@Override
+//			public void nodeCollapse(CollapseEvent event) {
+//				// Remove all children of the collapsing node
+//				removeItemsRecursively(tree, event.getItemId());
+//			}
+//
+//			void removeItemsRecursively(Tree tree, Object item) {
+//				// Find all child nodes of the node
+//				Collection<?> children = tree.getChildren(item);
+//				if (children == null)
+//					return;
+//
+//				// The list is unmodifiable so must copy to another list
+//				LinkedList<String> children2 = new LinkedList<String>();
+//				for (Iterator<?> i = children.iterator(); i.hasNext();)
+//					children2.add((String) i.next());
+//
+//				// Remove the children of the collapsing node
+//				for (Iterator<String> i = children2.iterator(); i.hasNext();) {
+//					String child = i.next();
+//					removeItemsRecursively(tree, child);
+//					tree.removeItem(child);
+//				}
+//			}
+//		});
 		tree.addItemClickListener(new ItemClickListener() {
 			
 			@Override
