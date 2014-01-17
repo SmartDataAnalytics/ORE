@@ -21,6 +21,7 @@ import org.aksw.ore.component.ExplanationProgressDialog;
 import org.aksw.ore.component.ExplanationTable;
 import org.aksw.ore.component.ExplanationsPanel;
 import org.aksw.ore.component.RepairPlanTable;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManager;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.aksw.ore.manager.ExplanationProgressMonitorExtended;
@@ -84,21 +85,21 @@ public class InconsistencyDebuggingView extends VerticalSplitPanel implements Vi
 		l.setSizeFull();
 		l.setCaption("Explanations");
 		
+		explanationsPanel = new ExplanationsPanel();
+		explanationsPanel.setCaption("Explanations");
+		
 		//put the options in the header of the portal
-		optionsPanel = new ExplanationOptionsPanel();
+		optionsPanel = new ExplanationOptionsPanel(explanationsPanel);
 		optionsPanel.setWidth(null);
 		l.addComponent(optionsPanel);
 		
-		
-		explanationsPanel = new ExplanationsPanel();
-		explanationsPanel.setCaption("Explanations");
 		//wrapper for scrolling
 		Panel panel = new Panel(explanationsPanel);
 		panel.setSizeFull();
 		l.addComponent(panel);
 		l.setExpandRatio(panel, 1.0f);
 		
-		ConfigurablePanel configurablePanel = new ConfigurablePanel(explanationsPanel);
+		WhitePanel configurablePanel = new WhitePanel(explanationsPanel);
 		configurablePanel.addComponent(optionsPanel);
 		return configurablePanel;
 	}
@@ -124,7 +125,7 @@ public class InconsistencyDebuggingView extends VerticalSplitPanel implements Vi
 		wrapper.addComponent(executeRepairButton);
 		wrapper.setComponentAlignment(executeRepairButton, Alignment.MIDDLE_RIGHT);
 		
-		return new ConfigurablePanel(wrapper);
+		return new WhitePanel(wrapper);
 		
 	}
 

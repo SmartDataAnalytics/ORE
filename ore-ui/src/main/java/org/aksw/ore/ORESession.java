@@ -15,6 +15,7 @@ import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinde
 import org.aksw.ore.manager.ConstraintValidationManager;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.manager.ExplanationManager;
+import org.aksw.ore.manager.ImpactManager;
 import org.aksw.ore.manager.KnowledgebaseManager;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.manager.LearningManager;
@@ -146,7 +147,8 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
 			//impact manager
-			
+			ImpactManager impMan = new ImpactManager(reasoner);
+			VaadinSession.getCurrent().setAttribute(ImpactManager.class, impMan);
 			
 			
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
@@ -197,6 +199,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	
 	public static RepairManager getRepairManager(){
 		return VaadinSession.getCurrent().getAttribute(RepairManager.class);
+	}
+	
+	public static ImpactManager getImpactManager(){
+		return VaadinSession.getCurrent().getAttribute(ImpactManager.class);
 	}
 	
 	public static ConstraintValidationManager getConstraintValidationManager(){

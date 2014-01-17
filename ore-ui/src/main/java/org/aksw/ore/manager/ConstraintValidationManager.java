@@ -12,13 +12,27 @@ import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
-import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
+import org.aksw.mole.ore.validation.constraint.ConstraintViolation;
 import org.aksw.mole.ore.validation.constraint.OWLAxiomConstraintToSPARQLConstructConverter;
 import org.aksw.mole.ore.validation.constraint.OWLAxiomConstraintToSPARQLConverter;
+import org.aksw.mole.ore.validation.constraint.SubjectObjectViolation;
+import org.aksw.mole.ore.validation.constraint.SubjectViolation;
+import org.apache.log4j.Logger;
 import org.dllearner.kb.LocalModelBasedSparqlEndpointKS;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.PrefixManager;
+import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.Query;
@@ -26,9 +40,6 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 /**
  * @author Lorenz Buehmann
@@ -36,6 +47,8 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
  */
 public class ConstraintValidationManager {
 	
+	
+	private static final Logger logger = Logger.getLogger(ConstraintValidationManager.class.getName());
 	
 	private QueryExecutionFactory qef;
 	private Model model;
@@ -50,7 +63,7 @@ public class ConstraintValidationManager {
 			if(cache != null){
 				qef = new QueryExecutionFactoryCacheEx(qef, cache);
 			}
-			qef = new QueryExecutionFactoryPaginated(qef, 10000);
+//			qef = new QueryExecutionFactoryPaginated(qef, 10000);
 			
 		} else {
 			qef = new QueryExecutionFactoryModel(((LocalModelBasedSparqlEndpointKS)ks).getModel());
@@ -79,17 +92,29 @@ public class ConstraintValidationManager {
 		return violations;
 	}
 	
-	public Set<String> getViolatingResources(OWLAxiom constraint){
-		Set<String> violations = new HashSet<String>();
+	public Set<ConstraintViolation> getViolatingResources(OWLAxiom constraint){
+		logger.info("Validating axiom " + constraint);
+		Set<ConstraintViolation> violations = new HashSet<ConstraintViolation>();
 		
-		Query query = conv2.asQuery("?s", constraint);
-		System.out.println(query);
+		Query query = conv2.asQuery(constraint, "?s", "?o");
+		logger.info("Running query\n" + query);
 		QueryExecution qe = qef.createQueryExecution(query);
 		ResultSet rs = qe.execSelect();
 		QuerySolution qs;
+		boolean subjectObject = query.isQueryResultStar();
 		while(rs.hasNext()){
 			qs = rs.next();
-			violations.add(qs.getResource("s").getURI());
+			if(subjectObject){
+				violations.add(new SubjectObjectViolation(
+						constraint, 
+						qs.getResource("s").getURI(), 
+						qs.getResource("o").getURI()));
+			} else {
+				violations.add(new SubjectViolation(
+						constraint, 
+						qs.getResource("s").getURI()));
+			}
+			
 		}
 		qe.close();
 		return violations;
@@ -116,19 +141,33 @@ public class ConstraintValidationManager {
 //		return explanation.toString();
 	}
 
-	public Set<String> validate(OWLAxiom constraint){
-		Set<String> violations = new HashSet<String>();
-		OWLAxiomConstraintToSPARQLConverter conv = new OWLAxiomConstraintToSPARQLConverter();
-		Query query = conv.asQuery("?s", constraint);query.setLimit(100);
-		System.out.println(query);
-		QueryExecution qe = qef.createQueryExecution(query);
-		ResultSet rs = qe.execSelect();
-		QuerySolution qs;
-		while(rs.hasNext()){
-			qs = rs.next();
-			violations.add(qs.getResource("s").getURI());
-		}
-		qe.close();
-		return violations;
+	public static void main(String[] args) throws Exception {
+		ConstraintValidationManager constraintMan = new ConstraintValidationManager(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia()), null);
+		
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLDataFactory df = man.getOWLDataFactory();
+		PrefixManager pm = new DefaultPrefixManager("http://dbpedia.org/ontology/");
+
+		OWLClass clsA = df.getOWLClass("A", pm);
+		OWLClass clsB = df.getOWLClass("B", pm);
+		OWLClass clsC = df.getOWLClass("C", pm);
+
+		OWLObjectProperty propR = df.getOWLObjectProperty("birthPlace", pm);
+		OWLObjectProperty propS = df.getOWLObjectProperty("team", pm);
+
+		OWLDataProperty dpT = df.getOWLDataProperty("t", pm);
+		OWLDataRange booleanRange = df.getBooleanOWLDatatype();
+		OWLLiteral lit = df.getOWLLiteral(1);
+
+		OWLIndividual indA = df.getOWLNamedIndividual("a", pm);
+		OWLIndividual indB = df.getOWLNamedIndividual("b", pm);
+		
+		OWLAxiom axiom = df.getOWLDisjointObjectPropertiesAxiom(propR, propS);
+		Set<ConstraintViolation> violations = constraintMan.getViolatingResources(axiom);
+		System.out.println(violations);
+		
+		axiom = df.getOWLAsymmetricObjectPropertyAxiom(propS);
+		violations = constraintMan.getViolatingResources(axiom);
+		System.out.println(violations);
 	}
 }

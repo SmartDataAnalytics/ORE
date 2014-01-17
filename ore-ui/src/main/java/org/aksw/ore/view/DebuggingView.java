@@ -20,7 +20,9 @@ import org.aksw.ore.component.ExplanationOptionsPanel;
 import org.aksw.ore.component.ExplanationProgressDialog;
 import org.aksw.ore.component.ExplanationTable;
 import org.aksw.ore.component.ExplanationsPanel;
+import org.aksw.ore.component.ImpactTable;
 import org.aksw.ore.component.RepairPlanTable;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManager;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.aksw.ore.manager.ExplanationProgressMonitorExtended;
@@ -66,6 +68,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
+	private ImpactTable impactTable;
 	private ExplanationsPanel explanationsPanel;
 	
 	ExplanationManager expMan;
@@ -85,6 +88,18 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		addStyleName("dashboard-view");
 		setSizeFull();
 		
+		createUnsatisfiableClassesTable();
+//		classesTable.sort(new String[]{"root", "class"}, new boolean[]{false, true});
+		
+		//the classes table on the left side
+		setFirstComponent(new ConfigurablePanel(classesTable));
+		//right explanations, repair plan and impact on the right side
+		setSecondComponent(createRightSide());
+		
+		setSplitPosition(30, Unit.PERCENTAGE);
+	}
+	
+	private void createUnsatisfiableClassesTable(){
 		classesTable = new Table("Unsatisfiable classes");
 		classesTable.addStyleName("unsatisfiable-classes-table");
 		classesTable.addContainerProperty("root", String.class, null);
@@ -110,18 +125,6 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 				computeExplanations((Set<OWLClass>) event.getProperty().getValue());
 			}
 		});
-//		classesTable.addGeneratedColumn("root", new ColumnGenerator() {
-//			
-//			@Override
-//			public Object generateCell(Table source, Object itemId, Object columnId) {
-//				Label l = new Label();
-//				OWLClass cls = (OWLClass)itemId;
-//				boolean root = ORESession.getExplanationManager().getRootUnsatisfiableClasses().contains(cls);
-//				l.setValue((root ? "<span class=\"root-class\"></span>" : ""));
-//				l.setContentMode(ContentMode.HTML);
-//				return l;
-//			}
-//		});
 		classesTable.setCellStyleGenerator(new Table.CellStyleGenerator() {
 			
 			@Override
@@ -153,15 +156,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 			    return null;
 			}});
 		
-		classesTable.setVisibleColumns(new String[]{"root", "class"});
-//		classesTable.sort(new String[]{"root", "class"}, new boolean[]{false, true});
-		
-		//the classes table on the left side
-		setFirstComponent(new ConfigurablePanel(classesTable));
-		//right explanations, repair plan and impact on the right side
-		setSecondComponent(createRightSide());
-		
-		setSplitPosition(30, Unit.PERCENTAGE);
+		classesTable.setVisibleColumns(new Object[]{"root", "class"});
 	}
 	
 	private Component createRightSide(){
@@ -172,10 +167,20 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		//show explanations in the top of the right side
 		Component explanationsPanel = createExplanationsPanel();
 		rightSide.addComponent(explanationsPanel);
-		//show repair plan  in the bottom of the right side
-		Component repairPlanPanel = createRepairPlanPanel();
-		rightSide.addComponent(repairPlanPanel);
 		
+		//show repair plan and impact in bottom of right side
+		HorizontalSplitPanel bottomRightSide = new HorizontalSplitPanel();
+		bottomRightSide.setSizeFull();
+		bottomRightSide.setSplitPosition(50);
+		rightSide.addComponent(bottomRightSide);
+		
+		//show repair plan in the bottom left of the right side
+		Component repairPlanPanel = createRepairPlanPanel();
+		bottomRightSide.addComponent(repairPlanPanel);
+
+		//show impact in bottom right of right side
+		Component impactPanel = createImpactPanel();
+		bottomRightSide.addComponent(impactPanel);
 		return rightSide;
 	}
 	
@@ -184,21 +189,22 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		l.setSizeFull();
 		l.setCaption("Explanations");
 		
-		//put the options in the header of the portal
-		optionsPanel = new ExplanationOptionsPanel();
-		optionsPanel.setWidth(null);
-		l.addComponent(optionsPanel);
-		
-		
 		explanationsPanel = new ExplanationsPanel();
 		explanationsPanel.setCaption("Explanations");
+		explanationsPanel.setHeight(null);
+		
+		//put the options in the header of the portal
+		optionsPanel = new ExplanationOptionsPanel(explanationsPanel);
+		optionsPanel.setWidth(null);
+//		l.addComponent(optionsPanel);
+		
 		//wrapper for scrolling
 		Panel panel = new Panel(explanationsPanel);
 		panel.setSizeFull();
 		l.addComponent(panel);
 		l.setExpandRatio(panel, 1.0f);
 		
-		ConfigurablePanel configurablePanel = new ConfigurablePanel(explanationsPanel);
+		WhitePanel configurablePanel = new WhitePanel(explanationsPanel);
 		configurablePanel.addComponent(optionsPanel);
 		return configurablePanel;
 	}
@@ -224,8 +230,19 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		wrapper.addComponent(executeRepairButton);
 		wrapper.setComponentAlignment(executeRepairButton, Alignment.MIDDLE_RIGHT);
 		
-		return new ConfigurablePanel(wrapper);
+		return new WhitePanel(wrapper);
+	}
+	
+	private Component createImpactPanel(){
+		VerticalLayout wrapper = new VerticalLayout();
+		wrapper.setCaption("Impact");
+		wrapper.setSizeFull();
 		
+		impactTable = new ImpactTable();
+		wrapper.addComponent(impactTable);
+		wrapper.setExpandRatio(impactTable, 1.0f);
+		
+		return new WhitePanel(wrapper);
 	}
 
 	/* (non-Javadoc)
@@ -249,6 +266,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		ExplanationManager expMan = ORESession.getExplanationManager();
 		expMan.setExplanationLimit(currentLimit);
 		ORESession.getRepairManager().addListener(repairPlanTable);
+		ORESession.getRepairManager().addListener(impactTable);
 		ORESession.getExplanationManager().addListener(this);
 	}
 	
@@ -259,6 +277,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 	public void detach() {
 		super.detach();
 		ORESession.getRepairManager().removeListener(repairPlanTable);
+		ORESession.getRepairManager().removeListener(impactTable);
 		ORESession.getExplanationManager().removeListener(this);
 //		ORESession.getExplanationManager().removeExplanationProgressMonitor(this);
 	}
@@ -406,7 +425,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 			}
 		});
 			ORESession.getRepairManager().addListener(t);
-			ConfigurablePanel c = new ConfigurablePanel(t);
+			WhitePanel c = new WhitePanel(t);
 			c.setHeight(null);
 			explanationsPanel.addComponent(c);
 			explanationTables.add(t);

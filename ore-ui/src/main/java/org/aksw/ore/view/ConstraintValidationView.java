@@ -8,6 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Set;
 
+import org.aksw.mole.ore.validation.constraint.ConstraintViolation;
+import org.aksw.mole.ore.validation.constraint.SubjectObjectViolation;
+import org.aksw.mole.ore.validation.constraint.SubjectViolation;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConstraintViolationExplanationWindow;
 import org.aksw.ore.component.ProgressDialog;
@@ -143,7 +146,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 		
 		violationsTable = new Table();
 		violationsTable.setPageLength(10);
-		violationsTable.addContainerProperty("individual", String.class, null);
+		violationsTable.addContainerProperty("subject", String.class, null);
 		violationsTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 		violationsTable.setSizeFull();
 		violationsTable.setSelectable(true);
@@ -155,7 +158,28 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 //				showViolationExplanation(currentConstraint, uri);
 			}
 		});
-		
+		violationsTable.addGeneratedColumn("subject", new Table.ColumnGenerator() {
+            public Component generateCell(Table source, Object itemId,
+                    Object columnId) {
+                Item item = violationsTable.getItem(itemId);
+                if(item != null){
+                	String uri = (String) item.getItemProperty("subject").getValue();
+                	if(uri != null){
+                		String decodedURI = uri;
+	                    try {
+	    					decodedURI = URLDecoder.decode(uri, "UTF-8");
+	    				} catch (UnsupportedEncodingException e) {
+	    					e.printStackTrace();
+	    				}
+	                    Link link = new Link(decodedURI, new ExternalResource(uri));
+	                    link.setTargetName("_blank");
+	                    return link;
+                	}
+                }
+                return null;
+            }
+
+        });
 		l.addComponent(violationsTable);
 		l.setExpandRatio(violationsTable, 1f);
 		
@@ -170,12 +194,12 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 			@Override
 			public void run() {
 				try {
-					final Set<String> violatingResources = ORESession.getConstraintValidationManager().getViolatingResources(constraint);
+					final Set<ConstraintViolation> violations = ORESession.getConstraintValidationManager().getViolatingResources(constraint);
 					UI.getCurrent().access(new Runnable() {
 						
 						@Override
 						public void run() {
-							showViolations(violatingResources);
+							showViolations(violations);
 						}
 					});
 				} catch (Exception e) {
@@ -198,35 +222,58 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 //		}
 	}
 	
-	private void showViolations(Set<String> violatingResources){
+	private void showViolations(Set<ConstraintViolation> violations){
 		violationsTable.removeAllItems();
-		if(violatingResources.isEmpty()){
-			resultInfoLabel.setValue("Found no violating resources.");
+		violationsTable.removeContainerProperty("object");
+		violationsTable.removeGeneratedColumn("object");
+		if(violations.isEmpty()){
+			resultInfoLabel.setValue("Found no violations.");
 		} else {
-			resultInfoLabel.setValue("Found " + violatingResources.size() + " violating resources:");
-			for (String uri : violatingResources) {
-				violationsTable.addItem(uri).getItemProperty("individual").setValue(uri);
-			}
-			violationsTable.addGeneratedColumn("individual", new Table.ColumnGenerator() {
-	            public Component generateCell(Table source, Object itemId,
-	                    Object columnId) {
-	                Item item = violationsTable.getItem(itemId);
-	                if(item != null){
-	                	String uri = (String) item.getItemProperty("individual").getValue();
-	                    String decodedURI = uri;
-	                    try {
-	    					decodedURI = URLDecoder.decode(uri, "UTF-8");
-	    				} catch (UnsupportedEncodingException e) {
-	    					e.printStackTrace();
-	    				}
-	                    Link link = new Link(decodedURI, new ExternalResource(uri));
-	                    link.setTargetName("_blank");
-	                    return link;
-	                }
-	                return null;
-	            }
+			//add object column
+			boolean subjectObjectViolations = violations.iterator().next() instanceof SubjectObjectViolation;
+			if(subjectObjectViolations){
+				violationsTable.addContainerProperty("object", String.class, null);
+				violationsTable.addGeneratedColumn("object", new Table.ColumnGenerator() {
+		            public Component generateCell(Table source, Object itemId,
+		                    Object columnId) {
+		                Item item = violationsTable.getItem(itemId);
+		                if(item != null){
+		                	String uri = (String) item.getItemProperty("object").getValue();
+							if (uri != null) {
+								String decodedURI = uri;
+								try {
+									decodedURI = URLDecoder.decode(uri, "UTF-8");
+								} catch (UnsupportedEncodingException e) {
+									e.printStackTrace();
+								}
+								Link link = new Link(decodedURI, new ExternalResource(uri));
+								link.setTargetName("_blank");
+								return link;
+							}
+		                   
+		                }
+		                return null;
+		            }
 
-	        });
+		        });
+			}
+			resultInfoLabel.setValue("Found " + violations.size() + " violations:");
+			String subject;
+			String object;
+			Item item;
+			for (ConstraintViolation violation : violations) {
+				item = violationsTable.addItem(violation);
+				if(subjectObjectViolations){
+					subject = ((SubjectObjectViolation)violation).getSubject();
+					item.getItemProperty("subject").setValue(subject);
+					object = ((SubjectObjectViolation)violation).getObject();
+					item.getItemProperty("object").setValue(object);
+				} else {
+					subject = ((SubjectViolation)violation).getSubject();
+					item.getItemProperty("subject").setValue(subject);
+				}
+				
+			}
 		}
 	}
 	

@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -39,6 +40,9 @@ import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
@@ -60,13 +64,17 @@ import com.vaadin.ui.themes.Reindeer;
 public class EvaluatedAxiomsTable extends Table{
 	
 	private DecimalFormat df = new DecimalFormat("0.00%");
+	
 	private Set<Object> selectedObjects = new HashSet<Object>();
+	
 	private AxiomType axiomType;
+	private Collection<EvaluatedAxiom> axioms;
 	
 	private Renderer renderer = new Renderer();
 	
 	public EvaluatedAxiomsTable(final AxiomType axiomType, Collection<EvaluatedAxiom> axioms) {
 		this.axiomType = axiomType;
+		this.axioms = axioms;
 		
 		addStyleName("enrichment-axioms-table");
 		setSizeFull();
@@ -84,6 +92,15 @@ public class EvaluatedAxiomsTable extends Table{
 		container.addContainerProperty("Accuracy", Double.class, null);
 		container.addContainerProperty("Axiom", Axiom.class, null);
 		setContainerDataSource(container);
+		
+		Set<String> renderedAxioms = Sets.newHashSetWithExpectedSize(axioms.size());
+		final Set<EvaluatedAxiom> axiomsToBePrefixed = Sets.newHashSetWithExpectedSize(axioms.size());
+		for (EvaluatedAxiom axiom : axioms) {
+			String s = renderer.render(axiom.getAxiom(), Syntax.MANCHESTER);
+			if(!renderedAxioms.add(s)){
+				axiomsToBePrefixed.add(axiom);
+			}
+		}
 		
 		addGeneratedColumn("Selected", new ColumnGenerator() {
 			
@@ -153,7 +170,13 @@ public class EvaluatedAxiomsTable extends Table{
 				if ("Axiom".equals(columnId)) {
 					if(itemId instanceof EvaluatedAxiom){
 						Axiom axiom = ((EvaluatedAxiom) itemId).getAxiom();
-						Label l = new Label(renderer.render(axiom, Syntax.MANCHESTER), ContentMode.HTML);
+						String s = renderer.renderPrefixed(axiom, Syntax.MANCHESTER);
+//						if(axiomsToBePrefixed.contains(((EvaluatedAxiom) itemId))){
+//							s = renderer.renderPrefixed(axiom, Syntax.MANCHESTER);
+//						} else {
+//							s = renderer.render(axiom, Syntax.MANCHESTER);
+//						}
+						Label l = new Label(s, ContentMode.HTML);
 						l.setDescription(renderer.render(axiom, Syntax.MANCHESTER, true));
 						return l;
 		        	}

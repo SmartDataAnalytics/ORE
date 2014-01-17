@@ -18,7 +18,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.VerticalLayout;
 
-public class ExplanationsPanel extends VerticalLayout{
+public class ExplanationsPanel extends VerticalLayout {
 	
 	private IRIShortFormProvider sfp = new SimpleIRIShortFormProvider();
 	private Set<ExplanationTable> tables = new HashSet<ExplanationTable>();

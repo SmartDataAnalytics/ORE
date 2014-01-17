@@ -33,6 +33,8 @@ import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.model.ResourceType;
+import org.aksw.ore.util.Renderer;
+import org.aksw.ore.util.Renderer.Syntax;
 import org.aksw.ore.util.UnsortedManchesterSyntaxRendererImpl;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
@@ -178,6 +180,7 @@ public class EnrichmentManager {
 	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private KeywordColorMap colorMap = new KeywordColorMap();
+	private Renderer renderer = new Renderer();
 	
 	private DecimalFormat df = new DecimalFormat("##0.0");
 	
@@ -804,6 +807,13 @@ public class EnrichmentManager {
 		return str;
 	}
 	
+	public String render(Axiom axiom, Syntax syntax){
+		return renderer.render(axiom, syntax);
+	}
+	
+	public String render(Axiom axiom, Syntax syntax, boolean longForm){
+		return renderer.render(axiom, syntax, longForm);
+	}
 	
 	public String render(OWLAxiom value, int depth){
 		String renderedString = manchesterSyntaxRenderer.render(value, OWLAPIConverter.getOWLAPIEntity(currentEntity));

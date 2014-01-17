@@ -6,6 +6,7 @@ import org.vaadin.risto.stepper.IntStepper;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.HorizontalLayout;
@@ -14,22 +15,41 @@ import com.vaadin.ui.HorizontalLayout;
 public class ExplanationOptionsPanel extends HorizontalLayout implements Property.ValueChangeListener{
 	
 	private CheckBox computeFineExplanationsCheckbox;
+	
+	private CheckBox showAggregatedViewCheckbox;
+	
 	private CheckBox limitExplanationCountCheckbox;
 	private IntStepper limitSpinner;
 	
-	public ExplanationOptionsPanel() {
+	public ExplanationOptionsPanel(final ExplanationsPanel explanationsPanel) {
 		setSpacing(true);
 		addStyleName("explanation-options");
+		
+		showAggregatedViewCheckbox = new CheckBox("Show aggregated view");
+		showAggregatedViewCheckbox.addValueChangeListener(new ValueChangeListener() {
+			
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				explanationsPanel.showAggregatedView((Boolean)event.getProperty().getValue());
+			}
+		});
+		showAggregatedViewCheckbox.setImmediate(true);
+		showAggregatedViewCheckbox.setWidth(null);
+		showAggregatedViewCheckbox.setDescription("Show the axioms of all recently computed explanations in one single table.");
+		addComponent(showAggregatedViewCheckbox);
+		setComponentAlignment(showAggregatedViewCheckbox, Alignment.TOP_CENTER);
 		
 		computeFineExplanationsCheckbox = new CheckBox("Show fine grained explanations");
 		computeFineExplanationsCheckbox.addValueChangeListener(this);
 		computeFineExplanationsCheckbox.setImmediate(true);
 		computeFineExplanationsCheckbox.setWidth(null);
+		computeFineExplanationsCheckbox.setDescription("Show explanations which contain only relevant parts of the axioms.");
 		addComponent(computeFineExplanationsCheckbox);
 		setComponentAlignment(computeFineExplanationsCheckbox, Alignment.TOP_CENTER);
 		
 		limitExplanationCountCheckbox = new CheckBox("Limit explanation count to");
 		limitExplanationCountCheckbox.setValue(true);
+		limitExplanationCountCheckbox.setDescription("Show at most a fixed number of explanations per selected unsatisfiable class.");
 		limitExplanationCountCheckbox.addValueChangeListener(this);
 		limitExplanationCountCheckbox.setImmediate(true);
 		limitExplanationCountCheckbox.setWidth(null);
@@ -40,6 +60,7 @@ public class ExplanationOptionsPanel extends HorizontalLayout implements Propert
 		limitSpinner.setStepAmount(1);
 		limitSpinner.setMinValue(1);
 		limitSpinner.addValueChangeListener(this);
+		limitSpinner.setWidth("50px");
 		
 		HorizontalLayout l = new HorizontalLayout();
 		l.addComponent(limitExplanationCountCheckbox);

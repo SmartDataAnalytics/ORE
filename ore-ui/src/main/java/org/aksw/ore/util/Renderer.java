@@ -52,6 +52,16 @@ public class Renderer {
 		             }
 		           });
 	
+	private LoadingCache<OWLObject, String> manchesterPrefixedCache = CacheBuilder.newBuilder()
+		       .maximumSize(200)
+		       .expireAfterWrite(10, TimeUnit.MINUTES)
+		       .build(
+		           new CacheLoader<OWLObject, String>() {
+		             public String load(OWLObject object){
+		               return renderManchesterSyntaxPrefixed(object);
+		             }
+		           });
+	
 	private LoadingCache<OWLObject, String> dlCache = CacheBuilder.newBuilder()
 		       .maximumSize(1000)
 		       .expireAfterWrite(10, TimeUnit.MINUTES)
@@ -64,7 +74,8 @@ public class Renderer {
 	
 	
 	private OWLObjectRenderer manchesterSyntaxRenderer = new ManchesterOWLSyntaxOWLObjectRendererImpl();
-	private OWLObjectRenderer manchesterSyntaxRendererPrefixed = new ManchesterOWLSyntaxOWLObjectRendererImpl();
+	private OWLObjectRenderer manchesterSyntaxRendererLongForm = new ManchesterOWLSyntaxOWLObjectRendererImpl();
+	private OWLObjectRenderer manchesterSyntaxRendererPrefixed = new UnsortedManchesterSyntaxRendererImpl();
 	private OWLObjectRenderer dlSyntaxRenderer = new DLSyntaxObjectRenderer(); 
 	
 	private KeywordColorMap colorMap = new KeywordColorMap();
@@ -73,7 +84,7 @@ public class Renderer {
 		OWLEntityShortFormProvider sfp = new OWLEntityShortFormProvider();
 		manchesterSyntaxRenderer.setShortFormProvider(sfp);
 		dlSyntaxRenderer.setShortFormProvider(sfp);
-		manchesterSyntaxRendererPrefixed.setShortFormProvider(new ShortFormProvider() {
+		manchesterSyntaxRendererLongForm.setShortFormProvider(new ShortFormProvider() {
 			@Override
 			public String getShortForm(OWLEntity entity) {
 				return entity.toStringID();
@@ -122,6 +133,11 @@ public class Renderer {
 		return render(ax, syntax, longForm);
 	}
 	
+	public String renderPrefixed(Axiom axiom, Syntax syntax){
+		OWLAxiom ax = OWLAPIConverter.getOWLAPIAxiom(axiom);
+		return renderPrefixed(ax, syntax);
+	}
+	
 	public String render(OWLObject object, Syntax syntax){
 		return render(object, syntax, false);
 	}
@@ -143,8 +159,25 @@ public class Renderer {
 		return null;
 	}
 	
-	private String renderManchesterSyntaxLongForm(OWLObject object){
+	public String renderPrefixed(OWLObject object, Syntax syntax){
+		try {
+			if(syntax == Syntax.DL){
+				return dlCache.get(object);
+			} else if(syntax == Syntax.MANCHESTER){
+				return manchesterPrefixedCache.get(object);
+			}
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private String renderManchesterSyntaxPrefixed(OWLObject object){
 		return renderManchesterSyntaxHTML(manchesterSyntaxRendererPrefixed.render(object));
+	}
+	
+	private String renderManchesterSyntaxLongForm(OWLObject object){
+		return renderManchesterSyntaxHTML(manchesterSyntaxRendererLongForm.render(object));
 	}
 	
 	private String renderManchesterSyntax(OWLObject object){

@@ -6,6 +6,9 @@ import java.text.DecimalFormat;
 import java.util.Set;
 
 import org.aksw.ore.ORESession;
+import org.aksw.ore.manager.EnrichmentManager;
+import org.aksw.ore.util.Renderer;
+import org.aksw.ore.util.Renderer.Syntax;
 import org.aksw.ore.util.ScoreExplanationPattern;
 import org.dllearner.core.EvaluatedAxiom;
 import org.dllearner.core.owl.Individual;
@@ -31,9 +34,10 @@ import com.vaadin.ui.Window;
 public class AxiomScoreExplanationDialog extends Window{
 	
 	private DecimalFormat df = new DecimalFormat("0.00%");
+	Renderer renderer = new Renderer();
 	
 	public AxiomScoreExplanationDialog(AxiomType axiomType, EvaluatedAxiom axiom) {
-		super("Explanation why " + axiom.getAxiom().toString() + " was learned.");
+		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");
 		setCloseShortcut(KeyCode.ESCAPE, null);
@@ -46,7 +50,9 @@ public class AxiomScoreExplanationDialog extends Window{
 		setContent(content);
 		
 		//show the total score of the axiom
-		Label label = new Label("<h2>Score: " + df.format(axiom.getScore().getAccuracy()) + "</h2>", ContentMode.HTML);
+		String renderedAxiom = ORESession.getEnrichmentManager().render(axiom.getAxiom(), Syntax.MANCHESTER, true);
+		Label label = new Label("<div><h3>Axiom: " + renderedAxiom + "</h3></div>"
+				+ "<div><h3>Score:" + df.format(axiom.getScore().getAccuracy()) + "</h3></div>", ContentMode.HTML);
 		content.addComponent(label);
 		content.setExpandRatio(label, 0f);
 		
