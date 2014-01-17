@@ -28,7 +28,6 @@
 
 	<modules>
 		<module>ore-core</module>
-		<module>ore-web</module>
 		<module>ore-ui</module>
 	</modules>
 	<licenses>
