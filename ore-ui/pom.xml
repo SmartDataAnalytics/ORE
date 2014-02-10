@@ -9,12 +9,12 @@
 	<groupId>org.aksw.ore</groupId>
 	<artifactId>ore-ui</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.4</version>
+	<version>0.6.0</version>
 	<name>ORE Web Application</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.1.9</vaadin.version>
+		<vaadin.version>7.1.10</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<repositories>
@@ -326,6 +326,7 @@
 					<artifactId>jdeb</artifactId>
 					<groupId>org.vafer</groupId>
 					<version>1.0</version>
+					
 					<executions>
 						<execution>
 							<phase>package</phase>
@@ -333,17 +334,17 @@
 								<goal>jdeb</goal>
 							</goals>
 							<configuration>
+							<installDir>/var/lib/tomcat6/webapps</installDir>
 								<dataSet>
 									<data>
 										<src>${project.build.directory}/${project.build.finalName}.war</src>
 										<type>file</type>
 										<mapper>
 											<type>perm</type>
-											<prefix>/var/lib/tomcat6/webapps</prefix>
+											<prefix>/var/lib/tomcat7/webapps</prefix>
 										</mapper>
 									</data>
 								</dataSet>
-							<changesIn>src/deb/changes.txt</changesIn>
 							</configuration>
 						</execution>
 					</executions>

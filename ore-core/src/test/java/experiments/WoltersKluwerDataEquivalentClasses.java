@@ -291,13 +291,10 @@ public class WoltersKluwerDataEquivalentClasses {
 				System.out.println("Skipping CELOE because class " + cls.toString() + " is empty.");
 				continue;
 			}
-			SortedSet<String> posExStr = Helper.getStringSet(posExamples);
-			System.out.println("done (" + posExStr.size() + " examples found in " + runTime + " ms)");
+			System.out.println("done (" + posExamples.size() + " examples found in " + runTime + " ms)");
 
 			AutomaticNegativeExampleFinderSPARQL2 finder = new AutomaticNegativeExampleFinderSPARQL2(ks.getEndpoint());
-			SortedSet<String> negExStr = finder.getNegativeExamples(cls.getName(), posExStr);
-			negExStr = SetManipulation.stableShrink(negExStr, 20);
-			SortedSet<Individual> negExamples = Helper.getIndividualSet(negExStr);
+			SortedSet<Individual> negExamples = finder.getNegativeExamples(cls, posExamples, 20);
 			SortedSetTuple<Individual> examples = new SortedSetTuple<Individual>(posExamples, negExamples);
 			
 			
