@@ -1,4 +1,0 @@
-#label,URL,useReasoning(only if ontology is coherent)
-non-matching child0, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1a.xml, false
-non-matching child1, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1b.xml, false
-non-matching child2, http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1c.xml, true
