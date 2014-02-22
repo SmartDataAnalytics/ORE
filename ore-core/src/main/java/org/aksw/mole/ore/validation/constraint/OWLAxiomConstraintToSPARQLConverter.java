@@ -78,7 +78,7 @@ import com.hp.hpl.jena.query.Syntax;
 
 public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor {
 
-	List<AxiomType> subjectObjectAxiomTypes = Arrays.asList(new AxiomType[] { AxiomType.ASYMMETRIC_OBJECT_PROPERTY,
+	static List<AxiomType> subjectObjectAxiomTypes = Arrays.asList(new AxiomType[] { AxiomType.ASYMMETRIC_OBJECT_PROPERTY,
 			AxiomType.DISJOINT_OBJECT_PROPERTIES, AxiomType.DISJOINT_DATA_PROPERTIES,
 			AxiomType.EQUIVALENT_OBJECT_PROPERTIES, AxiomType.EQUIVALENT_DATA_PROPERTIES
 
@@ -113,7 +113,13 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor {
 		this.targetSubjectVar = targetSubjectVar;
 		this.targetObjectVar = targetObjectVar;
 		
-		String queryString = "SELECT DISTINCT * WHERE {";
+		String queryString = "SELECT DISTINCT ";
+		if (subjectObjectAxiomTypes.contains(axiom.getAxiomType())) {
+			queryString += targetSubjectVar + targetObjectVar;
+		} else {
+			queryString += targetSubjectVar;
+		}
+		queryString += " WHERE {";
 		queryString += convert(targetSubjectVar, axiom);
 		queryString += "}";
 		return QueryFactory.create(queryString, Syntax.syntaxARQ);
@@ -146,6 +152,10 @@ public class OWLAxiomConstraintToSPARQLConverter implements OWLAxiomVisitor {
 	 */
 	public void setTargetObjectVar(String targetObjectVar) {
 		this.targetObjectVar = targetObjectVar;
+	}
+	
+	public static boolean isSubjectObjectBasedConstraint(OWLAxiom constraint){
+		return subjectObjectAxiomTypes.contains(constraint.getAxiomType());
 	}
 
 	@Override

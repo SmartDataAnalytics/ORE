@@ -237,7 +237,7 @@ public class OWLClassExpressionConstraintToSPARQLConstructQueryConverter impleme
 		} else {
 			if(ignoreGenericTypeStatements && !filler.isOWLThing()){
 				constructPattern += triple(objectVariable, "a", filler.asOWLClass().toStringID());
-				constructTemplate += triple(objectVariable, "a", filler.asOWLClass().toStringID());
+				constructTemplate += triple(objectVariable + "_mis", "a", filler.asOWLClass().toStringID());
 			}
 		}
 		constructPattern += "}";

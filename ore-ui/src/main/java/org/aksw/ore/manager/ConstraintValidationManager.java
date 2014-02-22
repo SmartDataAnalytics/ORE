@@ -101,7 +101,36 @@ public class ConstraintValidationManager {
 		QueryExecution qe = qef.createQueryExecution(query);
 		ResultSet rs = qe.execSelect();
 		QuerySolution qs;
-		boolean subjectObject = query.isQueryResultStar();
+		boolean subjectObject = OWLAxiomConstraintToSPARQLConverter.isSubjectObjectBasedConstraint(constraint);
+		while(rs.hasNext()){
+			qs = rs.next();
+			if(subjectObject){
+				violations.add(new SubjectObjectViolation(
+						constraint, 
+						qs.getResource("s").getURI(), 
+						qs.getResource("o").getURI()));
+			} else {
+				violations.add(new SubjectViolation(
+						constraint, 
+						qs.getResource("s").getURI()));
+			}
+			
+		}
+		qe.close();
+		return violations;
+	}
+	
+	public Set<ConstraintViolation> getViolatingResources(OWLAxiom constraint, int limit){
+		logger.info("Validating axiom " + constraint);
+		Set<ConstraintViolation> violations = new HashSet<ConstraintViolation>();
+		
+		Query query = conv2.asQuery(constraint, "?s", "?o");
+		query.setLimit(limit);
+		logger.info("Running query\n" + query);
+		QueryExecution qe = qef.createQueryExecution(query);
+		ResultSet rs = qe.execSelect();
+		QuerySolution qs;
+		boolean subjectObject = OWLAxiomConstraintToSPARQLConverter.isSubjectObjectBasedConstraint(constraint);
 		while(rs.hasNext()){
 			qs = rs.next();
 			if(subjectObject){
@@ -126,7 +155,7 @@ public class ConstraintValidationManager {
 		Query query = conv.asQuery("?s", constraint);
 		ParameterizedSparqlString ps = new ParameterizedSparqlString(query.toString());
 		ps.setIri("s", uri);
-		QueryExecution qe = new QueryExecutionFactoryModel(model).createQueryExecution(ps.asQuery());
+		QueryExecution qe = qef.createQueryExecution(ps.asQuery());
 		Model explanationModel = qe.execConstruct();
 		explanationModel.write(sw, "TURTLE");
 		return sw.toString();
@@ -151,9 +180,13 @@ public class ConstraintValidationManager {
 		OWLClass clsA = df.getOWLClass("A", pm);
 		OWLClass clsB = df.getOWLClass("B", pm);
 		OWLClass clsC = df.getOWLClass("C", pm);
+		OWLClass clsPerson = df.getOWLClass("Person", pm);
+		OWLClass clsPlace = df.getOWLClass("Place", pm);
 
 		OWLObjectProperty propR = df.getOWLObjectProperty("birthPlace", pm);
 		OWLObjectProperty propS = df.getOWLObjectProperty("team", pm);
+		OWLObjectProperty propBirthPlace = df.getOWLObjectProperty("birthPlace", pm);
+		OWLDataProperty propBirthDate = df.getOWLDataProperty("birthDate", pm);
 
 		OWLDataProperty dpT = df.getOWLDataProperty("t", pm);
 		OWLDataRange booleanRange = df.getBooleanOWLDatatype();
@@ -169,5 +202,14 @@ public class ConstraintValidationManager {
 		axiom = df.getOWLAsymmetricObjectPropertyAxiom(propS);
 		violations = constraintMan.getViolatingResources(axiom);
 		System.out.println(violations);
+		
+		axiom = df.getOWLSubClassOfAxiom(clsPerson, df.getOWLObjectIntersectionOf(
+				df.getOWLObjectSomeValuesFrom(propBirthPlace, clsPlace),
+				df.getOWLDataSomeValuesFrom(propBirthDate, df.getRDFPlainLiteral()))
+				);
+		System.out.println(new OWLAxiomConstraintToSPARQLConstructConverter().asQuery("?s", axiom));
+		violations = constraintMan.getViolatingResources(axiom, 10);
+		System.out.println(violations);
+		System.out.println(constraintMan.getViolationExplanation(axiom, "http://dbpedia.org/resource/Alec_Reid"));
 	}
 }
