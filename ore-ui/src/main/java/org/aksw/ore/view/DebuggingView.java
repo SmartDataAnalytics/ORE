@@ -373,7 +373,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		t.setPageLength(0);
 		t.setHeight(null);
 		final Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>(explanation.getAxioms());
-		selectedAxioms.retainAll(selectedAxioms);
+		selectedAxioms.retainAll(this.selectedAxioms);
 		t.addGeneratedColumn("selected", new Table.ColumnGenerator() {
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {

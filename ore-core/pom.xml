@@ -29,6 +29,12 @@
 		<dependency>
 			<groupId>org.dllearner</groupId>
 			<artifactId>components-core</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>stanford-corenlp</artifactId>
+					<groupId>edu.stanford.nlp</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
