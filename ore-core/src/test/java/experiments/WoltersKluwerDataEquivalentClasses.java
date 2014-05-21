@@ -31,7 +31,6 @@ import org.dllearner.algorithms.qtl.QTL;
 import org.dllearner.algorithms.qtl.cache.QueryTreeCache;
 import org.dllearner.algorithms.qtl.datastructures.QueryTree;
 import org.dllearner.algorithms.qtl.operations.lgg.EvaluatedQueryTree;
-import org.dllearner.algorithms.qtl.operations.lgg.NoiseSensitiveLGG;
 import org.dllearner.algorithms.qtl.operations.lgg.NoiseSensitiveLGGMultithreaded;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.ComponentInitException;
@@ -48,16 +47,13 @@ import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGenerator;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGeneratorImpl;
-import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.Heuristics.HeuristicType;
 import org.dllearner.learningproblems.PosOnlyLP;
 import org.dllearner.reasoning.FastInstanceChecker;
 import org.dllearner.reasoning.SPARQLReasoner;
-import org.dllearner.utilities.Helper;
 import org.dllearner.utilities.datastructures.Datastructures;
-import org.dllearner.utilities.datastructures.SetManipulation;
 import org.dllearner.utilities.datastructures.SortedSetTuple;
 import org.dllearner.utilities.examples.AutomaticNegativeExampleFinderSPARQL2;
 import org.dllearner.utilities.owl.OWLEntityTypeAdder;
@@ -78,7 +74,6 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -94,7 +89,7 @@ import com.jamonapi.MonitorFactory;
 public class WoltersKluwerDataEquivalentClasses {
 
 	private static final Logger logger = Logger.getLogger(WoltersKluwerDataEquivalentClasses.class.getName());
-	private static ExtractionDBCache wkCache = new ExtractionDBCache("wk_cache");
+	private static String wkCache = "wk_cache";
 	private static SparqlEndpoint wkEndpoint1;// Arbeitsrechtthesaurus
 	private static SparqlEndpoint wkEndpoint2;// Gerichtsthesaurus
 	private static SparqlEndpoint wkEndpoint3;
@@ -201,8 +196,7 @@ public class WoltersKluwerDataEquivalentClasses {
 				}  else {
 					Map<OWLClassExpression, Double> solutionsWithScore = new LinkedHashMap<OWLClassExpression, Double>();
 					logger.info(cls + " is " + "(based on " + posExamples.size() + " examples)" + " described by ");
-//					NoiseSensitiveLGGMultithreaded<String> lggGenerator = new NoiseSensitiveLGGMultithreaded<String>();
-					NoiseSensitiveLGG<String> lggGenerator = new NoiseSensitiveLGG<String>();
+					NoiseSensitiveLGGMultithreaded<String> lggGenerator = new NoiseSensitiveLGGMultithreaded<String>();
 					List<QueryTree<String>> posExampleTrees = getQueryTrees(
 							new ArrayList<String>(Datastructures.individualSetToStringSet(posExamples)));
 					

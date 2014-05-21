@@ -39,17 +39,17 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:git@github.com:AKSW/sparql-metrics.git</connection>
+		<connection>scm:git:git@github.com:AKSW/ore.git</connection>
 		<!-- developerConnection></developerConnection -->
 		<tag>HEAD</tag>
 	</scm>
-	
+
 	<properties>
 		<!-- tell the compiler we can use 1.7 -->
 		<compiler.version>1.7</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<repositories>
 		<repository>
 			<id>maven.aksw.internal</id>
@@ -85,7 +85,7 @@
 			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -126,14 +126,14 @@
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
-				<version>3.4.5</version>
+				<version>3.4.10</version>
 			</dependency>
 			<dependency>
-	<groupId>net.sourceforge.owlapi</groupId>
-	<artifactId>owlapi-api</artifactId>
-	<version>3.4.5</version>
-</dependency>
-<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-api</artifactId>
+				<version>3.4.10</version>
+			</dependency>
+			<dependency>
 				<groupId>net.sourceforge.owlapi.owllink</groupId>
 				<artifactId>owllink</artifactId>
 				<version>1.2.2</version>
@@ -181,7 +181,7 @@
 			<dependency>
 				<groupId>org.cz.vse.keg</groupId>
 				<artifactId>transformation</artifactId>
-				<version>0.1</version>
+				<version>0.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>edu.mit</groupId>
@@ -246,7 +246,6 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.0</version>
 					<configuration>
-						<!--We use 1.6 -->
 						<source>${compiler.version}</source>
 						<target>${compiler.version}</target>
 						<encoding>${project.build.sourceEncoding}</encoding>
@@ -257,7 +256,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.1.2</version>
+					<version>2.2.1</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -286,7 +285,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.14</version>
+					<version>2.16</version>
 					<configuration>
 						<skipTests>true</skipTests>
 					</configuration>
