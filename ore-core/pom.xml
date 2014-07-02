@@ -113,6 +113,12 @@
 			<groupId>net.sf.kxml</groupId>
 			<artifactId>kxml2-min</artifactId>
 		</dependency>
+		<!-- Explanation generation API from M. Horridge -->
+		<dependency>
+    <groupId>net.sourceforge.owlapi</groupId>
+    <artifactId>owlexplanation</artifactId>
+    <version>1.0.0</version>
+</dependency>
 		<dependency>
 			<groupId>org.semanticweb.owl.explanation</groupId>
 			<artifactId>explanation-api</artifactId>
