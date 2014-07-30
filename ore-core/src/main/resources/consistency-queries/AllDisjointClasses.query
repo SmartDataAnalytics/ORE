@@ -1,0 +1,21 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?y a owl:AllDisjointClasses .
+    ?y owl:members ?members .
+    ?members list:member ?c1 .
+    ?members list:member ?c2 .
+    ?x a ?c1 .
+    ?x a ?c2 .
+}
+WHERE {
+    ?y a owl:AllDisjointClasses .
+    ?y owl:members ?members .
+    ?members rdf:rest*/rdf:first ?c1 .
+    ?members rdf:rest*/rdf:first ?c2 .
+    FILTER (?c1 != ?c2) .
+    ?x a ?c1 .
+    ?x a ?c2 .
+}

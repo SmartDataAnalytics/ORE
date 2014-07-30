@@ -35,12 +35,13 @@ public class PatOMatPatternLibrary {
 				if(!line.startsWith("#")){
 					String[] split = line.split(",");
 					try {
-						String label = split[0].trim();
-						URL url = new URL(split[1].trim());
-						boolean useReasoning = Boolean.valueOf(split[2].trim());
-						String imageFilename =  split[3].trim();
-						String description =  split[4].trim();
-						pattern.add(new NamingPattern(label, url, useReasoning, imageFilename, description));
+						int id = Integer.valueOf(split[0]);
+						String label = split[1].trim();
+						URL url = new URL(split[2].trim());
+						boolean useReasoning = Boolean.valueOf(split[3].trim());
+						String imageFilename =  split[4].trim();
+						String description =  split[5].trim();
+						pattern.add(new NamingPattern(id, label, url, useReasoning, imageFilename, description));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

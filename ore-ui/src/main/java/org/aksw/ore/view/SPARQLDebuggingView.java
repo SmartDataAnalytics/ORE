@@ -13,7 +13,6 @@ import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.mole.ore.sparql.trivial_old.ConsoleSPARQLBasedInconsistencyProgressMonitor;
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.EvaluatedAxiomsTable;
 import org.aksw.ore.component.ExplanationOptionsPanel;
 import org.aksw.ore.component.ExplanationsPanel;
 import org.aksw.ore.component.RepairPlanTable;
@@ -22,13 +21,8 @@ import org.aksw.ore.component.SPARQLDebuggingProgressDialog;
 import org.aksw.ore.component.SPARULDialog;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManagerListener;
-import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
-import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owl.explanation.api.Explanation;
-import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.vaadin.risto.stepper.IntStepper;
 
@@ -60,7 +54,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
-public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, ExplanationManagerListener, ValueChangeListener{
+public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, Refreshable, ExplanationManagerListener, ValueChangeListener{
 	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
@@ -655,6 +649,17 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, E
 			ORESession.getSPARQLExplanationManager().setExplanationLimit((Integer)event.getProperty().getValue());
 			
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.view.Refreshable#refreshRendering()
+	 */
+	@Override
+	public void refreshRendering() {
+		for (SPARQLBasedExplanationTable table : tables) {
+			table.refreshRowCache();
+		}
+		repairPlanTable.refreshRowCache();
 	}
 	
 

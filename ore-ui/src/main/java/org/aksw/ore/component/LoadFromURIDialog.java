@@ -33,15 +33,14 @@ public class LoadFromURIDialog extends Window{
 	private Button okButton;
 	
 	public LoadFromURIDialog(String ontologyURI) {
-		this();
+		initUI();
 		
 		uriField.setValue(ontologyURI);
-		onLoadOntology(ontologyURI);
 		setResizeLazy(false);
 	}
 	
 	public LoadFromURIDialog() {
-		initUI();
+		this("");
 	}
 	
 	private void initUI(){
@@ -76,7 +75,7 @@ public class LoadFromURIDialog extends Window{
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				okButton.focus();
-				onLoadOntology((String)uriField.getValue());
+				onLoadOntology();
 			}
 		});
 		uriField.addTextChangeListener(new TextChangeListener() {
@@ -86,13 +85,12 @@ public class LoadFromURIDialog extends Window{
 			}
 		});
 		l.addComponent(uriField);
-		l.setExpandRatio(uriField, 1.0f);
 		
 		okButton = new Button("Ok", new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				onLoadOntology((String)uriField.getValue());
+				onLoadOntology();
 			}
 		});
 		Button cancelButton = new Button("Cancel", new Button.ClickListener() {
@@ -118,8 +116,9 @@ public class LoadFromURIDialog extends Window{
 		okButton.setEnabled(false);
 	}
 	
-	private void onLoadOntology(String uri){
+	public void onLoadOntology(){
 		try {
+			String uri = (String)uriField.getValue();
 			URI.create(uri);
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			man.addOntologyLoaderListener(ORESession.getKnowledgebaseManager());

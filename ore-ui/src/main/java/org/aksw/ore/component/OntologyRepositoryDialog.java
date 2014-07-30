@@ -11,6 +11,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.vaadin.resetbuttonfortextfield.ResetButtonForTextField;
 
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
@@ -93,6 +94,7 @@ public class OntologyRepositoryDialog extends Window {
 		
 		//filter
 		final TextField filter = new TextField();
+		ResetButtonForTextField.extend(filter);
         filter.addTextChangeListener(new TextChangeListener() {
             @Override
             public void textChange(final TextChangeEvent event) {

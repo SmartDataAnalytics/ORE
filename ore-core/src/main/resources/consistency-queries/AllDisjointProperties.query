@@ -1,0 +1,22 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?z a owl:AllDisjointProperties .
+    ?z owl:members ?members .
+    ?members rdf:rest*/rdf:first ?p1 .
+    ?x ?p1 ?y .
+    FILTER (?p1 != ?p2) .
+    ?x ?p2 ?y .
+    ?members rdf:rest*/rdf:first ?p2 .
+}
+WHERE {
+    ?z a owl:AllDisjointProperties .
+    ?z owl:members ?members .
+    ?members rdf:rest*/rdf:first ?p1 .
+    ?x ?p1 ?y .
+    FILTER (?p1 != ?p2) .
+    ?x ?p2 ?y .
+    ?members rdf:rest*/rdf:first ?p2 .
+}

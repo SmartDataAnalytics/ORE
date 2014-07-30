@@ -1,0 +1,19 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?x owl:maxQualifiedCardinality "0"^^xsd:nonNegativeInteger .
+    ?x owl:onProperty ?p .
+    ?x owl:onClass ?c .
+    ?u a ?x .
+    ?u ?p ?y .
+    ?y a ?c .
+}
+WHERE {
+    ?x owl:maxQualifiedCardinality "0"^^xsd:nonNegativeInteger .
+    ?x owl:onProperty ?p .
+    ?x owl:onClass ?c .
+    ?u a ?x .
+    ?u ?p ?y .
+    ?y a ?c .
+}

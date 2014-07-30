@@ -59,7 +59,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
-public class EnrichmentView extends HorizontalSplitPanel implements View{
+public class EnrichmentView extends HorizontalSplitPanel implements View, Refreshable{
 	
 	private TextField resourceURIField;
 	private ResourceTypeField resourceTypeField;
@@ -551,5 +551,15 @@ public class EnrichmentView extends HorizontalSplitPanel implements View{
 			}
 		}
 		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.view.Refreshable#refreshRendering()
+	 */
+	@Override
+	public void refreshRendering() {
+		for (EvaluatedAxiomsTable evaluatedAxiomsTable : tables) {
+			evaluatedAxiomsTable.refreshRowCache();
+		}
 	}
 }

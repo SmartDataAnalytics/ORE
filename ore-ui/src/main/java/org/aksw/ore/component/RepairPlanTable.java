@@ -5,10 +5,8 @@ import java.util.Collection;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.RepairManager;
 import org.aksw.ore.manager.RepairManager.RepairManagerListener;
-import org.aksw.ore.util.Renderer;
-import org.aksw.ore.util.Renderer.Syntax;
+import org.aksw.ore.rendering.Renderer;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 
@@ -18,7 +16,6 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.BaseTheme;
@@ -48,14 +45,14 @@ public class RepairPlanTable extends Table implements RepairManagerListener{
 		
 		addGeneratedColumn(AXIOM, new ColumnGenerator() {
 			
-			private Renderer renderer = new Renderer();
+			private Renderer renderer = ORESession.getRenderer();
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				if (AXIOM.equals(columnId)) {
 					if(itemId instanceof OWLOntologyChange){
 						OWLAxiom axiom = ((OWLOntologyChange) itemId).getAxiom();
-						return new Label(renderer.render(axiom, Syntax.MANCHESTER), ContentMode.HTML);
+						return new Label(renderer.render(axiom), ContentMode.HTML);
 		        	}
 				}
 				return null;

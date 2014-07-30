@@ -1,4 +1,4 @@
-package org.aksw.ore.util;
+package org.aksw.ore.rendering;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -104,7 +104,7 @@ public class UnsortedManchesterSyntaxRendererImpl implements OWLObjectRenderer{
 				if(!sorted.contains(o)){
 					sorted.add(o);
 				}
-			}System.out.println(sorted);
+			}
 			return sorted;
 		}
 	}

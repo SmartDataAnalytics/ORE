@@ -2,9 +2,6 @@ package org.aksw.ore.view;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -15,18 +12,21 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
 import org.aksw.ore.component.IndividualsTable;
 import org.aksw.ore.component.LearningOptionsPanel;
+import org.aksw.ore.component.OWLClassHierarchyTree;
 import org.aksw.ore.component.ProgressDialog;
 import org.aksw.ore.manager.LearningManager;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.LearningSetting;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
-import org.aksw.ore.util.Renderer;
-import org.aksw.ore.util.Renderer.Syntax;
+import org.aksw.ore.rendering.Renderer;
+import org.aksw.ore.util.AssertedClassHierarchyContainer;
 import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.core.owl.Individual;
 import org.dllearner.core.owl.NamedClass;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.dllearner.utilities.owl.OWLAPIConverter;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableFooterEvent;
@@ -36,9 +36,8 @@ import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableRowEvent
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -53,13 +52,10 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.Tree.CollapseEvent;
-import com.vaadin.ui.Tree.ExpandEvent;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 
-public class LearningView extends HorizontalSplitPanel implements View{
+public class LearningView extends HorizontalSplitPanel implements View, Refreshable{
 	
 	private LearningOptionsPanel optionsPanel;
 	
@@ -70,9 +66,9 @@ public class LearningView extends HorizontalSplitPanel implements View{
 	private IndexedContainer container;
 	private Button startBtn;
 	
-	private Tree tree;
+	private OWLClassHierarchyTree tree;
 	
-	private Renderer renderer = new Renderer();
+	private Renderer renderer = ORESession.getRenderer();
 	private DecimalFormat df = new DecimalFormat("0.00");
 	
 	NumberFormat percentFormat = NumberFormat.getPercentInstance();
@@ -142,24 +138,37 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		classExpressionTable.removeAllItems();
 		falseNegativesTable.removeAllItems();
 		falsePositivesTable.removeAllItems();
-		tree.removeAllItems();
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase instanceof OWLOntologyKnowledgebase){
 			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()){
-				setRootClasses();
+				tree.setContainerDataSource(new AssertedClassHierarchyContainer(((OWLOntologyKnowledgebase) knowledgebase).getOntology()));
+//				setRootClasses();
 			}
 		}
 	}
 	
 	private void setRootClasses(){
 		SortedSet<NamedClass> topLevelClasses = ORESession.getLearningManager().getTopLevelClasses();
-    	for(NamedClass topClass : topLevelClasses){
-    		tree.addItem(topClass).getItemProperty("label").setValue(renderer.render(topClass, Syntax.MANCHESTER, false));
-//    		if(!(ORESession.getLearningManager().getDirectSubClasses(topClass).size() > 1)){
-//    			tree.setChildrenAllowed(topClass, false);
-//    		}
-    		if(ORESession.getLearningManager().getDirectSubClasses(topClass).isEmpty()){
-    			tree.setChildrenAllowed(topClass, false);
+		//if ontology contains unsatisfiable classes, we do add owl:Nothing as separate node and attach all unsatisfiable classes
+		addClasses(null, topLevelClasses);
+	}
+	
+	/**
+	 * Adds nodes to class hierarchy tree.
+	 * @param parent
+	 * @param children
+	 */
+	private void addClasses(NamedClass parent, Set<NamedClass> children){
+		OWLDataFactory df = ORESession.getOWLReasoner().getRootOntology().getOWLOntologyManager().getOWLDataFactory();
+		Set<OWLClass> unsatisfiableClasses = ORESession.getOWLReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom();
+		for(NamedClass child : children){
+    		Item item = tree.addItem(child);
+			item.getItemProperty("label").setValue(renderer.render(child));
+			item.getItemProperty("unsatisfiable").setValue(unsatisfiableClasses.contains(df.getOWLClass(IRI.create(child.getName()))));
+    		tree.setParent(child, parent);
+    		//if class has no subclasses do not allow for expansion in tree
+    		if(ORESession.getLearningManager().getDirectSubClasses(child).isEmpty()){
+    			tree.setChildrenAllowed(child, false);
     		}
     	}
 	}
@@ -169,31 +178,28 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		l.setSizeFull();
 		l.setCaption("Classes");
 		
-		final Renderer renderer = new Renderer();
-		tree = new Tree();
-		tree.addContainerProperty("label", String.class, null);
-//		tree.addItem(Thing.instance).getItemProperty("label").setValue("TOP");
-		tree.setItemCaptionPropertyId("label");
-		tree.setImmediate(true);
-		tree.addExpandListener(new Tree.ExpandListener() {
-
-		    public void nodeExpand(ExpandEvent event) {
-		    	SortedSet<NamedClass> subClasses = ORESession.getLearningManager().getDirectSubClasses((NamedClass)event.getItemId());
-		    	
-		    	Item item;
-		    	for(NamedClass sub : subClasses){
-		    		item = tree.addItem(sub);
-		    		if(item != null){
-		    			item.getItemProperty("label").setValue(renderer.render(sub, Syntax.MANCHESTER, false));
-			    		if(ORESession.getLearningManager().getDirectSubClasses(sub).isEmpty()){
-			    			tree.setChildrenAllowed(sub, false);
-			    		}
-		                tree.setParent(sub, event.getItemId());
-		    		}
-		    	}
-		        
-		    }
-		});
+		tree = new OWLClassHierarchyTree();
+//		tree.addExpandListener(new Tree.ExpandListener() {
+//
+//		    public void nodeExpand(ExpandEvent event) {
+//		    	NamedClass parent = (NamedClass) event.getItemId();
+//		    	SortedSet<NamedClass> subClasses = ORESession.getLearningManager().getDirectSubClasses((NamedClass)event.getItemId());
+//		    	addClasses(parent, subClasses);
+//		    	
+////		    	Item item;
+////		    	for(NamedClass sub : subClasses){
+////		    		item = tree.addItem(sub);
+////		    		if(item != null){
+////		    			item.getItemProperty("label").setValue(renderer.render(sub));
+////			    		if(ORESession.getLearningManager().getDirectSubClasses(sub).isEmpty()){
+////			    			tree.setChildrenAllowed(sub, false);
+////			    		}
+////		                tree.setParent(sub, event.getItemId());
+////		    		}
+////		    	}
+//		        
+//		    }
+//		});
 //		tree.addCollapseListener(new Tree.CollapseListener() {
 //
 //			@Override
@@ -221,11 +227,13 @@ public class LearningView extends HorizontalSplitPanel implements View{
 //				}
 //			}
 //		});
-		tree.addItemClickListener(new ItemClickListener() {
+		tree.addValueChangeListener(new ValueChangeListener() {
 			
 			@Override
-			public void itemClick(ItemClickEvent event) {
-				onClassSelected((NamedClass) event.getItemId());
+			public void valueChange(ValueChangeEvent event) {
+				if(tree.getValue() != null){
+					onClassSelectionChanged();
+				}
 			}
 		});
 		
@@ -349,7 +357,7 @@ public class LearningView extends HorizontalSplitPanel implements View{
 		final LearningManager manager = ORESession.getLearningManager();
 		
 		LearningSetting learningSetting = new LearningSetting(
-				(NamedClass) tree.getValue(), 
+				new NamedClass(tree.getSelectedClass().toStringID()), 
 				optionsPanel.getMaxNrOfResults(), 
 				optionsPanel.getMaxExecutionTimeInSeconds(), 
 				optionsPanel.getNoiseInPercentage()/100, 
@@ -411,7 +419,7 @@ public class LearningView extends HorizontalSplitPanel implements View{
 								EvaluatedDescription bestSolution = manager.getBestLearnedDescriptions();
 								Notification notification = new Notification("Could not find any solution above the threshold!",
 										"<br/>Best solution found in " + optionsPanel.getMaxExecutionTimeInSeconds() + "s was <b>" + 
-												renderer.render(bestSolution.getDescription(), Syntax.MANCHESTER, false) +
+												renderer.render(bestSolution.getDescription()) +
 										"</b> with " + percentFormat.format(bestSolution.getAccuracy()), Type.WARNING_MESSAGE);
 								notification.setHtmlContentAllowed(true);
 								notification.show(Page.getCurrent());
@@ -422,23 +430,22 @@ public class LearningView extends HorizontalSplitPanel implements View{
 			});
 			t.start();
 		}
-		
-		
-
 	}
 	
 	private void showClassExpressions(List<EvaluatedDescriptionClass> result){
 		container.removeAllItems();
 		for(EvaluatedDescriptionClass ec : result){
 			Item item = container.addItem(ec);//container.getItem(container.addItem());
-			item.getItemProperty("Class Expression").setValue(new Label(renderer.render(ec.getDescription(), Syntax.MANCHESTER), ContentMode.HTML));
+			item.getItemProperty("Class Expression").setValue(new Label(renderer.renderHTML(ec.getDescription()), ContentMode.HTML));
 			item.getItemProperty("Accuracy").setValue(ec.getAccuracy());
 		}
 	}
 	
-	private void onClassSelected(NamedClass cls){
+	private void onClassSelectionChanged(){
 		//TODO use FastInstanceChecker
-		if(ORESession.getOWLReasoner().getInstances(OWLAPIConverter.getOWLAPIDescription(cls), true).getFlattened().size() >= 2){
+		OWLClass cls = tree.getSelectedClass();
+		System.out.println(ORESession.getOWLReasoner().getInstances(cls, false));
+		if(ORESession.getOWLReasoner().getInstances(cls, true).getFlattened().size() >= 2){
 			setLearningEnabled(true);
 		} else {
 			setLearningEnabled(false);
@@ -455,6 +462,14 @@ public class LearningView extends HorizontalSplitPanel implements View{
 	@Override
 	public void enter(ViewChangeEvent event) {
 		reset();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.view.Refreshable#refreshRendering()
+	 */
+	@Override
+	public void refreshRendering() {
+		classExpressionTable.refreshRowCache();
 	}
 
 

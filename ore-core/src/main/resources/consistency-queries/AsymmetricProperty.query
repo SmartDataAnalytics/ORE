@@ -1,0 +1,12 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?p a owl:AsymmetricProperty .
+    ?x ?p ?y .
+    ?y ?p ?x .
+}
+WHERE {
+    ?p a owl:AsymmetricProperty .
+    ?x ?p ?y .
+    ?y ?p ?x .
+}

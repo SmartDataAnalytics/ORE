@@ -1,0 +1,10 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+   ?p a owl:IrreflexiveProperty .
+    ?x ?p ?x .
+}
+WHERE {
+    ?p a owl:IrreflexiveProperty .
+    ?x ?p ?x .
+}

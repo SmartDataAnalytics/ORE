@@ -35,7 +35,7 @@ import com.jamonapi.MonitorFactory;
 public abstract class AbstractSPARQLBasedInconsistencyFinder implements InconsistencyFinder{
 	
 	
-	Stopwatch stopWatch = new Stopwatch();
+	Stopwatch stopWatch = Stopwatch.createUnstarted();
 	Monitor consistencyMonitor = MonitorFactory.getTimeMonitor("consistency checks");
 	
 

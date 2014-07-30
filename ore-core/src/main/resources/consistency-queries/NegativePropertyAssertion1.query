@@ -1,0 +1,14 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?x owl:sourceIndividual ?i1 .
+    ?x owl:assertionProperty ?p .
+    ?x owl:targetIndividual ?i2 .
+    ?i1 ?p ?i2 .
+}
+WHERE {
+    ?x owl:sourceIndividual ?i1 .
+    ?x owl:assertionProperty ?p .
+    ?x owl:targetIndividual ?i2 .
+    ?i1 ?p ?i2 .
+}

@@ -31,11 +31,11 @@ import java.util.concurrent.Future;
 
 import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
+import org.aksw.ore.ORESession;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.model.ResourceType;
-import org.aksw.ore.util.Renderer;
-import org.aksw.ore.util.Renderer.Syntax;
-import org.aksw.ore.util.UnsortedManchesterSyntaxRendererImpl;
+import org.aksw.ore.rendering.Renderer;
+import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.jena.riot.checker.CheckerLiterals;
@@ -99,18 +99,12 @@ import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.dllearner.utilities.owl.OWLEntityTypeAdder;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import com.clarkparsia.owlapiv3.XSD;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -180,7 +174,7 @@ public class EnrichmentManager {
 	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private KeywordColorMap colorMap = new KeywordColorMap();
-	private Renderer renderer = new Renderer();
+	private Renderer renderer = ORESession.getRenderer();
 	
 	private DecimalFormat df = new DecimalFormat("##0.0");
 	
@@ -805,14 +799,6 @@ public class EnrichmentManager {
 		if(accs.length()==4) { accs = " " + accs; }
 		String str =  accs + "%\t" + axiom.getAxiom().toManchesterSyntaxString(null, PrefixCCMap.getInstance());
 		return str;
-	}
-	
-	public String render(Axiom axiom, Syntax syntax){
-		return renderer.render(axiom, syntax);
-	}
-	
-	public String render(Axiom axiom, Syntax syntax, boolean longForm){
-		return renderer.render(axiom, syntax, longForm);
 	}
 	
 	public String render(OWLAxiom value, int depth){

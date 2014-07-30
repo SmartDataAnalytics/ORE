@@ -6421,5 +6421,35 @@ div.footnote {
 	padding-left:0px;
 }
 
+.dashboard .v-popupview-popup .filterTable {
+	background: #343638;
+	background: rgba(52, 54, 56, 0.92);
+	-webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+	-moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+	color: #fff;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+	padding: 4px;
+	-webkit-border-radius: 0.3em;
+	-moz-border-radius: 0.3em;
+	border-radius: 0.3em;
+	border: none;
+	min-width: 10em;
+	-webkit-animation: fade-in 160ms ease-out;
+	-moz-animation: fade-in 160ms ease-out;
+	-ms-animation: fade-in 160ms ease-out;
+	-o-animation: fade-in 160ms ease-out;
+	animation: fade-in 160ms ease-out;
+	opacity: 1;
+}
+
+.v-tree-node-unsatisfiable-class{
+	color:red;
+}
+
+.v-tree-node-caption-empty-class{
+	color: graytext;
+    font-style: italic;
+}
 
 

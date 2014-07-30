@@ -1,0 +1,12 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?c1 owl:complementOf ?c2 .
+    ?x a ?c1 .
+    ?x a ?c2 .
+}
+WHERE {
+    ?c1 owl:complementOf ?c2 .
+    ?x a ?c1 .
+    ?x a ?c2 .
+}

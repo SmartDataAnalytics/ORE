@@ -1,0 +1,18 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?x a owl:AllDifferent .
+    ?x owl:members ?list .
+    ?list list:member ?y1 .
+    ?list list:member ?y2 .
+    ?y1 owl:sameAs ?y2 .
+}
+WHERE {
+    ?x a owl:AllDifferent .
+    ?x owl:members ?list .
+    ?list rdf:rest*/rdf:first ?y1 .
+    ?list rdf:rest*/rdf:first ?y2 .
+    FILTER (?y1 != ?y2) .
+    ?y1 owl:sameAs ?y2 .
+}

@@ -24,6 +24,7 @@ import org.aksw.ore.manager.SPARQLExplanationManager;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.aksw.ore.rendering.Renderer;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
@@ -228,12 +229,17 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	public static OWLReasoner getOWLReasoner(){
 		return VaadinSession.getCurrent().getAttribute(OWLReasoner.class);
 	}
+	
+	public static Renderer getRenderer(){
+		return VaadinSession.getCurrent().getAttribute(Renderer.class);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener#knowledgebaseChanged(org.aksw.ore.model.Knowledgebase)
 	 */
 	@Override
 	public void knowledgebaseChanged(Knowledgebase knowledgebase) {
+		
 	}
 
 	/* (non-Javadoc)

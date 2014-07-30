@@ -1,15 +1,17 @@
 package org.aksw.ore;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.ore.component.SettingsDialog;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
+import org.aksw.ore.rendering.Renderer;
+import org.aksw.ore.rendering.RenderingListener;
 import org.aksw.ore.util.HelpManager;
 import org.aksw.ore.view.ConstraintValidationView;
 import org.aksw.ore.view.DebuggingView;
@@ -18,6 +20,7 @@ import org.aksw.ore.view.InconsistencyDebuggingView;
 import org.aksw.ore.view.KnowledgebaseView;
 import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.NamingView;
+import org.aksw.ore.view.Refreshable;
 import org.aksw.ore.view.SPARQLDebuggingView;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -35,6 +38,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -56,7 +60,7 @@ import com.vaadin.ui.VerticalLayout;
 @Title("ORE")
 @Push
 @SuppressWarnings("serial")
-public class OREUI extends UI implements KnowledgebaseLoadingListener
+public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener
 {
 	Navigator navigator;
     
@@ -64,7 +68,9 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     CssLayout content = new CssLayout();
     CssLayout menu = new CssLayout();
     
-    private List<String> views = Arrays.asList(new String[]{"knowledgebase", "enrichment", "logical", "naming", "constraints"});
+    View currentView;
+    
+    Set<View> views = new HashSet<View>();
     
     Map<String, Class<? extends View>> routes = new HashMap<String, Class<? extends View>>() {
         {
@@ -106,7 +112,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
     private HelpManager helpManager;
 
 	public OREUI() {
-		ToStringRenderer.getInstance().setRenderer(new ManchesterOWLSyntaxOWLObjectRendererImpl());
+//		ToStringRenderer.getInstance().setRenderer(new ManchesterOWLSyntaxOWLObjectRendererImpl());
 	}
     
     @Override
@@ -159,6 +165,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
             	} else if(event.getNewView() instanceof LearningView && !ORESession.getKnowledgebaseManager().getKnowledgebase().canLearn()){
             		return false;
             	}
+            	currentView = event.getNewView();
                 helpManager.closeAll();
                 return true;
             }
@@ -170,26 +177,45 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
             }
         });
     	
-    	
     	ORESession.getKnowledgebaseManager().addListener(this);
     }
     
     private void updateAvailableViews(){
     	Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
     	if(knowledgebase != null){
+    		View view;
     		if(knowledgebase instanceof OWLOntologyKnowledgebase){
-    			navigator.addView(view2Route.get(EnrichmentView.class), new LearningView());
+    			//enrichment view
+    			view = new LearningView();
+    			navigator.addView(view2Route.get(EnrichmentView.class), view);
+    			views.add(view);
+    			//debugging view
     			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()){
-    				navigator.addView(view2Route.get(DebuggingView.class), new DebuggingView());
+    				view = new DebuggingView();
+    				navigator.addView(view2Route.get(DebuggingView.class), view);
     			} else {
-    				navigator.addView(view2Route.get(DebuggingView.class), new InconsistencyDebuggingView());
+    				view = new InconsistencyDebuggingView();
+    				navigator.addView(view2Route.get(DebuggingView.class), view);
     			}
-    			navigator.addView(view2Route.get(NamingView.class), new NamingView());
+    			views.add(view);
+    			//naming issue view
+    			view = new NamingView();
+    			navigator.addView(view2Route.get(NamingView.class), view);
+    			views.add(view);
     		} else {
-    			navigator.addView(view2Route.get(EnrichmentView.class), new EnrichmentView());
-    			navigator.addView(view2Route.get(DebuggingView.class), new SPARQLDebuggingView());
+    			//enrichment view
+    			view = new EnrichmentView();
+    			navigator.addView(view2Route.get(EnrichmentView.class), view);
+    			views.add(view);
+    			//debugging view
+    			view = new SPARQLDebuggingView();
+    			navigator.addView(view2Route.get(DebuggingView.class), view);
+    			views.add(view);
     		}
-    		navigator.addView(view2Route.get(ConstraintValidationView.class), new ConstraintValidationView());
+    		//IC validation view
+    		view = new ConstraintValidationView();
+    		navigator.addView(view2Route.get(ConstraintValidationView.class), view);
+    		views.add(view);
     	}
     }
     
@@ -268,7 +294,13 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
                 MenuItem settingsMenu = settings.addItem("",
                         null);
                 settingsMenu.setStyleName("icon-cog");
-                settingsMenu.addItem("Settings", cmd);
+                settingsMenu.addItem("Settings", new Command() {
+                    @Override
+                    public void menuSelected(MenuItem selectedItem) {
+                        SettingsDialog settingsDialog = new SettingsDialog();
+                        addWindow(settingsDialog);
+                    }
+                });
                 settingsMenu.addItem("Preferences", cmd);
                 settingsMenu.addSeparator();
                 settingsMenu.addItem("My Account", cmd);
@@ -380,7 +412,8 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	 */
 	@Override
 	public void knowledgebaseChanged(Knowledgebase knowledgebase) {
-		
+		VaadinSession.getCurrent().setAttribute(Renderer.class, new Renderer());
+		ORESession.getRenderer().addRenderingListener(this);
 	}
 
 	/* (non-Javadoc)
@@ -414,5 +447,16 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener
 	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
 		showKnowledgebaseModified(!changes.isEmpty());
 	}
-    
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.util.RenderingListener#renderingChanged()
+	 */
+	@Override
+	public void renderingChanged() {
+		for (View view : views) {
+			if(view instanceof Refreshable){
+				((Refreshable) view).refreshRendering();
+			}
+		}
+	}
 }

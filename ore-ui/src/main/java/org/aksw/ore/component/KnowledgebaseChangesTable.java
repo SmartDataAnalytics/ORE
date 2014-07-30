@@ -1,15 +1,12 @@
 package org.aksw.ore.component;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
-import org.aksw.ore.model.EntityRenaming;
 import org.aksw.ore.model.Knowledgebase;
-import org.aksw.ore.util.Renderer;
-import org.aksw.ore.util.Renderer.Syntax;
+import org.aksw.ore.rendering.Renderer;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -49,14 +46,14 @@ public class KnowledgebaseChangesTable extends Table implements KnowledgebaseLoa
 		
 		addGeneratedColumn(AXIOM, new ColumnGenerator() {
 			
-			private Renderer renderer = new Renderer();
+			private Renderer renderer = ORESession.getRenderer();
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				if (AXIOM.equals(columnId)) {
 					if(itemId instanceof AddAxiom || itemId instanceof RemoveAxiom){
 						OWLAxiom axiom = ((OWLOntologyChange) itemId).getAxiom();
-						return new Label(renderer.render(axiom, Syntax.MANCHESTER), ContentMode.HTML);
+						return new Label(renderer.render(axiom), ContentMode.HTML);
 		        	} else {
 						return new Label(itemId.toString());
 		        	}

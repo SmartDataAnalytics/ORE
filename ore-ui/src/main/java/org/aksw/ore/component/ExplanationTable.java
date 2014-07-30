@@ -7,8 +7,7 @@ import java.util.Set;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2.FormattedExplanation;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.RepairManager.RepairManagerListener;
-import org.aksw.ore.util.Renderer;
-import org.aksw.ore.util.Renderer.Syntax;
+import org.aksw.ore.rendering.Renderer;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
@@ -89,7 +88,7 @@ public class ExplanationTable extends Table implements RepairManagerListener{
 		//render axiom column colored
 		addGeneratedColumn("Axiom", new ColumnGenerator() {
 			
-			private Renderer renderer = new Renderer();
+			private Renderer renderer = ORESession.getRenderer();
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
@@ -102,7 +101,7 @@ public class ExplanationTable extends Table implements RepairManagerListener{
 								indention += "&nbsp;";
 							}
 						}
-						return new Label(indention + renderer.render(ax, Syntax.MANCHESTER), ContentMode.HTML);
+						return new Label(indention + renderer.renderHTML(ax), ContentMode.HTML);
 		        	}
 				}
 				return null;

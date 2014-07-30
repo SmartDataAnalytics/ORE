@@ -7,7 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.aksw.mole.ore.repository.tones.TONESRepository;
 import org.aksw.mole.ore.sparql.SPARULTranslator;
@@ -198,6 +200,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private void onLoadOntologyFromURI(String ontologyURI){
 		LoadFromURIDialog dialog = new LoadFromURIDialog(ontologyURI);
 		getUI().addWindow(dialog);
+		dialog.onLoadOntology();
 	}
 	
 	private void onLoadOntologyFromRepository(){
@@ -407,20 +410,14 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	}
 	
 	private void handleURLRequestParameters(){
-		String endpointURL = VaadinService.getCurrentRequest().getParameter(URLParameters.ENDPOINT_URL);
-		String defaultGraph = VaadinService.getCurrentRequest().getParameter(URLParameters.DEFAULT_GRAPH);
-		String ontologyURI = VaadinService.getCurrentRequest().getParameter(URLParameters.ONTOLOGY_URL);
+		Map<String, String[]> parameterMap = new TreeMap<String, String[]>(String.CASE_INSENSITIVE_ORDER);
+		parameterMap.putAll(VaadinService.getCurrentRequest().getParameterMap());
+		
+		String endpointURL = parameterMap.containsKey(URLParameters.ENDPOINT_URL) ? parameterMap.get(URLParameters.ENDPOINT_URL)[0] : null;
+		String defaultGraph = parameterMap.containsKey(URLParameters.DEFAULT_GRAPH) ? parameterMap.get(URLParameters.DEFAULT_GRAPH)[0] : null;
+		String ontologyURI = parameterMap.containsKey(URLParameters.ONTOLOGY_URL) ? parameterMap.get(URLParameters.ONTOLOGY_URL)[0] : null;
+		
 		if(endpointURL != null){
-//			try {
-//				SparqlEndpoint endpoint = new SparqlEndpoint(new URL(endpointURL), defaultGraph);
-//				
-//				boolean isOnline = ORESession.getKnowledgebaseManager().isOnline(endpoint);
-//				if(isOnline){
-//					ORESession.getKnowledgebaseManager().setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
-//				}
-//			} catch (MalformedURLException e) {
-//				onSetSPARQLEndpoint(endpointURL, defaultGraph);
-//			}
 			onSetSPARQLEndpoint(endpointURL, defaultGraph);
 		} else if(ontologyURI != null){
 			onLoadOntologyFromURI(ontologyURI);

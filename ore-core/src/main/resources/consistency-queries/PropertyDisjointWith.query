@@ -1,0 +1,12 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?p1 owl:propertyDisjointWith ?p2 .
+    ?x ?p1 ?y .
+    ?x ?p2 ?y .
+}
+WHERE {
+    ?p1 owl:propertyDisjointWith ?p2 .
+    ?x ?p1 ?y .
+    ?x ?p2 ?y .
+}

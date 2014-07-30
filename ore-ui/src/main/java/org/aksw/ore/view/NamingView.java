@@ -1,62 +1,35 @@
 package org.aksw.ore.view;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import org.aksw.mole.ore.naming.NamingIssue;
+import org.aksw.mole.ore.naming.NamingIssueDetection;
+import org.aksw.mole.ore.naming.RenamingInstruction;
 import org.aksw.ore.OREConfiguration;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ProgressDialog;
 import org.aksw.ore.component.WhitePanel;
-import org.aksw.ore.manager.KnowledgebaseManager;
 import org.aksw.ore.model.EntityRenaming;
 import org.aksw.ore.model.NamingPattern;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
-import org.aksw.ore.model.RenamingInstruction;
+import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.util.PatOMatPatternLibrary;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vaadin.hene.popupbutton.PopupButton;
+import org.vaadin.hene.popupbutton.PopupButton.PopupVisibilityEvent;
+import org.vaadin.hene.popupbutton.PopupButton.PopupVisibilityListener;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.google.common.collect.Sets;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.navigator.View;
@@ -68,6 +41,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Embedded;
@@ -75,6 +49,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
@@ -82,42 +57,38 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-import cz.vse.keg.patomat.detection.OntologyPatternDetectionImpl;
-import cz.vse.keg.patomat.transformation.OntologyTransformation;
-import cz.vse.keg.patomat.transformation.OntologyTransformation.TransformationStrategy;
-import cz.vse.keg.patomat.transformation.OntologyTransformationImpl;
-import cz.vse.keg.patomat.transformation.pattern.InstructionGenerator;
-import cz.vse.keg.patomat.transformation.pattern.InstructionGeneratorImpl;
-import cz.vse.keg.patomat.transformation.pattern.TransformationPattern;
-import cz.vse.keg.patomat.transformation.pattern.TransformationPatternImpl;
-
-public class NamingView extends VerticalLayout implements View{
+public class NamingView extends VerticalLayout implements View, Refreshable{
+	
+	private static final Logger logger = LoggerFactory.getLogger(NamingView.class);
 	
 	private Table namingPatternsTable;
 	private Table patternInstancesTable;
 	private Table instructionsTable;
-	private BeanItemContainer<RenamingInstruction> instructionsContainer;
 	
 	private Button detectButton;
 	private Button instructButton;
 	private Button transformButton;
 	
-	TransformationPattern tp1;
-	OntologyTransformation<OWLOntology> transformation;
 	private NamingPattern currentNamingPattern;
-	private String currentOntologyURI;
 	private OWLOntology currentlyLoadedOntology;
 	Document doc;
 	
 	private GridLayout layout;
 	
-	private ArrayList<String> detectedPatternInstances;
-	private List<RenamingInstruction> generatedInstructions;
-	Set<String> selectedPatternInstances;
+	private Set<NamingIssue> detectedPatternInstances;
+	private Set<NamingIssue> selectedPatternInstances;
 	
-	private int nrOfSelectedInstructions = 0;
+	private List<RenamingInstruction> generatedInstructions;
+	private List<RenamingInstruction> selectedInstructions;
+
+	private Table filteredSuperclassesTable;
+
+	private Set<String> selectedSuperClasses;
+
+	private NamingIssueDetection namingIssueDetection;
 
 	public NamingView() {
+		namingIssueDetection = new NamingIssueDetection(OREConfiguration.getWordNetDirectory());
 		initUI();
 	}
 	
@@ -216,12 +187,12 @@ public class NamingView extends VerticalLayout implements View{
 		namingPatternsTable.setColumnExpandRatio("pattern", 1f);
 		namingPatternsTable.addContainerProperty("pattern", String.class, null);
 		for(NamingPattern p : PatOMatPatternLibrary.getPattern()){
-			if(!p.isUseReasoning() || ((OWLOntologyKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase()).isCoherent()){
+//			if(!p.isUseReasoning() || ((OWLOntologyKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase()).isCoherent()){
 				namingPatternsTable.addItem(p).getItemProperty("pattern").setValue(p.getDescription());
 //				namingPatternsTable.addItem(p.getImageFilename());
 //				namingPatternsTable.setChildrenAllowed(p.getImageFilename(), false);
 //				namingPatternsTable.setParent(p.getImageFilename(), p);
-			}
+//			}
 		}
 		
 		namingPatternsTable.addGeneratedColumn("pattern", new ColumnGenerator() {
@@ -256,18 +227,24 @@ public class NamingView extends VerticalLayout implements View{
 							w.focus();
 			            }
 			        });
-					l.addLayoutClickListener(new LayoutClickListener() {
-						private static final long serialVersionUID = 1L;
+			        if(!p.isUseReasoning() || ((OWLOntologyKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase()).isCoherent()){
+			        	l.addLayoutClickListener(new LayoutClickListener() {
+							private static final long serialVersionUID = 1L;
 
-						@Override
-						public void layoutClick(final LayoutClickEvent event) {
-							if (source.isSelected(itemId)) {
-								source.unselect(itemId);
-							} else {
-								source.select(itemId);
+							@Override
+							public void layoutClick(final LayoutClickEvent event) {
+								if (source.isSelected(itemId)) {
+									source.unselect(itemId);
+								} else {
+									source.select(itemId);
+								}
 							}
-						}
-					});
+						});
+			        } else {
+			        	l.setEnabled(false);
+			        	l.setDescription("The selection of this pattern is not possible because there exist some unsatisfiable classes in the ontology which would influence the reasoning used for this pattern.");
+			        }
+					
 					return l;
 				}
 				return null;
@@ -286,8 +263,89 @@ public class NamingView extends VerticalLayout implements View{
 	}
 	
 	private Component createPatternInstancesView(){
+		VerticalLayout view = new VerticalLayout();
+		view.setCaption("Detected pattern instances");
+		view.setSizeFull();
+		
+		//filter button to allow for omitting patterns instances with selected super classes
+		PopupButton filterButton = new PopupButton("Pattern Instances Filter");
+		filterButton.addStyleName("filterTable");
+		filterButton.setDescription("Filter out pattern instances by super class.");
+		filteredSuperclassesTable = new Table("Omit pattern instances with super class:");
+		filteredSuperclassesTable.setStyleName("filterTable");
+		filteredSuperclassesTable.setSizeFull();
+		filteredSuperclassesTable.setImmediate(true);
+		filteredSuperclassesTable.setPageLength(10);
+		filteredSuperclassesTable.addContainerProperty("superclass", String.class, null);
+		filteredSuperclassesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
+		filteredSuperclassesTable.setColumnExpandRatio("superclass", 1f);
+		selectedSuperClasses = new TreeSet<String>();
+		filteredSuperclassesTable.addGeneratedColumn("selected", new ColumnGenerator() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				CheckBox box = new CheckBox();
+				box.setValue(selectedSuperClasses.contains(itemId));
+				box.setImmediate(true);
+				box.addValueChangeListener(new Property.ValueChangeListener() {
+					@Override
+					public void valueChange(Property.ValueChangeEvent event) {
+						if((Boolean) event.getProperty().getValue()){
+							selectedSuperClasses.add((String) itemId);
+						} else {
+							selectedSuperClasses.remove(itemId);
+						}
+					}
+				});
+				return box;
+			}
+		});
+		filteredSuperclassesTable.setVisibleColumns(new String[] {"selected", "superclass"});
+		filterButton.addPopupVisibilityListener(new PopupVisibilityListener() {
+			
+			@Override
+			public void popupVisibilityChange(PopupVisibilityEvent event) {
+				if(!event.isPopupVisible()){
+					applySuperClassFilter();
+				}
+			}
+		});
+		filteredSuperclassesTable.setWidth("300px");
+		filteredSuperclassesTable.setHeight("300px");
+		filterButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final Window filterDialog = new Window("Filter");
+				filterDialog.setModal(true);
+				VerticalLayout content = new VerticalLayout();
+				filterDialog.setContent(content);
+				content.addComponent(filteredSuperclassesTable);
+				UI.getCurrent().addWindow(filterDialog);
+				filterDialog.setClosable(true);
+				Button applyButton = new Button("Apply");
+				applyButton.addClickListener(new ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						applySuperClassFilter();
+						filterDialog.close();
+					}
+				});
+				content.addComponent(applyButton);
+				content.setComponentAlignment(applyButton, Alignment.MIDDLE_CENTER);
+				content.setExpandRatio(filteredSuperclassesTable, 1f);
+			}
+		});
+		
+//		filterButton.setContent(filteredSuperclassesTable);
+		view.addComponent(filterButton);
+		
+		
+		//pattern instances table
 		patternInstancesTable = new Table();
-		patternInstancesTable.setCaption("Detected pattern instances");
+//		patternInstancesTable.setCaption();
 		patternInstancesTable.setSizeFull();
 		patternInstancesTable.setImmediate(true);
 		patternInstancesTable.setSelectable(true);
@@ -303,15 +361,34 @@ public class NamingView extends VerticalLayout implements View{
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				String patternInstance = (String) itemId;
-				String s = patternInstance.replace("?OP1_P", "<b>Superclass</b>").replace("?OP1_A", "<b>Subclass</b>").replace(";", "</br>");
+				NamingIssue patternInstance = (NamingIssue) itemId;
+				Renderer renderer = ORESession.getRenderer();
+				String superClass = renderer.render(patternInstance.getSuperClass());
+				String subClass = renderer.render(patternInstance.getSubClass());
+				String s = "<b>Superclass</b>=" + superClass + "</br><b>Subclass</b>=" + subClass;
 				Label l = new Label(s, ContentMode.HTML);
 				return l;
 			}
 		});
-		return new WhitePanel(patternInstancesTable);
+		view.addComponent(patternInstancesTable);
+		
+		view.setSpacing(true);
+		view.setExpandRatio(patternInstancesTable, 1f);
+		
+		return new WhitePanel(view);
 	}
 	
+
+	private void applySuperClassFilter() {
+		patternInstancesTable.removeAllItems();
+		//show all pattern instances whose super class is not filtered out
+		for (NamingIssue pi : detectedPatternInstances) {
+			if(!selectedSuperClasses.contains(pi.getSuperClass())){
+				patternInstancesTable.addItem(pi);
+			}
+		}
+	}
+
 	private Component createInstructionsView(){
 		instructionsTable = new Table();
 		instructionsTable.addStyleName("multiline");
@@ -319,46 +396,39 @@ public class NamingView extends VerticalLayout implements View{
 		instructionsTable.setCaption("Renaming instructions");
 		instructionsTable.setImmediate(true);
 		instructionsTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-		instructionsContainer = new BeanItemContainer<RenamingInstruction>(RenamingInstruction.class);
+		selectedInstructions = new ArrayList<RenamingInstruction>();
 		instructionsTable.addGeneratedColumn("selected", new ColumnGenerator() {
-
-            @Override
-            public Component generateCell(final Table source, final Object itemId, final Object columnId) {
-            	
-                final RenamingInstruction bean = (RenamingInstruction) itemId;
-
-                final CheckBox checkBox = new CheckBox();
-                checkBox.setImmediate(true);
-                checkBox.addValueChangeListener(new Property.ValueChangeListener() {
-                    @Override
-                    public void valueChange(final ValueChangeEvent event) {
-                        bean.setSelected((Boolean) event.getProperty().getValue());
-                        if((Boolean) event.getProperty().getValue()){
-                        	nrOfSelectedInstructions++;
-                        } else {
-                        	nrOfSelectedInstructions--;
-                        }
-                        transformButton.setEnabled(nrOfSelectedInstructions > 0);
-                        
-                    }
-                });
-
-                if (bean.isSelected()) {
-                    checkBox.setValue(true);
-                } else {
-                    checkBox.setValue(false);
-                }
-                return checkBox;
-            }
-        });
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public Object generateCell(Table source, final Object itemId, Object columnId) {
+				CheckBox box = new CheckBox();
+				box.setValue(selectedInstructions.contains(itemId));
+				box.setImmediate(true);
+				box.addValueChangeListener(new Property.ValueChangeListener() {
+					@Override
+					public void valueChange(Property.ValueChangeEvent event) {
+						if((Boolean) event.getProperty().getValue()){
+							selectedInstructions.add((RenamingInstruction) itemId);
+						} else {
+							selectedInstructions.remove(itemId);
+						}
+						transformButton.setEnabled(!selectedInstructions.isEmpty());
+					}
+				});
+				return box;
+			}
+		});
 		instructionsTable.addGeneratedColumn("instruction", new ColumnGenerator() {
-
+			final String template = "Rename <b>%s</b> to <b>%s</b>";
             @Override
             public Component generateCell(final Table source, final Object itemId, final Object columnId) {
             	
-                final RenamingInstruction bean = (RenamingInstruction) itemId;
-
-                return new Label(bean.getNLRepresentationHTML(), ContentMode.HTML);
+                RenamingInstruction ri = (RenamingInstruction) itemId;
+                Renderer renderer = ORESession.getRenderer();
+				String newURI = renderer.render(ri.getNewURI());
+				String originalURI = renderer.render(ri.getOriginalURI());
+                return new Label(String.format(template, originalURI, newURI), ContentMode.HTML);
             }
         });
 		instructionsTable.addValueChangeListener(new Property.ValueChangeListener() {
@@ -366,7 +436,6 @@ public class NamingView extends VerticalLayout implements View{
 		    	transformButton.setEnabled(true);
 		    }
 		});
-		instructionsTable.setContainerDataSource(instructionsContainer);
 		instructionsTable.setVisibleColumns(new Object[] {"selected", "instruction"});
 		instructionsTable.setColumnWidth("selected", 30);
 		
@@ -383,8 +452,7 @@ public class NamingView extends VerticalLayout implements View{
 	}
 	
 	private void onGenerateInstructions(){
-		instructionsContainer.removeAllItems();
-		selectedPatternInstances = (Set<String>) patternInstancesTable.getValue();
+		selectedPatternInstances = (Set<NamingIssue>) patternInstancesTable.getValue();
 		if(selectedPatternInstances.isEmpty()){
 			Notification.show("Please select some pattern instances.");
 		} else {
@@ -393,54 +461,12 @@ public class NamingView extends VerticalLayout implements View{
 	}
 	
 	private void onTransform(){
-		//get the parent node of all renaming nodes
-		String expression = "/instructions/entities";
-		Node parent = null;
-	    try {
-			NodeList nodesOP;
-			XPath xpath = XPathFactory.newInstance().newXPath();
-			nodesOP = (NodeList) xpath.evaluate(expression, doc, XPathConstants.NODESET);
-			parent = nodesOP.item(0);
-		} catch (XPathExpressionException e1) {
-			e1.printStackTrace();
+		Set<OWLOntologyChange> changes = Sets.newLinkedHashSet();
+		for(RenamingInstruction i : selectedInstructions){
+			changes.add(new EntityRenaming(currentlyLoadedOntology, i.getOriginalURI(), i.getNewURI()));
 		}
-	    //remove all renaming instance nodes not selected
-	    Set<OWLOntologyChange> changes = Sets.newLinkedHashSet();
-		for(RenamingInstruction i : instructionsContainer.getItemIds()){
-			if(!i.isSelected()){
-				parent.removeChild(i.getNode());
-			} else {
-				changes.add(new EntityRenaming(currentlyLoadedOntology, i.getOriginalName(), i.getNewName()));
-			}
-		}
-		try {
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			//initialize StreamResult with File object to save to file
-			StreamResult result = new StreamResult(new StringWriter());
-			DOMSource source = new DOMSource(doc);
-			transformer.transform(source, result);
-			String instructions = result.getWriter().toString();
-			transformation.setInstructions(instructions);
-			OWLOntology transformOntology = transformation.transformOntology(TransformationStrategy.Progressive, true);
-			try {
-				transformOntology.getOWLOntologyManager().saveOntology(transformOntology, new FileOutputStream("/home/me/renamed.owl"));
-			} catch (OWLOntologyStorageException e) {
-				e.printStackTrace();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			ORESession.getKnowledgebaseManager().addChanges(changes);
-			Notification.show("Transformation was successful.");
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			e.printStackTrace();
-		}
+		ORESession.getKnowledgebaseManager().addChanges(changes);
+		Notification.show("Transformation was successful.");
 	}
 	
 	private void showGeneratingInstructions(boolean generating){
@@ -465,16 +491,18 @@ public class NamingView extends VerticalLayout implements View{
 	public void enter(ViewChangeEvent event) {
 		OWLOntologyKnowledgebase kb = (OWLOntologyKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase();
 		currentlyLoadedOntology = kb.getOntology();
-		currentOntologyURI = currentlyLoadedOntology.getOWLOntologyManager().getOntologyDocumentIRI(currentlyLoadedOntology).toString();
-//		namingPatternsTable.removeAllItems();
-//		for(NamingPattern p : PatOMatPatternLibrary.getPattern()){
-//			if(!p.isUseReasoning() || ((OWLOntologyKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase()).isCoherent()){
-//				namingPatternsTable.addItem(p);
-//				namingPatternsTable.addItem(p.getUrl());
-//				namingPatternsTable.setChildrenAllowed(p.getUrl(), false);
-//				namingPatternsTable.setParent(p.getUrl(), p);
-//			}
-//		}
+	}
+	
+	private void updateSuperClassesFilter(){
+		filteredSuperclassesTable.removeAllItems();
+		Set<String> superClasses = new TreeSet<String>();
+		for (NamingIssue patternInstance : detectedPatternInstances) {
+			superClasses.add(patternInstance.getSuperClass());
+		}
+		Renderer renderer = ORESession.getRenderer();
+		for (String sup : superClasses) {
+			filteredSuperclassesTable.addItem(sup).getItemProperty("superclass").setValue(renderer.render(sup));
+		}
 	}
 	
 	public class PatternDetectionProcess extends Thread {
@@ -485,6 +513,7 @@ public class NamingView extends VerticalLayout implements View{
 		
 	    @Override
 	    public void run() {
+	    	//show progress dialog
 	    	final ProgressDialog dialog = new ProgressDialog("Detecting pattern instances...");
 	    	UI.getCurrent().access(new Runnable() {
 				
@@ -494,42 +523,53 @@ public class NamingView extends VerticalLayout implements View{
 				}
 			});
 	    	
-	    	detectedPatternInstances = detectPatternInstances();
-	    	UI.getCurrent().access(new Runnable() {
-				
-				@Override
-				public void run() {
-					UI.getCurrent().removeWindow(dialog);
-					for(String s : detectedPatternInstances){
-				    	   patternInstancesTable.addItem(s).getItemProperty("pattern").setValue(s);
-				    	   System.out.println(s);
-				    }
-					patternInstancesTable.setEnabled(true);
+	    	try {
+	    		//detect the pattern instances
+	    		try {
+	    			NamingPattern pattern = (NamingPattern) namingPatternsTable.getValue();
+	    			int id = pattern.getID();
+	    			switch(id){
+	    				case 1:detectedPatternInstances = namingIssueDetection.detectNonExactMatchingDirectChildIssues(currentlyLoadedOntology);break;
+	    				case 2:detectedPatternInstances = namingIssueDetection.detectNonMatchingChildIssues(currentlyLoadedOntology, true);break;
+	    				case 3:detectedPatternInstances = namingIssueDetection.detectNonMatchingChildIssues(currentlyLoadedOntology, false);break;
+	    			}
+				} catch (Exception e) {
+					logger.error("Naming issue detection failed.", e);
 				}
-			});
-	    }
-	    
-	    private ArrayList<String> detectPatternInstances() {
-	    	tp1 = new TransformationPatternImpl(currentNamingPattern.getUrl().toString());
-			//pattern detection
-			transformation = new OntologyTransformationImpl(
-					currentlyLoadedOntology, 
-					OREConfiguration.getWordNetDirectory(), 
-					OREConfiguration.getPosTaggerModelsDirectory(), "/");
-			OntologyPatternDetectionImpl detection = new OntologyPatternDetectionImpl(transformation.getDictionaryPath(), transformation.getModelsPath());		
-					
-			//detection and transformation instructions generation:
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			OWLOntologyManager man = currentlyLoadedOntology.getOWLOntologyManager();
-			try {
-				man.saveOntology(currentlyLoadedOntology, new RDFXMLOntologyFormat(), baos);
-				InputStream is = new ByteArrayInputStream(baos.toByteArray());
-				return detection.queryPatternStructuralAspect2(tp1, is, false, currentNamingPattern.isUseReasoning());
-			} catch (OWLOntologyStorageException e) {
-				e.printStackTrace();
+				
+				//show message if nothing was found or show the result
+				UI.getCurrent().access(new Runnable() {
+
+					@Override
+					public void run() {
+						UI.getCurrent().removeWindow(dialog);
+						
+						patternInstancesTable.removeAllItems();
+
+						if (detectedPatternInstances.isEmpty()) {// if nothing was found
+							Notification.show("Could not find any pattern instance.", Type.HUMANIZED_MESSAGE);
+						} else {
+							for (NamingIssue s : detectedPatternInstances) {
+								patternInstancesTable.addItem(s);
+							}
+							patternInstancesTable.setEnabled(true);
+						}
+						
+						//update the filter
+						updateSuperClassesFilter();
+					}
+				});
+			} catch (Exception e) {
+				logger.error("Pattern instance detection failed.", e);
+				UI.getCurrent().access(new Runnable() {
+					@Override
+					public void run() {
+						UI.getCurrent().removeWindow(dialog);
+						Notification.show("Pattern detection failed.", Type.ERROR_MESSAGE);
+						patternInstancesTable.setEnabled(true);
+					}
+				});
 			}
-			return new ArrayList<String>();
-//			return detection.queryPatternStructuralAspect2(tp1, currentOntologyURI, false, currentNamingPattern.isUseReasoning());
 	    }
 	  }
 	
@@ -538,61 +578,33 @@ public class NamingView extends VerticalLayout implements View{
 	    public void run() {
 	    	final ProgressDialog dialog = new ProgressDialog("Generating transformation instructions...");
 	    	UI.getCurrent().access(new Runnable() {
-				
 				@Override
 				public void run() {
 					UI.getCurrent().addWindow(dialog);
 				}
 			});
-	    	generatedInstructions = generateInstructions();
+	    	
+	    	generateInstructions();
+	    	
 	    	UI.getCurrent().access(new Runnable() {
-				
 				@Override
 				public void run() {
 					UI.getCurrent().removeWindow(dialog);
-					instructionsContainer.addAll(generatedInstructions);
+					instructionsTable.removeAllItems();
+					for (RenamingInstruction i : generatedInstructions) {
+						instructionsTable.addItem(i);
+					}
 				}
 			});
 	    }
 	    
-	    private List<RenamingInstruction> generateInstructions(){
-			List<RenamingInstruction> instructions = new ArrayList<RenamingInstruction>();
-			boolean POStagger=true;		
-			//generate the instructions
-			InstructionGenerator ig = new InstructionGeneratorImpl(tp1,POStagger,transformation.getDictionaryPath(),transformation.getModelsPath());
-			ig.generateGeneralTransformationInstructions();
-			for(String pi : selectedPatternInstances){
-				ig.generateInstantiatedInstructions(ig.parseXMLpatternInstanceBinding(OntologyPatternDetectionImpl.outputOnePairXML(currentOntologyURI, currentNamingPattern.getUrl().toString(), pi)), true);
+	    private void generateInstructions(){
+	    	generatedInstructions = new ArrayList<RenamingInstruction>();
+	    	for(NamingIssue pi : selectedPatternInstances){
+				generatedInstructions.add(pi.getRenamingInstruction());
 			}
-			//get the instructions as XML
-			String instructionXML = ig.exportTransformationInstructions(false);
-			//process the XML and generate some user-friendly representation while keeping the reference to the corresponding node in the XML document
-			try {
-				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			    dbf.setNamespaceAware(true); 
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				doc = db.parse(new ByteArrayInputStream(instructionXML.getBytes()));
-				XPath xpath = XPathFactory.newInstance().newXPath();
-			    String expression = "/instructions/entities/rename";
-			    NodeList nodesOP;
-				nodesOP = (NodeList) xpath.evaluate(expression, doc, XPathConstants.NODESET);
-				Node currentNode;
-				for(int i=0;i<nodesOP.getLength();i++) {				
-					currentNode = nodesOP.item(i);
-					String original_name=((Element)currentNode).getAttribute("original_name");
-					String new_name=((Element)nodesOP.item(i)).getTextContent();
-					if (!original_name.equals(new_name)) {
-						instructions.add(new RenamingInstruction(original_name, new_name, currentNode));
-					}
-				}
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-			
-			return instructions;
-		}
-	  }
+	    }
+	    }
 	
 	public void reset(){
 		patternInstancesTable.removeAllItems();
@@ -603,114 +615,7 @@ public class NamingView extends VerticalLayout implements View{
 		transformButton.setEnabled(false);
 	}
 	
-	public static void main(String[] args) throws Exception{
-		ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-		
-		
-		String ontologyURL = "localhost:";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLDataFactory dataFactory = man.getOWLDataFactory();
-		OWLOntology ontology = man.loadOntologyFromOntologyDocument(new FileInputStream(new File("/home/me/work/projects/DL-Learner/examples/carcinogenesis/carcinogenesis.owl")));
-		ontology = man.loadOntology(IRI.create("http://xmlns.com/foaf/spec/20100809.rdf"));
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		man.saveOntology(ontology, new RDFXMLOntologyFormat(), baos);
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		
-		KnowledgebaseManager kbMan = new KnowledgebaseManager();
-		kbMan.setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
-		
-//		String ontologyURI = "http://nb.vse.cz/~svabo/oaei2011/data/confOf.owl";
-		String namingPattern = "http://nb.vse.cz/~svabo/patomat/tp/np/tp_np1a.xml";
-//		OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntology(IRI.create(ontologyURI));
-		TransformationPattern tp1 = new TransformationPatternImpl(namingPattern);
-		//pattern detection
-		OntologyTransformation<OWLOntology> transformation = new OntologyTransformationImpl(ontology, "/opt/ore/wordnet", "/opt/ore/postagger", "/tmp/");//UserSession.getOntology());
-		OntologyPatternDetectionImpl detection = new OntologyPatternDetectionImpl(transformation.getDictionaryPath(), transformation.getModelsPath());	
-		ArrayList<String> pattern = detection.queryPatternStructuralAspect2(tp1, bais, false, false);
-		
-		List<String> selectedPattern = new ArrayList<String>();
-		selectedPattern.add(pattern.get(0));
-		selectedPattern.add(pattern.get(1));
-		
-		List<RenamingInstruction> instructions = new ArrayList<RenamingInstruction>();
-		boolean POStagger=true;		
-		//generate the instructions
-		InstructionGenerator ig = new InstructionGeneratorImpl(tp1,POStagger,transformation.getDictionaryPath(),transformation.getModelsPath());
-		ig.generateGeneralTransformationInstructions();
-		for(String pi : selectedPattern){
-			ig.generateInstantiatedInstructions(ig.parseXMLpatternInstanceBinding(OntologyPatternDetectionImpl.outputOnePairXML("ont", namingPattern, pi)), true);
-		}
-		//get the instructions as XML
-		String instructionXML = ig.exportTransformationInstructions(false);
-		//process the XML and generate some user-friendly representation while keeping the reference to the corresponding node in the XML document
-		Document doc = null;
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		    dbf.setNamespaceAware(true); 
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			doc = db.parse(new ByteArrayInputStream(instructionXML.getBytes()));
-			XPath xpath = XPathFactory.newInstance().newXPath();
-		    String expression = "/instructions/entities/rename";
-		    NodeList nodesOP;
-			nodesOP = (NodeList) xpath.evaluate(expression, doc, XPathConstants.NODESET);
-			Node currentNode;
-			for(int i=0;i<nodesOP.getLength();i++) {				
-				currentNode = nodesOP.item(i);
-				String original_name=((Element)currentNode).getAttribute("original_name");
-				String new_name=((Element)nodesOP.item(i)).getTextContent();
-				if (!original_name.equals(new_name)) {
-					instructions.add(new RenamingInstruction(original_name, new_name, currentNode));
-				}
-			}
-			
-			
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		List<RenamingInstruction> selectedInstructions = new ArrayList<RenamingInstruction>();
-		selectedInstructions.add(instructions.get(0));
-		
-		//get the parent node of all renaming nodes
-				String expression = "/instructions/entities";
-				Node parent = null;
-			    try {
-					NodeList nodesOP;
-					XPath xpath = XPathFactory.newInstance().newXPath();
-					nodesOP = (NodeList) xpath.evaluate(expression, doc, XPathConstants.NODESET);
-					parent = nodesOP.item(0);
-				} catch (XPathExpressionException e1) {
-					e1.printStackTrace();
-				}
-			    //remove all renaming instance nodes not selected
-				for(RenamingInstruction i : selectedInstructions){System.out.println(i);
-					if(!i.isSelected()){
-						parent.removeChild(i.getNode());
-					}
-				}
-				try {
-					Transformer transformer = TransformerFactory.newInstance().newTransformer();
-					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-					//initialize StreamResult with File object to save to file
-					StreamResult result = new StreamResult(new StringWriter());
-					DOMSource source = new DOMSource(doc);
-					transformer.transform(source, result);
-					String instructionsString = result.getWriter().toString();
-					transformation.setInstructions(instructionsString);
-					OWLOntology transformedOntology = transformation.transformOntology(TransformationStrategy.Progressive, true);
-					transformation.saveOntology("patomat_test.owl");
-					transformedOntology = transformation.getOntology();
-					man.saveOntology(ontology, new FileOutputStream("renamed.owl"));
-					man.saveOntology(transformedOntology, new FileOutputStream("renamed1.owl"));
-				} catch (TransformerConfigurationException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (TransformerFactoryConfigurationError e) {
-					e.printStackTrace();
-				} catch (TransformerException e) {
-					e.printStackTrace();
-				}
+	public void refreshRendering(){
+		patternInstancesTable.refreshRowCache();
 	}
-
 }

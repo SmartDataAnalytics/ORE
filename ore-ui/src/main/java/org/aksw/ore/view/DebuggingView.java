@@ -61,7 +61,7 @@ import com.vaadin.ui.VerticalSplitPanel;
  * @author Lorenz Buehmann
  *
  */
-public class DebuggingView extends HorizontalSplitPanel implements View, ExplanationProgressMonitorExtended<OWLAxiom>, ExplanationManagerListener{
+public class DebuggingView extends HorizontalSplitPanel implements View, Refreshable, ExplanationProgressMonitorExtended<OWLAxiom>, ExplanationManagerListener{
 	
 	
 	private static final Logger logger = Logger.getLogger(DebuggingView.class.getName());
@@ -320,7 +320,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 		explanationsPanel.removeAllComponents();
 		progressDialog = new ExplanationProgressDialog(unsatClasses, currentLimit);
 		ORESession.getExplanationManager().addExplanationProgressMonitor(progressDialog);
-		getUI().addWindow(progressDialog);
+		UI.getCurrent().addWindow(progressDialog);
 		new Thread(new Runnable() {
 
 			@Override
@@ -519,6 +519,18 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Explana
 			currentExplanationType = type;
 		}
 		computeExplanations();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.view.Refreshable#refreshRendering()
+	 */
+	@Override
+	public void refreshRendering() {
+		for (ExplanationTable explanationTable : explanationTables) {
+			explanationTable.refreshRowCache();
+		}
+		impactTable.refreshRowCache();
+		repairPlanTable.refreshRowCache();
 	}
 
 	

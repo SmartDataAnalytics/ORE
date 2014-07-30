@@ -1,0 +1,10 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+    ?x owl:sameAs ?y .
+    ?x owl:differentFrom ?y .
+}
+WHERE {
+    ?x owl:sameAs ?y .
+    ?x owl:differentFrom ?y .
+}

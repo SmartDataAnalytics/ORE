@@ -10,12 +10,12 @@
 	<groupId>org.aksw.ore</groupId>
 	<artifactId>ore-ui</artifactId>
 	<packaging>war</packaging>
-	<version>0.6.4</version>
+	<version>0.6.5</version>
 	<name>ORE Web Application</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.2.1</vaadin.version>
+		<vaadin.version>7.2.5</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<repositories>
@@ -196,6 +196,11 @@
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<dependency>
+   <groupId>org.vaadin.addons</groupId>
+   <artifactId>resetbuttonfortextfield</artifactId>
+   <version>1.1.1</version>
+</dependency>
 	</dependencies>
 
 	<build>
@@ -240,6 +245,8 @@
 					<style>OBF</style>
 					<strict>true</strict>
 					<runTarget>http://localhost:8080/</runTarget>
+					<persistentunitcachedir>/tmp/</persistentunitcachedir>
+					<deploy>/tmp/gwt.deploy</deploy>
 				</configuration>
 				<executions>
 					<execution>
@@ -281,7 +288,6 @@
 					<server>local</server>
 					<url>http://localhost:8080/manager/text</url>
 					<path>/ore</path>
-
 				</configuration>
 			</plugin>
 		</plugins>

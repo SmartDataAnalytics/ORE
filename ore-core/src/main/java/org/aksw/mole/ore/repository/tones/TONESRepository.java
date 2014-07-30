@@ -16,6 +16,9 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.util.OntologyIRIShortFormProvider;
 
+import com.google.common.base.Strings;
+import com.google.common.io.Files;
+
 public class TONESRepository implements OntologyRepository{
 	
 	private final String repositoryName = "TONES";
@@ -25,6 +28,8 @@ public class TONESRepository implements OntologyRepository{
     private List<RepositoryEntry> entries;
 
     private OWLOntologyIRIMapper iriMapper;
+    
+    private boolean loadLocally = true;
 
 
     public TONESRepository() {
@@ -76,8 +81,14 @@ public class TONESRepository implements OntologyRepository{
     private void fillRepository() {
         try {
             entries.clear();
-            URI listURI = URI.create(repositoryLocation + "/list");
-            BufferedReader br = new BufferedReader(new InputStreamReader(listURI.toURL().openStream()));
+            
+            BufferedReader br;
+            if(loadLocally){
+            	br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("tones_repository_uris.txt")));
+            } else {
+            	 URI listURI = URI.create(repositoryLocation + "/list");
+                 br = new BufferedReader(new InputStreamReader(listURI.toURL().openStream()));
+            }
             String line;
             while((line = br.readLine()) != null) {
                 try {
@@ -87,6 +98,7 @@ public class TONESRepository implements OntologyRepository{
                     e.printStackTrace();
                 }
             }
+           br.close();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -107,7 +119,6 @@ public class TONESRepository implements OntologyRepository{
             shortName = sfp.getShortForm(IRI.create(ontologyIRI));
             physicalURI = URI.create(repositoryLocation + "/download?ontology=" + ontologyIRI);
         }
-
 
         public String getOntologyShortName() {
             return shortName;
@@ -142,5 +153,4 @@ public class TONESRepository implements OntologyRepository{
             return null;
         }
     }
-
 }

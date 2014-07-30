@@ -163,6 +163,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	private void fireKnowledgebaseChanged(){//System.out.println("Fire KB changed");
+		logger.info("Knowledge base changed.");
 		synchronized(listeners){
 			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
 				l.knowledgebaseChanged(knowledgebase);
@@ -171,6 +172,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	private void fireKnowledgebaseAnalyzed(){//System.out.println("Fire KB analyzed");
+		logger.info("Knowledge base analyzed.");
 		synchronized (listeners) {
 			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
 				l.knowledgebaseAnalyzed(knowledgebase);
@@ -179,12 +181,14 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	private void fireKnowledgebaseStatusChanged(){
+		logger.info("Knowledge base status changed.");
 		for (KnowledgebaseLoadingListener l : listeners) {
 			l.knowledgebaseStatusChanged(knowledgebase);
 		}
 	}
 	
 	private void fireKnowledgebaseModified(){
+		logger.info("Knowledge base modified.");
 		for (KnowledgebaseLoadingListener l : listeners) {
 			l.knowledgebaseModified(changes);
 		}

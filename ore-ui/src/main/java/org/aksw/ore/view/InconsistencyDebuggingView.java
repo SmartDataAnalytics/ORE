@@ -50,7 +50,7 @@ import com.vaadin.ui.VerticalSplitPanel;
  * @author Lorenz Buehmann
  *
  */
-public class InconsistencyDebuggingView extends VerticalSplitPanel implements View, ExplanationProgressMonitorExtended<OWLAxiom>, ExplanationManagerListener{
+public class InconsistencyDebuggingView extends VerticalSplitPanel implements View, Refreshable, ExplanationProgressMonitorExtended<OWLAxiom>, ExplanationManagerListener{
 	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
@@ -290,6 +290,16 @@ public class InconsistencyDebuggingView extends VerticalSplitPanel implements Vi
 			currentExplanationType = type;
 		}
 		computeExplanations();
+	}
+	/* (non-Javadoc)
+	 * @see org.aksw.ore.view.Refreshable#refreshRendering()
+	 */
+	@Override
+	public void refreshRendering() {
+		for (ExplanationTable explanationTable : explanationTables) {
+			explanationTable.refreshRowCache();
+		}
+		repairPlanTable.refreshRowCache();
 	}
 
 	
