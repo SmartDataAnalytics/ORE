@@ -54,6 +54,14 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'FontAwesome';  font-weight: normal; font-style: normal;
+	src:url('fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg'),
+		url('fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'),
+		url('fontawesome-webfont.woff?v=3.2.1') format('woff'), 
+		url('fontawesome-webfont.ttf?v=3.2.1') format('truetype');
+}
+
 .v-debugwindow [data-icon]:before, .v-debugwindow-menu [data-icon]:before {
 	font-family: "vdebugfont";
 	content: attr(data-icon);
@@ -6449,7 +6457,20 @@ div.footnote {
 
 .v-tree-node-caption-empty-class{
 	color: graytext;
-    font-style: italic;
 }
+
+.dialog-window {}
+.dialog-window .v-window-contents .inner .v-caption:not(first-of-type)>.v-captiontext {margin-top:5px;}
+.dialog-window .v-window-contents .v-horizontal.bp-box {padding-top:5px;margin-top:5px;border-top:solid 1px #EBEBEB;}
+.dialog-window.modal .v-window-contents .inner {min-height:4em;min-width:300px;}
+.dialog-window.modal .v-window-contents .inner:before {font-family: "FontAwesome";font-size:4em;position:absolute;left:19px;width:1em;text-align: center;}
+.dialog-window.modal .v-window-contents .inner{padding-left:4em;margin-left:19px;}
+.dialog-window.modal.ok-cancel-dlg .v-window-contents .inner:before {content:"\f128";}
+.dialog-window.modal.yes-no-dlg .v-window-contents .inner:before {content:"\f059";}
+.dialog-window.modal.save-cancel-dlg .v-window-contents .inner:before {content:"\f0c7";}
+.dialog-window.modal.message-dlg .v-window-contents .inner:before {content:"\f129";}
+.dialog-window.modal.warning-dlg .v-window-contents .inner:before {content:"\f12a";}
+.dialog-window.modal.ban-dlg .v-window-contents .inner:before {content:"\f05e";}
+.dialog-window .v-button>.v-button-wrap {min-width: 5em;}
 
 

@@ -26,6 +26,7 @@ import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManager;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.aksw.ore.manager.ExplanationProgressMonitorExtended;
+import org.aksw.ore.rendering.Renderer;
 import org.apache.log4j.Logger;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owl.explanation.api.ExplanationGenerator;
@@ -145,10 +146,11 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			ExplanationManager expMan = ORESession.getExplanationManager();
 			
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
+				OWLClass cls = (OWLClass)itemId;
 			    if(propertyId == null){
-			        return itemId.toString();
+			        return cls.toStringID();
 			    } else if(propertyId.equals("root")) {
-			    	boolean root = expMan.getRootUnsatisfiableClasses().contains(itemId);
+			    	boolean root = expMan.getRootUnsatisfiableClasses().contains(cls);
 			    	if(root){
 			    		return "The unsatisfiability of this class is a possible cause for the unsatisfiability of other classes";
 			    	}
@@ -290,11 +292,12 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 		c.addContainerProperty("root", String.class, null);
 		try {
 			ExplanationManager expMan = ORESession.getExplanationManager();
+			Renderer renderer = ORESession.getRenderer();
 			//first the root classes
 			Set<OWLClass> classes = expMan.getRootUnsatisfiableClasses();
 			for (OWLClass cls : classes) {
 				Item i = c.addItem(cls);
-				i.getItemProperty("class").setValue(cls.toString());
+				i.getItemProperty("class").setValue(renderer.render(cls));
 //				boolean root = ORESession.getExplanationManager().getRootUnsatisfiableClasses().contains(cls);
 //				i.getItemProperty("root").setValue(root ? "R" : "");
 			}
@@ -302,7 +305,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			classes = expMan.getDerivedUnsatisfiableClasses();
 			for (OWLClass cls : classes) {
 				Item i = c.addItem(cls);
-				i.getItemProperty("class").setValue(cls.toString());
+				i.getItemProperty("class").setValue(renderer.render(cls));
 //				boolean root = ORESession.getExplanationManager().getRootUnsatisfiableClasses().contains(cls);
 //				i.getItemProperty("root").setValue(root ? "R" : "");
 			}
@@ -347,10 +350,6 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 		}).start();
 	}
 	
-	private void computeExplanations(final OWLClass unsatClass){
-		computeExplanations(Collections.singleton(unsatClass));
-	}
-	
 	private void computeExplanations(){
 		Set<OWLClass> unsatClasses = (Set<OWLClass>) classesTable.getValue();
 		if(unsatClasses != null){
@@ -358,61 +357,12 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 		}
 	}
 	
-	private void showExplanation2(final Explanation<OWLAxiom> explanation) {
-		final Table t = new Table();
-		t.addContainerProperty("axiom", String.class, null);
-		for (OWLAxiom axiom : explanation.getAxioms()) {
-			t.addItem(axiom).getItemProperty("axiom").setValue(axiom.toString());
-		}
-		t.setWidth("100%");
-		t.setImmediate(true);
-		t.setSelectable(true);
-		t.addStyleName("borderless");
-//		t.addStyleName("plain");
-		t.setCaption(explanation.getEntailment().toString());
-		t.setPageLength(0);
-		t.setHeight(null);
-		final Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>(explanation.getAxioms());
-		selectedAxioms.retainAll(this.selectedAxioms);
-		t.addGeneratedColumn("selected", new Table.ColumnGenerator() {
-			@Override
-			public Object generateCell(Table source, final Object itemId, Object columnId) {
-				final OWLAxiom axiom = (OWLAxiom) itemId;
-				boolean selected = selectedAxioms.contains(axiom);
-				if(selected){
-					t.select(axiom);
-				}
-				final CheckBox cb = new CheckBox("", selected);
-				cb.addValueChangeListener(new Property.ValueChangeListener() {
-					@Override
-					public void valueChange(Property.ValueChangeEvent event) {
-						if (selectedAxioms.contains(axiom)) {
-							selectedAxioms.remove(axiom);
-							selectedAxioms.remove(axiom);
-						} else {
-							selectedAxioms.add(axiom);
-							selectedAxioms.add(axiom);
-						}
-						updateSelection();
-					}
-				});
-				return cb;
-			}
-		});
-		t.setColumnHeader("selected", "");
-		t.setVisibleColumns(new String[]{"selected", "axiom"});
-		ConfigurablePanel c = new ConfigurablePanel(t);
-		c.setHeight(null);
-		explanationsPanel.addComponent(c);
-//		explanationTables.add(t);
-		
-	}
-	
 	private void showExplanation(final Explanation<OWLAxiom> explanation) {
 		try {
 			final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
 			if(explanation.getEntailment() != null){
-				t.setCaption(((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().toString());
+				OWLClass cls = ((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().asOWLClass();
+				t.setCaption(ORESession.getRenderer().render(cls));
 			}
 		t.addValueChangeListener(new Property.ValueChangeListener() {
 			{table2Listener.put(t, this);}
@@ -527,6 +477,10 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	@Override
 	public void refreshRendering() {
 		for (ExplanationTable explanationTable : explanationTables) {
+			//refresh caption
+			OWLClass cls = ((OWLSubClassOfAxiom)explanationTable.getExplanation().getEntailment()).getSubClass().asOWLClass();
+			explanationTable.setCaption(ORESession.getRenderer().render(cls));
+			//refresh content
 			explanationTable.refreshRowCache();
 		}
 		impactTable.refreshRowCache();

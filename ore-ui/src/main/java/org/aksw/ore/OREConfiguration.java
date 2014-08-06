@@ -12,8 +12,6 @@ import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Profile.Section;
 
-import com.vaadin.server.VaadinServlet;
-
 /**
  * @author Lorenz Buehmann
  *
@@ -21,7 +19,6 @@ import com.vaadin.server.VaadinServlet;
 public class OREConfiguration {
 
 	private static String wordNetDirectory;
-	private static String posTaggerModelsDirectory;
 	private static String cacheDirectory;
 	
 	public OREConfiguration() {
@@ -36,16 +33,11 @@ public class OREConfiguration {
 				//base section
 				Section baseSection = ini.get("base");
 				wordNetDirectory = baseSection.get("wordNetDir", String.class).trim();
-				posTaggerModelsDirectory = baseSection.get("posTaggerModelsDir", String.class).trim();
 				cacheDirectory = baseSection.get("cacheDir", String.class).trim();
 			}
 			
 			if(wordNetDirectory == null || wordNetDirectory.isEmpty()){
 				wordNetDirectory = OREConfiguration.class.getClassLoader().getResource("wordnet").getPath();
-			}
-			
-			if(posTaggerModelsDirectory == null || posTaggerModelsDirectory.isEmpty()){
-				posTaggerModelsDirectory = OREConfiguration.class.getClassLoader().getResource("postagger").getPath();
 			}
 			
 			if(cacheDirectory == null || cacheDirectory.isEmpty() || !cacheDirectory.startsWith("/")){
@@ -65,13 +57,6 @@ public class OREConfiguration {
 	 */
 	public static String getWordNetDirectory() {
 		return wordNetDirectory;
-	}
-	
-	/**
-	 * @return the posTaggerModelsDirectory
-	 */
-	public static String getPosTaggerModelsDirectory() {
-		return posTaggerModelsDirectory;
 	}
 	
 	/**

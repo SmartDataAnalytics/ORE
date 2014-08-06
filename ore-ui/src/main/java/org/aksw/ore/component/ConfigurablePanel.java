@@ -16,27 +16,35 @@ import com.vaadin.ui.Button.ClickListener;
  */
 public class ConfigurablePanel extends CssLayout{
 
+	private static final ClickListener NOT_IMPLEMENTED_LISTENER = new ClickListener() {
+        @Override
+        public void buttonClick(ClickEvent event) {
+            Notification.show("Not implemented in this demo");
+        }
+    };
 	
+	private Button configureButton;
+
 	public ConfigurablePanel(Component content) {
         addStyleName("layout-panel");
         setSizeFull();
 
-        Button configure = new Button();
-        configure.addStyleName("configure");
-        configure.addStyleName("icon-cog");
-        configure.addStyleName("icon-only");
-        configure.addStyleName("borderless");
-        configure.setDescription("Configure");
-        configure.addStyleName("small");
-        configure.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                Notification.show("Not implemented in this demo");
-            }
-        });
-        addComponent(configure);
+        configureButton = new Button();
+        configureButton.addStyleName("configure");
+        configureButton.addStyleName("icon-cog");
+        configureButton.addStyleName("icon-only");
+        configureButton.addStyleName("borderless");
+        configureButton.setDescription("Configure");
+        configureButton.addStyleName("small");
+        configureButton.addClickListener(NOT_IMPLEMENTED_LISTENER);
+        addComponent(configureButton);
 
         addComponent(content);
+	}
+	
+	public void addClickListener(ClickListener clickListener){
+		configureButton.removeClickListener(NOT_IMPLEMENTED_LISTENER);
+		configureButton.addClickListener(clickListener);
 	}
 
 }

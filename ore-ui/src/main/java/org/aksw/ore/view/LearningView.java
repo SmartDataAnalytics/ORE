@@ -4,29 +4,31 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.ConfigurablePanel;
+import org.aksw.ore.component.Dialog;
+import org.aksw.ore.component.Dialog.DialogClickListener;
 import org.aksw.ore.component.IndividualsTable;
 import org.aksw.ore.component.LearningOptionsPanel;
 import org.aksw.ore.component.OWLClassHierarchyTree;
 import org.aksw.ore.component.ProgressDialog;
+import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.LearningManager;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.LearningSetting;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.rendering.Renderer;
-import org.aksw.ore.util.AssertedClassHierarchyContainer;
+import org.aksw.ore.util.ClassHierarchyContainer;
+import org.aksw.ore.util.ClassHierarchyContainer.ClassHierarchy;
 import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.core.owl.Individual;
 import org.dllearner.core.owl.NamedClass;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTableFooterEvent;
@@ -50,7 +52,9 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -114,18 +118,18 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 	    
         HorizontalSplitPanel bottomHLayout = new HorizontalSplitPanel();
         bottomHLayout.setSizeFull();
-        bottomHLayout.addComponent(new ConfigurablePanel(falsePositivesTable));
-        bottomHLayout.addComponent(new ConfigurablePanel(falseNegativesTable));
+        bottomHLayout.addComponent(new WhitePanel(falsePositivesTable));
+        bottomHLayout.addComponent(new WhitePanel(falseNegativesTable));
         
         VerticalSplitPanel layout = new VerticalSplitPanel();
         layout.setSizeFull();
-        layout.addComponent(new ConfigurablePanel(createLearningResultTable()));
+        layout.addComponent(new WhitePanel(createLearningResultTable()));
         layout.addComponent(bottomHLayout);
         layout.setSplitPosition(70);
         
         HorizontalSplitPanel hLayout = new HorizontalSplitPanel();
         hLayout.setSizeFull();
-		hLayout.addComponent(new ConfigurablePanel(buildClassesPanel()));
+		hLayout.addComponent(buildClassesPanel());
         hLayout.addComponent(layout);
         hLayout.setSplitPosition(20);
         
@@ -141,36 +145,19 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase instanceof OWLOntologyKnowledgebase){
 			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()){
-				tree.setContainerDataSource(new AssertedClassHierarchyContainer(((OWLOntologyKnowledgebase) knowledgebase).getOntology()));
-//				setRootClasses();
+				showClassHierarchy(ClassHierarchy.ASSERTED);
 			}
 		}
 	}
 	
-	private void setRootClasses(){
-		SortedSet<NamedClass> topLevelClasses = ORESession.getLearningManager().getTopLevelClasses();
-		//if ontology contains unsatisfiable classes, we do add owl:Nothing as separate node and attach all unsatisfiable classes
-		addClasses(null, topLevelClasses);
-	}
-	
-	/**
-	 * Adds nodes to class hierarchy tree.
-	 * @param parent
-	 * @param children
-	 */
-	private void addClasses(NamedClass parent, Set<NamedClass> children){
-		OWLDataFactory df = ORESession.getOWLReasoner().getRootOntology().getOWLOntologyManager().getOWLDataFactory();
-		Set<OWLClass> unsatisfiableClasses = ORESession.getOWLReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom();
-		for(NamedClass child : children){
-    		Item item = tree.addItem(child);
-			item.getItemProperty("label").setValue(renderer.render(child));
-			item.getItemProperty("unsatisfiable").setValue(unsatisfiableClasses.contains(df.getOWLClass(IRI.create(child.getName()))));
-    		tree.setParent(child, parent);
-    		//if class has no subclasses do not allow for expansion in tree
-    		if(ORESession.getLearningManager().getDirectSubClasses(child).isEmpty()){
-    			tree.setChildrenAllowed(child, false);
-    		}
-    	}
+	private void showClassHierarchy(ClassHierarchy classHierarchy){
+		ClassHierarchyContainer container = new ClassHierarchyContainer(ORESession.getOWLReasoner());
+		if(classHierarchy == ClassHierarchy.ASSERTED){
+			container = new ClassHierarchyContainer(new StructuralReasonerFactory().createNonBufferingReasoner(ORESession.getOWLReasoner().getRootOntology()));
+		} else if(classHierarchy == ClassHierarchy.INFERRED){
+			container = new ClassHierarchyContainer(ORESession.getOWLReasoner());
+		}
+		tree.setContainerDataSource(container);
 	}
 	
 	private Component buildClassesPanel(){
@@ -179,54 +166,7 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 		l.setCaption("Classes");
 		
 		tree = new OWLClassHierarchyTree();
-//		tree.addExpandListener(new Tree.ExpandListener() {
-//
-//		    public void nodeExpand(ExpandEvent event) {
-//		    	NamedClass parent = (NamedClass) event.getItemId();
-//		    	SortedSet<NamedClass> subClasses = ORESession.getLearningManager().getDirectSubClasses((NamedClass)event.getItemId());
-//		    	addClasses(parent, subClasses);
-//		    	
-////		    	Item item;
-////		    	for(NamedClass sub : subClasses){
-////		    		item = tree.addItem(sub);
-////		    		if(item != null){
-////		    			item.getItemProperty("label").setValue(renderer.render(sub));
-////			    		if(ORESession.getLearningManager().getDirectSubClasses(sub).isEmpty()){
-////			    			tree.setChildrenAllowed(sub, false);
-////			    		}
-////		                tree.setParent(sub, event.getItemId());
-////		    		}
-////		    	}
-//		        
-//		    }
-//		});
-//		tree.addCollapseListener(new Tree.CollapseListener() {
-//
-//			@Override
-//			public void nodeCollapse(CollapseEvent event) {
-//				// Remove all children of the collapsing node
-//				removeItemsRecursively(tree, event.getItemId());
-//			}
-//
-//			void removeItemsRecursively(Tree tree, Object item) {
-//				// Find all child nodes of the node
-//				Collection<?> children = tree.getChildren(item);
-//				if (children == null)
-//					return;
-//
-//				// The list is unmodifiable so must copy to another list
-//				LinkedList<String> children2 = new LinkedList<String>();
-//				for (Iterator<?> i = children.iterator(); i.hasNext();)
-//					children2.add((String) i.next());
-//
-//				// Remove the children of the collapsing node
-//				for (Iterator<String> i = children2.iterator(); i.hasNext();) {
-//					String child = i.next();
-//					removeItemsRecursively(tree, child);
-//					tree.removeItem(child);
-//				}
-//			}
-//		});
+		tree.setSizeFull();
 		tree.addValueChangeListener(new ValueChangeListener() {
 			
 			@Override
@@ -236,10 +176,41 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 				}
 			}
 		});
-		
-		tree.setSizeFull();
 		l.addComponent(tree);
-		return l;
+		
+		ConfigurablePanel panel = new ConfigurablePanel(l);
+		panel.addClickListener(new ClickListener() {
+			
+			private ClassHierarchy currentClassHierarchyStyle = ClassHierarchy.ASSERTED;
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final OptionGroup options = new OptionGroup("Class hierarchy");
+				options.addItems(ClassHierarchy.values());
+				
+				options.select(currentClassHierarchyStyle);
+				
+				Dialog dialog = Dialog.createOkCancel("Settings", options, new DialogClickListener() {
+					
+					@Override
+					public boolean buttonClick(Event event, int action) {
+						switch (action) {
+						case Dialog.OK:{
+							currentClassHierarchyStyle = (ClassHierarchy) options.getValue();
+							showClassHierarchy(currentClassHierarchyStyle);break;
+						}
+						case Dialog.CANCEL:return false;
+						default:
+						}
+						return true;
+					}
+				});
+				dialog.center();
+				dialog.show();
+			}
+		});
+		
+		return panel;
 	}
 	
 	private Component buildRightPortal(){
@@ -248,7 +219,7 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 		vl.setSpacing(true);
 		
 		optionsPanel = new LearningOptionsPanel();
-		ConfigurablePanel c = new ConfigurablePanel(optionsPanel);
+		WhitePanel c = new WhitePanel(optionsPanel);
 		c.setSizeFull();
 		vl.addComponent(c);
 		vl.setExpandRatio(c, 1f);

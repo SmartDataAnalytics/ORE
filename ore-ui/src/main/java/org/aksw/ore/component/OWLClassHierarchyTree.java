@@ -3,10 +3,9 @@
  */
 package org.aksw.ore.component;
 
-import org.aksw.ore.util.AssertedClassHierarchyContainer;
+import org.aksw.ore.util.ClassHierarchyContainer;
 import org.semanticweb.owlapi.model.OWLClass;
 
-import com.vaadin.data.Item;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Tree;
 
@@ -18,7 +17,7 @@ public class OWLClassHierarchyTree extends Tree{
 	
 	
 	public OWLClassHierarchyTree() {
-		setItemCaptionPropertyId(AssertedClassHierarchyContainer.LABEL_PROPERTY);
+		setItemCaptionPropertyId(ClassHierarchyContainer.LABEL_PROPERTY);
 		setImmediate(true);
 		setSizeFull();
 		setMultiSelect(false);
@@ -28,11 +27,11 @@ public class OWLClassHierarchyTree extends Tree{
 			
 			@Override
 			public String getStyle(Tree source, Object itemId) {
-				boolean unsatisfiable = (Boolean) getItem(itemId).getItemProperty(AssertedClassHierarchyContainer.UNSATISFIABLE_PROPERTY).getValue();
-				int nrOfInstances = (Integer) getItem(itemId).getItemProperty(AssertedClassHierarchyContainer.INSTANCES_SIZE_PROPERTY).getValue();
+				boolean unsatisfiable = (Boolean) getItem(itemId).getItemProperty(ClassHierarchyContainer.UNSATISFIABLE_PROPERTY).getValue();
+				int nrOfInstances = (Integer) getItem(itemId).getItemProperty(ClassHierarchyContainer.INSTANCES_SIZE_PROPERTY).getValue();
 				if(unsatisfiable){
 					return "unsatisfiable-class";
-				} else if(nrOfInstances < 3){
+				} else if(nrOfInstances < 2){
 					return "empty-class";
 				}
 				return null;
@@ -43,7 +42,8 @@ public class OWLClassHierarchyTree extends Tree{
 			
 			@Override
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
-				return itemId.toString();
+				OWLClass cls = (OWLClass)itemId;
+				return cls.toStringID();
 			}
 		});
 		

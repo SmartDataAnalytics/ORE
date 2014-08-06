@@ -429,6 +429,10 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	 */
 	@Override
 	public void knowledgebaseChanged(Knowledgebase knowledgebase) {
+		onAnalyzeKnowledgebase();
+	}
+	
+	private void onAnalyzeKnowledgebase(){
 		final KnowledgebaseAnalyzationDialog dialog = new KnowledgebaseAnalyzationDialog();
 		ORESession.getKnowledgebaseManager().addListener(dialog);
 		UI.getCurrent().addWindow(dialog);
