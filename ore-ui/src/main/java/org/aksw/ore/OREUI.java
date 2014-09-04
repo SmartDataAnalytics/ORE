@@ -57,7 +57,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@Theme("dashboard")
+@Theme("ore")
 @Title("ORE")
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener

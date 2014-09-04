@@ -114,6 +114,11 @@
 			<version>1.1.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.eternach</groupId>
+			<artifactId>rich-option-group</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.aksw.mole</groupId>
 			<artifactId>ore-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
@@ -146,40 +151,15 @@
 			<version>1.8.2</version>
 		</dependency>
 		<!-- Patomat -->
-		<!-- 
-		<dependency>
-			<groupId>org.coode.oppl</groupId>
-			<artifactId>api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.coode.oppl</groupId>
-			<artifactId>parsers</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cz.vse.keg</groupId>
-			<artifactId>patomat</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cz.vse.keg</groupId>
-			<artifactId>meronymy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cz.vse.keg</groupId>
-			<artifactId>nlp</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cz.vse.keg</groupId>
-			<artifactId>transformation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>edu.mit</groupId>
-			<artifactId>jwi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>edu.stanford</groupId>
-			<artifactId>tagger</artifactId>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>org.coode.oppl</groupId> <artifactId>api</artifactId> 
+			</dependency> <dependency> <groupId>org.coode.oppl</groupId> <artifactId>parsers</artifactId> 
+			</dependency> <dependency> <groupId>org.cz.vse.keg</groupId> <artifactId>patomat</artifactId> 
+			</dependency> <dependency> <groupId>org.cz.vse.keg</groupId> <artifactId>meronymy</artifactId> 
+			</dependency> <dependency> <groupId>org.cz.vse.keg</groupId> <artifactId>nlp</artifactId> 
+			</dependency> <dependency> <groupId>org.cz.vse.keg</groupId> <artifactId>transformation</artifactId> 
+			</dependency> <dependency> <groupId>edu.mit</groupId> <artifactId>jwi</artifactId> 
+			</dependency> <dependency> <groupId>edu.stanford</groupId> <artifactId>tagger</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>

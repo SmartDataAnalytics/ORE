@@ -27,6 +27,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.vaadin.risto.stepper.IntStepper;
 
+import com.eternach.RichOptionGroup;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -516,7 +517,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			});
 			addComponent(autoDetectBox);
 			
-			resourceTypeGroup = new OptionGroup();
+			
+			resourceTypeGroup = new RichOptionGroup("");
 			resourceTypeGroup.setImmediate(true);
 			resourceTypeGroup.addItem(ResourceType.CLASS);
 			resourceTypeGroup.addItem(ResourceType.OBJECT_PROPERTY);
