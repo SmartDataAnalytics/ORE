@@ -126,7 +126,7 @@ public class ClassHierarchyContainer extends HierarchicalContainer{
 		
 		String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLDataFactory dataFactory = man.getOWLDataFactory();
+		OWLDataFactory df = man.getOWLDataFactory();
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
 		OWLReasonerFactory reasonerFactory = new StructuralReasonerFactory();
 		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
