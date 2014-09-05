@@ -2,15 +2,14 @@ package org.aksw.ore.component;
 
 import java.util.Arrays;
 
-import org.vaadin.risto.stepper.IntStepper;
+import org.vostok.vaadin.addon.button.spin.NumberModel;
+import org.vostok.vaadin.addon.button.spin.SpinButton;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
@@ -22,8 +21,8 @@ public class LearningOptionsPanel extends VerticalLayout{
 		DEFAULT, OWL2, EL
 	}
 	
-	private IntStepper maxExecutionTimeSpinner;
-	private IntStepper maxNrOfResultsSpinner;
+	private SpinButton maxExecutionTimeSpinner;
+	private SpinButton maxNrOfResultsSpinner;
 	private Slider noiseSlider;
 	private Slider thresholdSlider;
 	
@@ -32,7 +31,7 @@ public class LearningOptionsPanel extends VerticalLayout{
 	private CheckBox negationCheckBox;
 	private CheckBox hasValueCheckBox;
 	private CheckBox cardinalityCheckBox;
-	private IntStepper cardinalitySpinner;
+	private SpinButton cardinalitySpinner;
 	
 	private OptionGroup profileOptions;
 	
@@ -45,18 +44,26 @@ public class LearningOptionsPanel extends VerticalLayout{
 		addStyleName("enrichment-options");
 		setMargin(true);
 		
-		maxExecutionTimeSpinner = new IntStepper();
-		maxExecutionTimeSpinner.setStepAmount(1);
-		maxExecutionTimeSpinner.setMinValue(1);
+		try {
+			maxExecutionTimeSpinner = new SpinButton(new NumberModel(1, 1, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+//		maxExecutionTimeSpinner.setStepAmount(1);
+//		maxExecutionTimeSpinner.setMinValue(1);
 		maxExecutionTimeSpinner.setWidth("100%");
 		maxExecutionTimeSpinner.setImmediate(true);
 		maxExecutionTimeSpinner.setCaption("Max. execution time in s");
 		maxExecutionTimeSpinner.setDescription("The maximum execution time of the algorithm in seconds.");
 		addComponent(maxExecutionTimeSpinner);
 		
-		maxNrOfResultsSpinner = new IntStepper();
-		maxNrOfResultsSpinner.setStepAmount(1);
-		maxNrOfResultsSpinner.setMinValue(1);
+		try {
+			maxNrOfResultsSpinner = new SpinButton(new NumberModel(1, 1, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		maxNrOfResultsSpinner.setStepAmount(1);
+//		maxNrOfResultsSpinner.setMinValue(1);
 		maxNrOfResultsSpinner.setWidth("100%");
 		maxNrOfResultsSpinner.setImmediate(true);
 		maxNrOfResultsSpinner.setCaption("Max. number of results");
@@ -123,10 +130,14 @@ public class LearningOptionsPanel extends VerticalLayout{
 		cardinalityLayout.setSizeUndefined();
 		cardinalityLayout.setWidth("100%");
 		cardinalityLayout.addStyleName("no-padding");
-		cardinalitySpinner = new IntStepper();
-		cardinalitySpinner.setStepAmount(1);
-		cardinalitySpinner.setMinValue(1);
-		cardinalitySpinner.setMaxValue(10);
+		try {
+			cardinalitySpinner = new SpinButton(new NumberModel(1, 1, 10, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		cardinalitySpinner.setStepAmount(1);
+//		cardinalitySpinner.setMinValue(1);
+//		cardinalitySpinner.setMaxValue(10);
 		cardinalitySpinner.setWidth("50px");
 		cardinalitySpinner.setImmediate(true);
 		cardinalityLayout.addComponent(cardinalitySpinner);

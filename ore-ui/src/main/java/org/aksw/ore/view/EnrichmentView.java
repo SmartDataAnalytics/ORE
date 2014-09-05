@@ -25,7 +25,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.vaadin.risto.stepper.IntStepper;
+import org.vostok.vaadin.addon.button.spin.NumberModel;
+import org.vostok.vaadin.addon.button.spin.SpinButton;
 
 import com.eternach.RichOptionGroup;
 import com.vaadin.data.Property;
@@ -65,8 +66,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	private TextField resourceURIField;
 	private ResourceTypeField resourceTypeField;
 	private CheckBox useInferenceBox;
-	private IntStepper maxExecutionTimeSpinner;
-	private IntStepper maxNrOfReturnedAxiomsSpinner;
+	private SpinButton maxExecutionTimeSpinner;
+	private SpinButton maxNrOfReturnedAxiomsSpinner;
 	private Slider thresholdSlider;
 	
 	private Table axiomTypesTable;
@@ -226,17 +227,25 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		useInferenceBox.setCaption("Inference");
 		form.addComponent(useInferenceBox);
 		
-		maxExecutionTimeSpinner = new IntStepper();
-		maxExecutionTimeSpinner.setValue(10);
-		maxExecutionTimeSpinner.setStepAmount(1);
+		try {
+			maxExecutionTimeSpinner = new SpinButton(new NumberModel(10, 0, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		maxExecutionTimeSpinner.setValue(10);
+//		maxExecutionTimeSpinner.setStepAmount(1);
 		maxExecutionTimeSpinner.setWidth("100%");
 		maxExecutionTimeSpinner.setCaption("Max. execution time");
 		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
 		form.addComponent(maxExecutionTimeSpinner);
 		
-		maxNrOfReturnedAxiomsSpinner = new IntStepper();
-		maxNrOfReturnedAxiomsSpinner.setValue(10);
-		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
+		try {
+			maxNrOfReturnedAxiomsSpinner = new SpinButton(new NumberModel(10, 1, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+//		maxNrOfReturnedAxiomsSpinner.setValue(10);
+//		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
 		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
 		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
 		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "

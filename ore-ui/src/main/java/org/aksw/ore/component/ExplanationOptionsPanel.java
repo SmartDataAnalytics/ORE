@@ -2,7 +2,8 @@ package org.aksw.ore.component;
 
 import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.ore.ORESession;
-import org.vaadin.risto.stepper.IntStepper;
+import org.vostok.vaadin.addon.button.spin.NumberModel;
+import org.vostok.vaadin.addon.button.spin.SpinButton;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -19,7 +20,7 @@ public class ExplanationOptionsPanel extends HorizontalLayout implements Propert
 	private CheckBox showAggregatedViewCheckbox;
 	
 	private CheckBox limitExplanationCountCheckbox;
-	private IntStepper limitSpinner;
+	private SpinButton limitSpinner;
 	
 	public ExplanationOptionsPanel(final ExplanationsPanel explanationsPanel) {
 		setSpacing(true);
@@ -54,11 +55,15 @@ public class ExplanationOptionsPanel extends HorizontalLayout implements Propert
 		limitExplanationCountCheckbox.setImmediate(true);
 		limitExplanationCountCheckbox.setWidth(null);
 		
-		limitSpinner = new IntStepper();
+		try {
+			limitSpinner = new SpinButton(new NumberModel(1, 1, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		limitSpinner.setImmediate(true);
-		limitSpinner.setValue(1);
-		limitSpinner.setStepAmount(1);
-		limitSpinner.setMinValue(1);
+//		limitSpinner.setValue(1);
+//		limitSpinner.setStepAmount(1);
+//		limitSpinner.setMinValue(1);
 		limitSpinner.addValueChangeListener(this);
 		limitSpinner.setWidth("50px");
 		

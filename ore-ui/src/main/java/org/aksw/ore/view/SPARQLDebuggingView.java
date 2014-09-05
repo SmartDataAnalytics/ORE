@@ -24,7 +24,8 @@ import org.aksw.ore.manager.ExplanationManagerListener;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.vaadin.risto.stepper.IntStepper;
+import org.vostok.vaadin.addon.button.spin.NumberModel;
+import org.vostok.vaadin.addon.button.spin.SpinButton;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -67,7 +68,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	private CheckBox stopIfInconsistencyFoundCheckBox;
 	
 	private CheckBox limitExplanationCountCheckbox;
-	private IntStepper limitSpinner;
+	private SpinButton limitSpinner;
 	
 	private ListSelect uriList;
 	
@@ -218,11 +219,15 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		limitExplanationCountCheckbox.setImmediate(true);
 		limitExplanationCountCheckbox.setWidth(null);
 		
-		limitSpinner = new IntStepper();
+		try {
+			limitSpinner = new SpinButton(new NumberModel(1, 1, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		limitSpinner.setImmediate(true);
-		limitSpinner.setValue(1);
-		limitSpinner.setStepAmount(1);
-		limitSpinner.setMinValue(1);
+//		limitSpinner.setValue(1);
+//		limitSpinner.setStepAmount(1);
+//		limitSpinner.setMinValue(1);
 		limitSpinner.addValueChangeListener(this);
 		
 		HorizontalLayout limit = new HorizontalLayout();

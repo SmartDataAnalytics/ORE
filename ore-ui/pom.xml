@@ -83,11 +83,11 @@
 			<version>${vaadin.version}</version>
 		</dependency>
 		<!-- Vaadin Addons -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.vaadin.addons</groupId>
 			<artifactId>stepper</artifactId>
 			<version>2.1.2</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.vaadin.addons</groupId>
 			<artifactId>popupbutton</artifactId>
@@ -117,6 +117,11 @@
 			<groupId>com.eternach</groupId>
 			<artifactId>rich-option-group</artifactId>
 			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.vostok.vaadin</groupId>
+			<artifactId>vaadin-addon</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.aksw.mole</groupId>

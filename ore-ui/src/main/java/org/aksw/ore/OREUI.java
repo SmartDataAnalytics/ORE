@@ -33,6 +33,7 @@ import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
@@ -125,10 +126,10 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
 //        root.setSizeFull();
         
         setContent(root);
-        root.setWidth("100%");
+       
         root.addMenu(createSideBar2());
         
-        Responsive.makeResponsive(this);
+//        Responsive.makeResponsive(this);
         
         //create and add sidebar to the left
 //        Component sidebar = createSidebar();
@@ -245,6 +246,10 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     	}
     }
     
+    private void createSideBar3(){
+    	
+    }
+    
     private Component createSideBar2(){
     	CssLayout menu = new CssLayout();
     	menu.addStyleName("large-icons");
@@ -254,7 +259,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         img.setWidth("95%");
         img.setHeight("95%");
         menu.addComponent(img);
-        setHeight("100px");
+        img.setHeight("100px");
     	
     	// add menu items
     	CssLayout menuItemsLayout = new CssLayout();
@@ -265,6 +270,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     		String caption = view2ButtonLabel.get(view);
     		final String route = view2Route.get(view);
             Button b = new Button(caption);
+            b.setIcon(FontAwesome.DATABASE);
             b.setHtmlContentAllowed(true);
             b.setPrimaryStyleName("valo-menu-item");
             b.addClickListener(new ClickListener() {
