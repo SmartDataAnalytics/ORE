@@ -9,7 +9,45 @@ $v-app-loading-text: "Loading ORE...";
 
 .ore {
   @include valo;
+  
+  .no-kb-label .v-icon {
+  	font-size: 200px;
+  	text-align: center;
+  }
 
 
-  // Your theme's rules go here
+  .kb-view .v-button {
+      display: block;
+      height: 55px;
+      background: transparent;
+      border: none;
+      text-align: center;
+}
+ 
+.kb-view .v-button img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+}
+
+.kb-view .v-button .v-button-wrap, 
+.kb-view .v-disabled.v-button .v-button-wrap {
+   background: transparent;
+   border: none;
+   -webkit-border-radius: 0;
+   -moz-border-radius: 0;
+   border-radius: 0;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
+
+.kb-view .v-button:active .v-button-wrap,
+.kb-view .v-button.v-pressed .v-button-wrap {
+   background: transparent;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
 }

@@ -84,11 +84,11 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     Map<Class<? extends View>, String> view2ButtonLabel = new HashMap<Class<? extends View>, String>(){
     	{
     		put(KnowledgebaseView.class, "knowledge base");
-    		put(EnrichmentView.class, "enrichment");
-    		put(DebuggingView.class, "logical\ndebugging");
-    		put(SPARQLDebuggingView.class, "logical\ndebugging");
-    		put(NamingView.class, "naming issue\ndetection");
-    		put(ConstraintValidationView.class, "constraint\nvalidation");
+    		put(EnrichmentView.class, "schema");
+    		put(DebuggingView.class, "logical");
+    		put(SPARQLDebuggingView.class, "logical");
+    		put(NamingView.class, "naming issues");
+    		put(ConstraintValidationView.class, "constraints");
     	}
     };
     
@@ -252,7 +252,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     
     private Component createSideBar2(){
     	CssLayout menu = new CssLayout();
-    	menu.addStyleName("large-icons");
+//    	menu.addStyleName("large-icons");
 
     	// add logo
     	Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
@@ -260,6 +260,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         img.setHeight("95%");
         menu.addComponent(img);
         img.setHeight("100px");
+        img.setPrimaryStyleName("valo-menu-logo");
     	
     	// add menu items
     	CssLayout menuItemsLayout = new CssLayout();
@@ -273,6 +274,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
             b.setIcon(FontAwesome.DATABASE);
             b.setHtmlContentAllowed(true);
             b.setPrimaryStyleName("valo-menu-item");
+            b.addStyleName("test");
             b.addClickListener(new ClickListener() {
                 @Override
                 public void buttonClick(ClickEvent event) {
@@ -284,6 +286,20 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
             });
             menuItemsLayout.addComponent(b);
             viewNameToMenuButton.put(route, b);
+            if (view == KnowledgebaseView.class) {
+            	Label label = new Label("Enrichment", ContentMode.HTML);
+                label.setPrimaryStyleName("valo-menu-subtitle");
+                label.addStyleName("h4");
+                label.setSizeUndefined();
+                menuItemsLayout.addComponent(label);
+            }
+            if (view == EnrichmentView.class) {
+            	Label label = new Label("Debugging", ContentMode.HTML);
+                label.setPrimaryStyleName("valo-menu-subtitle");
+                label.addStyleName("h4");
+                label.setSizeUndefined();
+                menuItemsLayout.addComponent(label);
+            }
 		}
     	return menu;
     }

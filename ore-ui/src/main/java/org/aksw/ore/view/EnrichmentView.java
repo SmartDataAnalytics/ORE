@@ -228,7 +228,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		form.addComponent(useInferenceBox);
 		
 		try {
-			maxExecutionTimeSpinner = new SpinButton(new NumberModel(10, 0, 1, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
+			maxExecutionTimeSpinner = new SpinButton(new NumberModel(10, 1, 0, Integer.MAX_VALUE, false, NumberModel.FORMAT_INTEGER));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -280,10 +280,10 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		boolean useInference = (Boolean) useInferenceBox.getValue();
 		man.setUseInference(useInference);
 		
-		int maxExecutionTimeInSeconds = (Integer) maxExecutionTimeSpinner.getValue();
+		int maxExecutionTimeInSeconds = ((Double)maxExecutionTimeSpinner.getValue()).intValue();
 		man.setMaxExecutionTimeInSeconds(maxExecutionTimeInSeconds);
 		
-		int maxNrOfReturnedAxioms = (Integer) maxNrOfReturnedAxiomsSpinner.getValue();
+		int maxNrOfReturnedAxioms = ((Double)maxNrOfReturnedAxiomsSpinner.getValue()).intValue();
 		man.setMaxNrOfReturnedAxioms(maxNrOfReturnedAxioms);
 		
 		double threshold = (Double) thresholdSlider.getValue()/100;
