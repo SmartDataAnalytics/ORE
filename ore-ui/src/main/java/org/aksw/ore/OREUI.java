@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.ore.component.SettingsDialog;
+import org.aksw.ore.component.ValoMenuLayout;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -22,31 +23,27 @@ import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.NamingView;
 import org.aksw.ore.view.Refreshable;
 import org.aksw.ore.view.SPARQLDebuggingView;
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-
-import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
-import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
@@ -64,9 +61,9 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
 {
 	Navigator navigator;
     
-    HorizontalLayout root = new HorizontalLayout();
-    CssLayout content = new CssLayout();
-    CssLayout menu = new CssLayout();
+//    HorizontalLayout root = new HorizontalLayout();
+//    CssLayout content = new CssLayout();
+//    CssLayout menu = new CssLayout();
     
     View currentView;
     
@@ -110,6 +107,11 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     Map<String, Button> viewNameToMenuButton = new HashMap<String, Button>();
     
     private HelpManager helpManager;
+    
+    ValoMenuLayout root = new ValoMenuLayout();
+    ComponentContainer viewDisplay = root.getContentContainer();
+    CssLayout menu = new CssLayout();
+    CssLayout menuItemsLayout = new CssLayout();
 
 	public OREUI() {
 //		ToStringRenderer.getInstance().setRenderer(new ManchesterOWLSyntaxOWLObjectRendererImpl());
@@ -119,25 +121,30 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     protected void init(VaadinRequest request) {
     	UI.getCurrent().setLocale(Locale.ENGLISH);
     	getPage().setTitle("ORE");
-    	root.addStyleName("root");
-        root.setSizeFull();
+//    	root.addStyleName("root");
+//        root.setSizeFull();
+        
         setContent(root);
+        root.setWidth("100%");
+        root.addMenu(createSideBar2());
+        
+        Responsive.makeResponsive(this);
         
         //create and add sidebar to the left
-        Component sidebar = createSidebar();
-        root.addComponent(sidebar);
-        
-        //create the main content panel
-        content.setSizeFull();
-        content.setStyleName("view-content");
-        root.addComponent(content);
-        root.setExpandRatio(content, 1f);
+//        Component sidebar = createSidebar();
+//        root.addComponent(sidebar);
+//        
+//        //create the main content panel
+//        content.setSizeFull();
+//        content.setStyleName("view-content");
+//        root.addComponent(content);
+//        root.setExpandRatio(content, 1f);
         
         //initialize the ORE session
         ORESession.init();
         
         // Create a navigator to control the views
-        navigator = new Navigator(this, content);
+        navigator = new Navigator(this, viewDisplay);
         
         // Create and register the views
         KnowledgebaseView knowledgebaseView = new KnowledgebaseView();
@@ -236,6 +243,43 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
 			viewNameToMenuButton.get(view2Route.get(NamingView.class)).setEnabled(false);
 			viewNameToMenuButton.get(view2Route.get(ConstraintValidationView.class)).setEnabled(false);
     	}
+    }
+    
+    private Component createSideBar2(){
+    	CssLayout menu = new CssLayout();
+    	menu.addStyleName("large-icons");
+
+    	// add logo
+    	Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
+        img.setWidth("95%");
+        img.setHeight("95%");
+        menu.addComponent(img);
+        setHeight("100px");
+    	
+    	// add menu items
+    	CssLayout menuItemsLayout = new CssLayout();
+    	menu.addComponent(menuItemsLayout);
+    	
+    	menuItemsLayout.setPrimaryStyleName("valo-menuitems");
+    	for (Class<? extends View> view : Lists.newArrayList(KnowledgebaseView.class, EnrichmentView.class, DebuggingView.class, NamingView.class, ConstraintValidationView.class)) {
+    		String caption = view2ButtonLabel.get(view);
+    		final String route = view2Route.get(view);
+            Button b = new Button(caption);
+            b.setHtmlContentAllowed(true);
+            b.setPrimaryStyleName("valo-menu-item");
+            b.addClickListener(new ClickListener() {
+                @Override
+                public void buttonClick(ClickEvent event) {
+                    clearMenuSelection();
+                    event.getButton().addStyleName("selected");
+                    if (!navigator.getState().equals(route))
+                    	navigator.navigateTo(route);
+                }
+            });
+            menuItemsLayout.addComponent(b);
+            viewNameToMenuButton.put(route, b);
+		}
+    	return menu;
     }
     
     private Component createSidebar(){
