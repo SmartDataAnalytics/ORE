@@ -74,7 +74,7 @@ public class EvaluatedAxiomsTable extends Table{
 		setSizeFull();
 		setPageLength(0);
 		setHeight(null);
-		setColumnWidth("Selected", 30);
+//		setColumnWidth("Selected", 30);
 //		setColumnWidth("Accuracy", 100);
 		setColumnExpandRatio("Axiom", 1.0f);
 		setSelectable(true);
@@ -129,16 +129,19 @@ public class EvaluatedAxiomsTable extends Table{
 				
 				HorizontalLayout cell = new HorizontalLayout();
 				cell.setSizeFull();
-				cell.addStyleName("tweet");
+				cell.setWidth(null);
+//				cell.addStyleName("tweet");
 				cell.setSpacing(true);
 				
 				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom) itemId).getScore().getAccuracy()));
 				accuracyLabel.setDescription(getAccuracyDescription((EvaluatedAxiom)itemId));
 				cell.addComponent(accuracyLabel);
-				accuracyLabel.setWidth("100%");
+//				accuracyLabel.setWidth("100%");
 				cell.setExpandRatio(accuracyLabel, 1f);
+				cell.setComponentAlignment(accuracyLabel, Alignment.MIDDLE_RIGHT);
 				
 				Button explain = new Button("?");
+				explain.setHeight(null);
 				explain.addStyleName(BaseTheme.BUTTON_LINK);
 				explain.setDescription("Explain the score.");
 				explain.addClickListener(new Button.ClickListener() {

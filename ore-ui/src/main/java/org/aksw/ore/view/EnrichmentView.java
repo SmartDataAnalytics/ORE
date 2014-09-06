@@ -10,6 +10,7 @@ import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.component.EnrichmentProgressDialog;
 import org.aksw.ore.component.EvaluatedAxiomsTable;
+import org.aksw.ore.component.PanelStyleLayout;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
@@ -89,18 +90,18 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	}
 	
 	private void initUI(){
-		addStyleName("dashboard-view");
 		setSizeFull();
 		setSplitPosition(25);
+		addStyleName("wrapping");
 		
 		Component leftSide = createLeftSide();
-		addComponent(new WhitePanel(leftSide));
+		addComponent(leftSide);
 		
 		VerticalLayout rightSide = new VerticalLayout();
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
-		rightSide.setCaption("Learned axioms");
-		addComponent(new WhitePanel(rightSide));
+//		rightSide.setCaption("Learned axioms");
+		addComponent(new PanelStyleLayout("Learned axioms", rightSide));
 		
 		Component panel = createAxiomsPanel();
 		rightSide.addComponent(panel);
@@ -174,14 +175,14 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		return panel;
 	}
 	
-	private VerticalLayout createLeftSide(){
+	private Component createLeftSide(){
 		VerticalLayout leftSide = new VerticalLayout();
 		leftSide.setSizeFull();
-		leftSide.setCaption("Options");
 		leftSide.setSpacing(true);
-		leftSide.setMargin(new MarginInfo(false, false, true, false));
+		leftSide.setMargin(new MarginInfo(false, true, true, true));
 		
 		Component configForm = createConfigForm();
+		configForm.setHeight(null);
 		Panel p = new Panel();
 		p.setSizeFull();
 		p.setContent(configForm);
@@ -202,7 +203,14 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		leftSide.addComponent(startButton);
 		leftSide.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
-		return leftSide;
+		Panel panel = new Panel("Options");
+		panel.setSizeFull();
+		panel.setContent(leftSide);
+		panel.addStyleName("color-header");
+//		panel.addStyleName("uppercase");
+		
+		return new PanelStyleLayout("Options", leftSide);
+//		return panel;
 	}
 	
 	private Component createConfigForm(){
@@ -261,6 +269,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		axiomTypesField = new AxiomTypesField();
 		axiomTypesField.setSizeFull();
+		axiomTypesField.setHeight(null);
 		form.addComponent(axiomTypesField);
 		form.setExpandRatio(axiomTypesField, 1f);
 		
@@ -450,9 +459,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			addComponent(allCheckBox);
 			//table
 			axiomTypesTable = new Table();
-			axiomTypesTable.setSizeFull();
+//			axiomTypesTable.setSizeFull();
+			axiomTypesTable.setHeight(null);
+			axiomTypesTable.setWidth("100%");
 			axiomTypesTable.setImmediate(true);
-//			axiomTypesTable.setPageLength(0);
+//			axiomTypesTable.setPageLength(0);	
 			axiomTypesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 			axiomTypesContainer = new BeanItemContainer<AxiomType<OWLAxiom>>(AxiomType.class);
 			this.visibleAxiomTypes = ORESession.getEnrichmentManager().getAxiomTypes(ResourceType.UNKNOWN);

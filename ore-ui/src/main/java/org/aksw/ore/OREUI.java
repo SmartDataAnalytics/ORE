@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChange;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.navigator.Navigator;
@@ -54,9 +55,11 @@ import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @Theme("ore")
 @Title("ORE")
+@Push
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener
 {
@@ -260,7 +263,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         img.setHeight("95%");
         menu.addComponent(img);
         img.setHeight("100px");
-        img.setPrimaryStyleName("valo-menu-logo");
+//        img.setPrimaryStyleName("valo-menu-logo");
     	
     	// add menu items
     	CssLayout menuItemsLayout = new CssLayout();
