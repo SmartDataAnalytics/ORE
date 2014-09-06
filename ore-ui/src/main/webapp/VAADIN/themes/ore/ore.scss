@@ -1,0 +1,221 @@
+
+// Modify the base color of the theme
+//$v-background-color: hsl(200, 50%, 50%);
+
+$v-app-loading-text: "Loading ORE...";
+
+// Import valo after setting the parameters
+@import "../valo/valo";
+
+
+@mixin ore {
+  @include valo;
+  
+  $color1: hsl(220, 5%, 38%);
+  $color2: #5d73c0;
+  $color3: #3dbc1a;
+  
+  .v-panel-caption-color-header {
+    @include valo-panel-caption-style($background-color: $color1);
+  }
+  
+ 
+  
+  .no-kb-label {
+  
+  	opacity:0.3;
+  
+  	.v-icon {
+  		font-size: 200px;
+  		//text-align: center;
+  		display:block;
+  		
+	}
+	
+	.text {
+		text-align:center;
+		font-weight:600;
+		
+	}
+  	
+  }
+  
+  .v-nativebutton-borderless {
+    border: none;
+    background: img/owl-ontology.png;
+    width: 342px;
+    height: 60px;
+	}
+
+
+  .kb-view .v-button {
+      display: block;
+      height: 55px;
+      background: transparent;
+      border: none;
+      text-align: center;
+}
+ 
+.kb-view .v-button img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 5px;
+}
+
+.kb-view .v-button .v-button-wrap, 
+.kb-view .v-disabled.v-button .v-button-wrap {
+   background: transparent;
+   border: none;
+   -webkit-border-radius: 0;
+   -moz-border-radius: 0;
+   border-radius: 0;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
+
+.kb-view .v-button:active .v-button-wrap,
+.kb-view .v-button.v-pressed .v-button-wrap {
+   background: transparent;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+}
+
+.caption-below-icon {
+      //background-color: #4172AE;      
+	
+	.v-button-link {
+      display: block;
+      background: transparent;
+      border: none;
+      text-align: center;
+	}
+
+	.v-button-link .v-button-caption {
+	    color: #fff;
+	    font-weight:bold;
+	    text-decoration: none;
+	}
+	
+	.v-button-link .v-button-caption:hover {
+	    color: #39849d;
+	    text-decoration: underline;
+	}
+	
+	.v-button {
+	      display: block;
+	      background: transparent;
+	      border: none;
+	      text-align: center;
+	}
+	
+	.v-button img {
+	      display: block;
+	      margin-left: auto;
+	      margin-right: auto;
+	      margin-bottom: 5px;
+	}
+	
+	.v-button span {
+	      /*font-size: x-small;*/
+	      text-shadow: #fafafa 1px 1px 0;
+	}
+}
+
+.kb-info {
+	.v-nativebutton {
+		background: transparent;
+		border:none;
+		cursor:pointer;
+		
+		.v-icon {
+			display:block;
+		}
+	}
+}
+
+
+@font-face {
+	font-family: 'FontAwesome';  font-weight: normal; font-style: normal;
+	src:url('fontawesome-webfont.svg#fontawesomeregular?v=3.2.1') format('svg'),
+		url('fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'),
+		url('fontawesome-webfont.woff?v=3.2.1') format('woff'), 
+		url('fontawesome-webfont.ttf?v=3.2.1') format('truetype');
+}
+
+/***********************************************
+button declaration
+used by i18nButton, spinbutton, Toolbar, Dialog
+***********************************************/
+
+.v-button, .v-disabled.v-button{
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #FFFFFF),color-stop(0.05, #FAFAFA),color-stop(0.94, #EAEBEC),color-stop(1, #E2E3E4))repeat scroll 0 0 transparent;
+	background: -o-linear-gradient(top bottom, #FFFFFF 0%, #FAFAFA 5%, #EAEBEC 94%, #E2E3E4 100%)repeat scroll 0 0 transparent;
+	background: -moz-linear-gradient(center top, #FFFFFF 0%, #FAFAFA 5%, #EAEBEC 94%, #E2E3E4 100%)repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(top bottom, #FFFFFF 0%, #FAFAFA 5%, #EAEBEC 94%, #E2E3E4 100%)repeat scroll 0 0 transparent;
+	background: -ms-linear-gradient(top bottom, #FFFFFF 0%, #FAFAFA 5%, #EAEBEC 94%, #E2E3E4 100%)repeat scroll 0 0 transparent;
+	background: linear-gradient(to top bottom, #FFFFFF 0%, #FAFAFA 5%, #EAEBEC 94%, #E2E3E4 100%)repeat scroll 0 0 transparent;				
+	color: #5A6066;border-color: #D4D4D6 #B3B4B5 #989B9C; border-left: 0.1em solid #B3B4B5; border-right: 0.1em solid #B3B4B5;border-style: solid; border-width: 0.1em;border-radius: 0.25em;box-shadow: 0 0 0 2px rgba(49, 50, 51, 0.07);
+	letter-spacing: -0.03em;padding: 0.3em 0.3em;text-shadow: 0 0.1em 0 rgba(255, 255, 255, 0.75);height:auto;cursor: pointer;
+}
+.v-button:focus, .v-button:focus >.v-button-wrap{background: transparent;}
+.v-button:hover:focus, .v-button:hover {
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0,#F5F5F5 ),color-stop(0.05, #F0F0F0),color-stop(0.94, #E1E1E2),color-stop(1,#D9D9DA ))repeat scroll 0 0 transparent;
+	background: -o-linear-gradient(top bottom,#F5F5F5 0%, #F0F0F0 5%, #E1E1E2 94%,#D9D9DA 100%) repeat scroll 0 0 transparent;
+	background: -moz-linear-gradient(center top,#F5F5F5 0%, #F0F0F0 5%, #E1E1E2 94%,#D9D9DA 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(top bottom,#F5F5F5 0%, #F0F0F0 5%, #E1E1E2 94%,#D9D9DA 100%) repeat scroll 0 0 transparent;
+	background: -ms-linear-gradient(top bottom,#F5F5F5 0%, #F0F0F0 5%, #E1E1E2 94%,#D9D9DA 100%) repeat scroll 0 0 transparent;
+	background: linear-gradient(to top bottom,#F5F5F5 0%, #F0F0F0 5%, #E1E1E2 94%,#D9D9DA 100%) repeat scroll 0 0 transparent;
+}
+.v-button:focus:active {
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0,#F0F0F0 ),color-stop(0.05, #FAFAFA),color-stop(0.94,#DADADB )	color-stop(1, #D4D4D5))repeat scroll 0 0 transparent;
+	background: -o-linear-gradient(top bottom,#F0F0F0 0%, #FAFAFA 5%, #DADADB 94%,#D4D4D5 100%) repeat scroll 0 0 transparent;
+	background: -moz-linear-gradient(center top,#F0F0F0 0%, #FAFAFA 5%, #DADADB 94%,#D4D4D5 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(top bottom,#F0F0F0 0%, #FAFAFA 5%, #DADADB 94%,#D4D4D5 100%) repeat scroll 0 0 transparent;
+	background: -ms-linear-gradient(top bottom,#F0F0F0 0%, #FAFAFA 5%, #DADADB 94%,#D4D4D5 100%) repeat scroll 0 0 transparent;
+	background: linear-gradient(to top bottom,#F0F0F0 0%, #FAFAFA 5%, #DADADB 94%,#D4D4D5 100%) repeat scroll 0 0 transparent;
+}
+.v-disabled.v-button .v-button-wrap {background: none;}
+.v-button.selected {	
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0,#F3F3F3 ),color-stop(0.05,#ededed ),color-stop(0.94,#ddddde )	color-stop(1, #D7D7D8))repeat scroll 0 0 transparent;
+	background: -o-linear-gradient(top bottom,#F3F3F3 0%, #ededed 5%, #ddddde 94%,#D7D7D8 100%) repeat scroll 0 0 transparent;
+	background: -moz-linear-gradient(center top,#F3F3F3 0%, #ededed 5%, #ddddde 94%,#D7D7D8 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(top bottom,#F3F3F3 0%, #ededed 5%, #ddddde 94%,#D7D7D8 100%) repeat scroll 0 0 transparent;
+	background: -ms-linear-gradient(top bottom,#F3F3F3 0%, #ededed 5%, #ddddde 94%,#D7D7D8 100%) repeat scroll 0 0 transparent;
+	background: linear-gradient(to top bottom,#F3F3F3 0%, #ededed 5%, #ddddde 94%,#D7D7D8 100%) repeat scroll 0 0 transparent;
+}
+.v-button>.v-button-wrap {background: none;padding:0.2em;height: auto}
+.v-button>.v-button-wrap:before{font-family: "FontAwesome";font-size: 1.2em;line-height:1.2em;}
+.v-button>*>.v-button-caption{margin-left:5px;font-size: 0.9em;}
+.v-layout.mode-icon .v-button>*>.v-button-caption, .v-button.mode-icon>*>.v-button-caption{display: none;}
+.v-layout.mode-icon .v-button>.v-button-wrap, .v-button.mode-icon>.v-button-wrap {min-width:1.6em;height:1.4em;padding:0px;font-size: 1.4em;text-align: center;}
+
+
+	/***********************************************
+spinButton
+***********************************************/
+.v-button.increase>.v-button-wrap:before {content:"\f067";}
+.v-button.decrease>.v-button-wrap:before {content:"\f068";}
+.v-button.increase-arrow>.v-button-wrap:before {content:"\f077";}
+.v-button.decrease-arrow>.v-button-wrap:before {content:"\f078";}
+
+.v-spinbutton input.v-textfield.v-widget[type="text"] {text-align:right;}
+.v-spinbutton.v-spinbutton-defbp .v-button>*>.v-button-caption{display:none;}
+/* nota : theme use pixel for texfield height, have to do so.... */
+
+.v-spinbutton>*{margin:0 0.1em;display:inline;float:left;width:auto!important;}
+.v-spinbutton>*:first-child{margin-left:0px}
+.v-spinbutton>*:last-child{margin-right:0px;}
+.v-spinbutton.v-spinbutton-box>*:first-child{padding-top:4px;}
+.v-spinbutton.v-spinbutton-box>*:last-child>.v-button{display:block;width:16px;height:16px;padding:0px;}
+.v-spinbutton.v-spinbutton-box>*:last-child>.v-button>.v-button-wrap{padding: 0px}
+.v-spinbutton.v-spinbutton-box>*:last-child>.v-button>.v-button-wrap:before{font-size:6px;line-height:6px;}
+
+
+	
+
+	
+	 
+}
