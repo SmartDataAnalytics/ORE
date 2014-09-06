@@ -61,6 +61,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -79,6 +80,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private VerticalLayout kbInfoPanel;
 	private VerticalLayout changesPanel;
 	private Button applyChangesButton;
+	private Label noKBLabel;
 	
 	public KnowledgebaseView() {
 		setSizeFull();
@@ -132,14 +134,25 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	}
 	
 	private Component createButtons(){
-		Label label = new Label("<h3>Set up knowledge base:</h3>", ContentMode.HTML);
 		VerticalLayout layout = new VerticalLayout();
+//		layout.setSizeFull();
+		layout.setWidth("100%");
+		layout.setHeight(null);
+//		layout.setSizeUndefined();
+		
+		Label label = new Label("<h3>Set up knowledge base:</h3>", ContentMode.HTML);
+//		label.setHeight(null);
 		layout.addComponent(label);
+		
 		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.setWidth("100%");
-		buttons.setHeight(null);
-		buttons.setSizeUndefined();
+		buttons.setWidth(null);
+//		buttons.setSizeFull();
+//		buttons.setHeight(null);
+//		buttons.setSizeUndefined();
 //		buttons.setStyleName("kb-view");
+//		buttons.setStyleName("caption-below-icon");
+		layout.addComponent(buttons);
+//		layout.setExpandRatio(buttons, 1f);
 		
 //		Button ontologyButton = new Button("OWL Ontology");
 //		ontologyButton.addStyleName("ontology-button");
@@ -149,8 +162,11 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		//OWL Ontology
 		PopupButton ontologyButton = new PopupButton("OWL Ontology");
 		ontologyButton.addStyleName("ontology-button");
-		ontologyButton.setIcon(new ThemeResource("img/owl-ontology.jpg"));
-		ontologyButton.addStyleName("borderless");
+		ThemeResource icon = new ThemeResource("img/owl-ontology.jpg");
+		ontologyButton.setIcon(icon);
+//		ontologyButton.addStyleName("borderless");
+		ontologyButton.setHeight("140px");
+//		ontologyButton.setHeight("100%");
 		buttons.addComponent(ontologyButton);
 		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
 		
@@ -184,7 +200,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		}));
 		
 		//SPARQL endpoint
-		Button endpointButton = new Button("SPARQL Endpoint", new ClickListener() {
+		Button endpointButton = new NativeButton("SPARQL Endpoint", new ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -192,11 +208,12 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			}
 		});
 		endpointButton.setIcon(new ThemeResource("img/sparql-128.png"));
-		endpointButton.addStyleName("borderless");
+//		endpointButton.setHeight("140px");
+//		endpointButton.addStyleName("borderless");
+//		endpointButton.setHeight("100%");
 		buttons.addComponent(endpointButton);
 		buttons.setComponentAlignment(endpointButton, Alignment.MIDDLE_LEFT);
 		
-		layout.addComponent(buttons);
 		return layout;
 	}
 	
@@ -269,6 +286,8 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	public void refresh(){
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase != null){
+			kbInfo.setVisible(true);
+			noKBLabel.setVisible(false);
 			if(knowledgebase instanceof OWLOntologyKnowledgebase){
 				visualizeOntology((OWLOntologyKnowledgebase) knowledgebase);
 				applyChangesButton.setDescription("Export modified ontology.");
@@ -309,21 +328,28 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private Component createKnowledgeBaseInfo(){
 		kbInfoPanel = new VerticalLayout();
 		kbInfoPanel.setSizeFull();
-		kbInfoPanel.addComponent(new Label("Current knowledge base:", ContentMode.HTML));
-		kbInfoPanel.setSpacing(true);
+		
+		Label label = new Label("<h3>Current knowledge base:<h3>", ContentMode.HTML);
+		label.setHeight(null);
+		kbInfoPanel.addComponent(label);
 		
 		kbInfo = new Label("</br>");
 		kbInfo.setContentMode(ContentMode.HTML);
 		kbInfoPanel.addComponent(kbInfo);
+		kbInfo.setVisible(false);
+		
+		kbInfoPanel.setExpandRatio(kbInfo, 1f);
 		
 		return kbInfoPanel;
 	}
 	
 	private void showNoKBInfo(){
-		Label noKBLabel = new Label(FontAwesome.FROWN_O.getHtml() + "<span>You haven't set up a knowledge base,yet!</span>", ContentMode.HTML);
+		kbInfo.setVisible(false);
+		noKBLabel = new Label(FontAwesome.FROWN_O.getHtml() + "<span class='text'>You haven't set up a knowledge base, yet!</span>", ContentMode.HTML);
 		noKBLabel.setStyleName("no-kb-label");
 //		noKBLabel.setSizeFull();
 		kbInfoPanel.addComponent(noKBLabel);
+		kbInfoPanel.setExpandRatio(noKBLabel, 1f);
 	}
 	
 	private void onExport(){
