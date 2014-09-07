@@ -6,6 +6,7 @@ $v-app-loading-text: "Loading ORE...";
 
 // Import valo after setting the parameters
 @import "../valo/valo";
+@import "../valo/shared/variables";
 
 
 @mixin ore {
@@ -19,35 +20,33 @@ $v-app-loading-text: "Loading ORE...";
     @include valo-panel-caption-style($background-color: $color1);
   }
   
+  #menu-logo {
+  	width: 95%;
+  	margin: 10px auto;
+  }
  
   
   .no-kb-label {
   
   	opacity:0.3;
-  
-  	.v-icon {
+  	text-align:center;
+  	
+  	.icon {
   		font-size: 200px;
   		//text-align: center;
   		display:block;
-  		
 	}
 	
 	.text {
-		text-align:center;
 		font-weight:600;
-		
+		font-size:2em;
 	}
-  	
   }
   
-  .v-nativebutton-borderless {
-    border: none;
-    background: img/owl-ontology.png;
-    width: 342px;
-    height: 60px;
-	}
-
-
+  .ore-menu .valo-menu-item-caption{
+  	text-transform: capitalize;
+  }
+  
   .kb-view .v-button {
       display: block;
       height: 55px;
@@ -126,13 +125,32 @@ $v-app-loading-text: "Loading ORE...";
 
 .kb-info {
 	.v-nativebutton {
-		background: transparent;
-		border:none;
+		//background: transparent;
+		//border:none;
 		cursor:pointer;
 		
 		.v-icon {
+			visibility:visible;
 			display:block;
 		}
+		
+		span {
+			visibility:visible;
+		}
+		
+		&:focus,&:hover {
+    		visibility:visible;
+  		}
+  		visibility: hidden;
+	}
+}
+
+.settings-menu {
+	position:absolute;
+	bottom:10px;
+	
+	.v-menubar-menuitem {
+		font-size: round($v-font-size * 1.6);
 	}
 }
 

@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.Future;
 
 import org.aksw.mole.ore.repository.tones.TONESRepository;
 import org.aksw.mole.ore.sparql.SPARULTranslator;
@@ -21,7 +20,6 @@ import org.aksw.ore.component.KnowledgebaseChangesTable;
 import org.aksw.ore.component.LoadFromURIDialog;
 import org.aksw.ore.component.OntologyRepositoryDialog;
 import org.aksw.ore.component.SPARQLEndpointDialog;
-import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -39,16 +37,16 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
-import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.google.common.base.Joiner;
+import com.vaadin.client.ui.FontIcon;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -57,11 +55,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -105,36 +99,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		showNoKBInfo();
 	}
 	
-	private Component createMenu(){
-		MenuBar menu = new MenuBar();
-		MenuItem item = menu.addItem("OWL Ontology", null);
-		item.addItem("From file", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				
-			}
-		});
-		item.addItem("From URI", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				
-			}
-		});
-		
-		menu.addItem("SPARQL Endpoint", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				SPARQLEndpointDialog dialog = new SPARQLEndpointDialog();
-				getUI().addWindow(dialog);
-			}
-		});
-		return menu;
-	}
-	
-
 	private Component createChangesPanel(){
 		changesPanel = new VerticalLayout();
 		changesPanel.setSizeFull();
@@ -180,7 +144,10 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private void showNoKBInfo(){
 		kbInfo.setVisible(false);
-		noKBLabel = new Label(FontAwesome.FROWN_O.getHtml() + "<span class='text'>You haven't set up a knowledge base, yet!</span>", ContentMode.HTML);
+		FontAwesome fontIcon = FontAwesome.FROWN_O;
+		String html = "<span class='icon' style=\"display:block;font-family: " + fontIcon.getFontFamily()
+                + ";\">&#x" + Integer.toHexString(fontIcon.getCodepoint()) + ";</span>";
+		noKBLabel = new Label(html + "<span class='text'>You haven't set up a knowledge base, yet!</span>", ContentMode.HTML);
 		noKBLabel.setStyleName("no-kb-label");
 		noKBLabel.setWidth(null);
 //		noKBLabel.setSizeFull();
@@ -215,7 +182,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		//OWL Ontology
 		Button ontologyButton = new NativeButton("OWL Ontology");
 		ontologyButton.addStyleName("ontology-button");
-		ThemeResource icon = new ThemeResource("img/owl-ontology.jpg");
+		ThemeResource icon = new ThemeResource("img/owl-ontology-128.png");
 		ontologyButton.setIcon(icon);
 //		ontologyButton.addStyleName("borderless");
 //		ontologyButton.setHeight("140px");
@@ -482,7 +449,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	}
 	
 	private void onAnalyzeKnowledgebase(){
-		System.out.println("Show dialog");
 		final KnowledgebaseAnalyzationDialog dialog = new KnowledgebaseAnalyzationDialog();
 		ORESession.getKnowledgebaseManager().addListener(dialog);
 		UI.getCurrent().addWindow(dialog);
@@ -491,13 +457,11 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			@Override
 			public void run() {
 				ORESession.getKnowledgebaseManager().analyzeKnowledgebase();
-				System.out.println("Analyzed");
 				UI.getCurrent().access(new Runnable() {
 					
 					@Override
 					public void run() {
 						ORESession.getKnowledgebaseManager().removeListener(dialog);
-						System.out.println("remove");
 						dialog.close();
 						UI.getCurrent().removeWindow(dialog);
 					}

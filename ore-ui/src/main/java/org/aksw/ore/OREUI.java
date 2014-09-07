@@ -56,6 +56,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 @Theme("ore")
 @Title("ORE")
@@ -92,6 +93,17 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     		put(SPARQLDebuggingView.class, "logical");
     		put(NamingView.class, "naming issues");
     		put(ConstraintValidationView.class, "constraints");
+    	}
+    };
+    
+    Map<Class<? extends View>, FontAwesome> view2Icon = new HashMap<Class<? extends View>, FontAwesome>(){
+    	{
+    		put(KnowledgebaseView.class, FontAwesome.DATABASE);
+    		put(EnrichmentView.class, FontAwesome.TASKS);
+    		put(DebuggingView.class, FontAwesome.BUG);
+    		put(SPARQLDebuggingView.class, FontAwesome.BUG);
+    		put(NamingView.class, FontAwesome.PENCIL);
+    		put(ConstraintValidationView.class, FontAwesome.EYE);
     	}
     };
     
@@ -132,7 +144,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
        
         root.addMenu(createSideBar2());
         
-//        Responsive.makeResponsive(this);
+        Responsive.makeResponsive(this);
         
         //create and add sidebar to the left
 //        Component sidebar = createSidebar();
@@ -254,27 +266,44 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     }
     
     private Component createSideBar2(){
-    	CssLayout menu = new CssLayout();
-//    	menu.addStyleName("large-icons");
+//    	CssLayout menu = new CssLayout();
+    	menu.addStyleName("large-icons");
+    	menu.addStyleName("ore-menu");
+    	
+    	final Button showMenu = new Button("Menu", new ClickListener() {
+            @Override
+            public void buttonClick(final ClickEvent event) {
+                if (menu.getStyleName().contains("valo-menu-visible")) {
+                    menu.removeStyleName("valo-menu-visible");
+                } else {
+                    menu.addStyleName("valo-menu-visible");
+                }
+            }
+        });
+        showMenu.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        showMenu.addStyleName(ValoTheme.BUTTON_SMALL);
+        showMenu.addStyleName("valo-menu-toggle");
+        showMenu.setIcon(FontAwesome.LIST);
+        menu.addComponent(showMenu);
 
     	// add logo
     	Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
-        img.setWidth("95%");
-        img.setHeight("95%");
         menu.addComponent(img);
-        img.setHeight("100px");
 //        img.setPrimaryStyleName("valo-menu-logo");
+        img.setId("menu-logo");
     	
     	// add menu items
     	CssLayout menuItemsLayout = new CssLayout();
     	menu.addComponent(menuItemsLayout);
     	
     	menuItemsLayout.setPrimaryStyleName("valo-menuitems");
+    	
     	for (Class<? extends View> view : Lists.newArrayList(KnowledgebaseView.class, EnrichmentView.class, DebuggingView.class, NamingView.class, ConstraintValidationView.class)) {
     		String caption = view2ButtonLabel.get(view);
     		final String route = view2Route.get(view);
+    		FontAwesome icon = view2Icon.get(view);
             Button b = new Button(caption);
-            b.setIcon(FontAwesome.DATABASE);
+            b.setIcon(icon);
             b.setHtmlContentAllowed(true);
             b.setPrimaryStyleName("valo-menu-item");
             b.addStyleName("test");
@@ -304,6 +333,12 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
                 menuItemsLayout.addComponent(label);
             }
 		}
+//    	menuItemsLayout.addComponent(createSettingsMenu());
+    	
+    	// settings menu
+    	
+    	menu.addComponent(createSettingsMenu());
+    	
     	return menu;
     }
     
@@ -388,6 +423,35 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
             }
         });
         return l;
+    }
+    
+    private Component createSettingsMenu(){
+    	Command cmd = new Command() {
+            @Override
+            public void menuSelected(
+                    MenuItem selectedItem) {
+                Notification
+                        .show("Not implemented in this demo");
+            }
+        };
+        
+    	MenuBar settings = new MenuBar();
+    	settings.addStyleName("user-menu");
+    	settings.addStyleName("settings-menu");
+        MenuItem settingsMenu = settings.addItem("", FontAwesome.COG, null);
+        
+        settingsMenu.addItem("Settings", new Command() {
+            @Override
+            public void menuSelected(MenuItem selectedItem) {
+                SettingsDialog settingsDialog = new SettingsDialog();
+                addWindow(settingsDialog);
+            }
+        });
+        settingsMenu.addItem("Preferences", cmd);
+        settingsMenu.addSeparator();
+        settingsMenu.addItem("My Account", cmd);
+        
+        return settings;
     }
     
     private void createMenu(){

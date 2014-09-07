@@ -43,6 +43,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
@@ -92,21 +93,31 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	private void initUI(){
 		setSizeFull();
 		setSplitPosition(25);
-		addStyleName("wrapping");
 		
 		Component leftSide = createLeftSide();
-		addComponent(leftSide);
+		setFirstComponent(leftSide);
 		
+		Component rightSide = createRightSide();
+		setSecondComponent(rightSide);
+		
+		resourceURIField.focus();
+		
+		reset();
+//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
+//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+	}
+	
+	public Component createRightSide(){
 		VerticalLayout rightSide = new VerticalLayout();
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
-//		rightSide.setCaption("Learned axioms");
-		addComponent(new PanelStyleLayout("Learned axioms", rightSide));
+
+		// the panel where the learned axioms are shown
+		Component axiomsPanel = createAxiomsPanel();
+		rightSide.addComponent(axiomsPanel);
+		rightSide.setExpandRatio(axiomsPanel, 1f);
 		
-		Component panel = createAxiomsPanel();
-		rightSide.addComponent(panel);
-		rightSide.setExpandRatio(panel, 1f);
-		
+		// the buttons
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setWidth(null);
 		rightSide.addComponent(buttons);
@@ -152,14 +163,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		buttons.addComponent(dumpSPARULButton);
 		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
 		
-//		addToKbButton.setEnabled(false);
-//		dumpSPARULButton.setEnabled(false);
-		
-		resourceURIField.focus();
-		
-		reset();
-//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
-//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+		Component panel = new PanelStyleLayout("Learned axioms", rightSide);
+		return panel;
 	}
 	
 	private Component createAxiomsPanel(){
@@ -205,7 +210,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		Panel panel = new Panel("Options");
 		panel.setSizeFull();
-		panel.setContent(leftSide);
+//		panel.setContent(leftSide);
 		panel.addStyleName("color-header");
 //		panel.addStyleName("uppercase");
 		
