@@ -6473,4 +6473,41 @@ div.footnote {
 .dialog-window.modal.ban-dlg .v-window-contents .inner:before {content:"\f05e";}
 .dialog-window .v-button>.v-button-wrap {min-width: 5em;}
 
+.no-kb-label {  
+  	opacity:0.3;
+  	text-align:center;
+}
+
+.no-kb-label .icon {
+  		font-size: 200px;
+  		//text-align: center;
+  		display:block;
+	}
+	
+.no-kb-label .text {
+		font-weight:600;
+		font-size:2em;
+	}
+
+.kb-info .v-nativebutton {
+	cursor: pointer;
+	visibility: hidden;
+}
+
+.kb-info .v-nativebutton .v-icon {
+	visibility: visible;
+	display: block;
+}
+
+.kb-info .v-nativebutton span {
+	visibility: visible;
+}
+
+.kb-info .v-nativebutton:focus {
+	visibility:visible;
+}
+
+.kb-info .v-nativebutton:hover {
+	visibility:visible;
+}
 

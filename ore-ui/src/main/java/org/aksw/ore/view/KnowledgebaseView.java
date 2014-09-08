@@ -306,6 +306,8 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	public void refresh(){
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase != null){
+			kbInfo.setVisible(true);
+			noKBLabel.setVisible(false);
 			if(knowledgebase instanceof OWLOntologyKnowledgebase){
 				visualizeOntology((OWLOntologyKnowledgebase) knowledgebase);
 				applyChangesButton.setDescription("Export modified ontology.");

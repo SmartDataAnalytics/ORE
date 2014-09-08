@@ -1,0 +1,65 @@
+@mixin icons-ore {
+
+	@font-face {
+	  font-family: 'ore-icons-font';
+	  src: url(ore-icons-font.eot);
+	  src: url(ore-icons-font.eot?#iefix) format('embedded-opentype'), url(ore-icons-font.woff) format('woff'), url(ore-icons-font.ttf) format('truetype'), url(ore-icons-font.svg#ore-icons-font) format('svg');
+	  font-weight: normal;
+	  font-style: normal;
+	}
+	
+	[class^="icon-"] > .v-button-wrap:before,
+	[class*=" icon-"] > .v-button-wrap:before,
+	[class^="icon-"].v-nativebutton:before,
+	[class*=" icon-"].v-nativebutton:before,
+	[class^="icon-"].v-label:before,
+	[class*=" icon-"].v-label:before,
+	[class*="-icon-"].v-menubar-menuitem:before {
+	  font-family: 'ore-icons-font';
+	  font-style: normal;
+	  font-weight: normal;
+	  speak: none;
+	  display: inline-block;
+	  text-decoration: inherit;
+	  text-align: center;
+	  line-height: 1;
+	  margin-right: .4em;
+	  vertical-align: 1px;
+	}
+	
+	[class^="icon-"] > .v-button-wrap:before,
+	[class*=" icon-"] > .v-button-wrap:before,
+	[class^="icon-"].v-nativebutton:before,
+	[class*=" icon-"].v-nativebutton:before {
+		margin: 0;
+		margin-left: -.3em;
+	}
+	
+	[class^="icon-"] > span > .v-button-caption,
+	[class^="icon-"] > .v-nativebutton-caption,
+	[class*=" icon-"] > span > .v-button-caption,
+	[class*=" icon-"] > .v-nativebutton-caption {
+	  margin-left: .3em;
+	}
+	
+	@include icon(right-bold, '\e810');
+	@include icon(cog, '\2699');
+	@include icon(flash, '\e7a2');	
+	@include icon(cancel-circle, '\e813');
+	@include icon(cancel-circled, '\e814');
+	@include icon(plus-circled, '\e806');
+	@include icon(minus-circled, '\e808');
+	@include icon(enrichment, '\e803');
+	@include icon(doc-add, '\e812');
+	@include icon(doc-remove, '\e811');
+	@include icon(naming, '\e80e');
+	@include icon(help-circled, '\e802');
+	@include icon(constraints, '\e80d');
+	@include icon(knowledgebase, '\e800');
+	@include icon(plus-squared, '\e807');
+	@include icon(minus-squared, '\e809');
+	@include icon(logical, '\e801');
+	@include icon(globe, '\e80c');
+	@include icon(alert, '\e80b');
+	@include icon(wrench, '\e80f');
+}
