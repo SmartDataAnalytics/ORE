@@ -40,7 +40,7 @@
 	@include dashboard-combobox;
 	@include dashboard-label;
 	@include dashboard-notification;
-	@include dashboard-table;
+//	@include dashboard-table;
 	@include dashboard-tabsheet;
 	@include dashboard-textfield;
 	@include dashboard-window;
@@ -754,7 +754,7 @@
 	
 	.dashboard-view .enrichment-axioms-table .v-horizontallayout {
 	padding: initial;
-}
+	}
 	
 	.dashboard-view .enrichment-options .v-caption {
 	font-weight: 0;

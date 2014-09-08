@@ -17,6 +17,8 @@ import org.semanticweb.owl.explanation.api.ExplanationGenerator;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
+import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -61,8 +63,9 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
         axiomType2Label = new HashMap<AxiomType<OWLAxiom>, Label>(axiomTypes.size());
         for (AxiomType<OWLAxiom> axiomType : axiomTypes) {
         	message = new Label(
-                    axiomType.getName() + "...");
+                    axiomType.getName() + "..." + FontAwesome.SPINNER.getHtml(), ContentMode.HTML);
             message.setImmediate(true);
+            message.addStyleName("fa-spin");
             l.addComponent(message);
             axiomType2Label.put(axiomType, message);
 		}

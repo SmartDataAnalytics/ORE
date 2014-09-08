@@ -368,7 +368,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				tables.add(table);
 				WhitePanel c = new WhitePanel(table);
 				c.setHeight(null);
-				axiomsPanel.addComponent(c);
+				axiomsPanel.addComponent(table);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

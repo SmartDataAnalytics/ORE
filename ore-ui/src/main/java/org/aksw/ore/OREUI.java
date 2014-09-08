@@ -252,18 +252,18 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         l.addComponent(new CssLayout() {
             {
                 addStyleName("branding");
-                Label logo = new Label(
-                        "<span>QuickTickets</span> Dashboard",
-                        ContentMode.HTML);
-                logo.setSizeUndefined();
-//                addComponent(logo);
                 Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
                 img.setWidth("95%");
                 img.setHeight("95%");
                 addComponent(img);
-                setHeight("100px");
+//                img.setHeight("100px");
+                setSizeFull();
             }
         });
+        Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
+//      img.setWidth("95%");
+//      img.setHeight("95%");
+//      l.addComponent(img);
         
         //create menu bar left
         createMenu();

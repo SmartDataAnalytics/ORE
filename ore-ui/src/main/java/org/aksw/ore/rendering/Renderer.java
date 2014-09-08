@@ -164,6 +164,11 @@ public class Renderer {
 		return renderHTML(ce);
 	}
 	
+	public String renderHTML(Axiom axiom){
+		OWLAxiom ax = OWLAPIConverter.getOWLAPIAxiom(axiom);
+		return renderHTML(ax);
+	}
+	
 	public String render(Axiom axiom){
 		OWLAxiom ax = OWLAPIConverter.getOWLAPIAxiom(axiom);
 		return render(ax);
