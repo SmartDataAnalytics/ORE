@@ -31,6 +31,8 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ShortcutAction;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.MarginInfo;
@@ -216,10 +218,22 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		resourceURIField.setWidth("100%");
 		resourceURIField.setCaption("Resource URI");
 		resourceURIField.setRequired(true);
+		resourceURIField.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.ENTER, null) {
+			
+			@Override
+			public void handleAction(Object sender, Object target) {
+				try {
+					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType(resourceURIField.getValue());
+					axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(resourceType));
+				} catch (OREException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		form.addComponent(resourceURIField);
 		
 		resourceTypeField = new ResourceTypeField();
-		form.addComponent(resourceTypeField);
+//		form.addComponent(resourceTypeField);
 		
 		useInferenceBox = new CheckBox();
 		useInferenceBox.setCaption("Inference");
