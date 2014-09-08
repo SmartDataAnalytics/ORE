@@ -33,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
+import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -57,8 +58,10 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@Theme("dashboard")
+@Theme("ore")
 @Title("ORE")
+@Push
+@VaadinServletConfiguration(productionMode = false, ui = OREUI.class, widgetset="org.aksw.ore.AppWidgetSet")
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener
 {
@@ -249,18 +252,18 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         l.addComponent(new CssLayout() {
             {
                 addStyleName("branding");
-                Label logo = new Label(
-                        "<span>QuickTickets</span> Dashboard",
-                        ContentMode.HTML);
-                logo.setSizeUndefined();
-//                addComponent(logo);
                 Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
                 img.setWidth("95%");
                 img.setHeight("95%");
                 addComponent(img);
-                setHeight("100px");
+//                img.setHeight("100px");
+                setSizeFull();
             }
         });
+        Image img = new Image(null, new ThemeResource("img/ore-logo.png"));
+//      img.setWidth("95%");
+//      img.setHeight("95%");
+//      l.addComponent(img);
         
         //create menu bar left
         createMenu();

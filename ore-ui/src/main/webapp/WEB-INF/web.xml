@@ -25,16 +25,6 @@
 			<param-name>widgetset</param-name>
 			<param-value>org.aksw.ore.AppWidgetSet</param-value>
 		</init-param>
-		<init-param>
-			<param-name>pushmode</param-name>
-			<param-value>automatic</param-value>
-		</init-param>
-		<init-param>
-			<param-name>transport</param-name>
-			<!-- <param-value>long-polling</param-value> -->
-			<param-value>websocket</param-value>
-		</init-param>
-		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Vaadin Application Servlet</servlet-name>
