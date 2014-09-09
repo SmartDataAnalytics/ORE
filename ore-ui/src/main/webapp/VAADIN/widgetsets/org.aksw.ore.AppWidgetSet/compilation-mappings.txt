@@ -1,4 +1,4 @@
-AD11A3CB025ED0E1BC8FAEB3E1FC79A2.cache.js
+1F1C31EC24E9FCA3756C11AE4EA3F7B3.cache.js
 ClientBundle.enableInlining true
 audioElementSupport maybe
 canvasElementSupport maybe
@@ -26,7 +26,40 @@ locale default
 modernie none
 superdevmode off
 touchEventSupport maybe
-user.agent safari
+user.agent gecko1_8
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
+
+1F1C31EC24E9FCA3756C11AE4EA3F7B3.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie yes
+superdevmode off
+touchEventSupport maybe
+user.agent gecko1_8
 vaadin.profiler false
 videoElementSupport maybe
 webApiUsage modern

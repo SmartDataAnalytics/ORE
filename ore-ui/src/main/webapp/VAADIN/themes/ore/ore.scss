@@ -1,4 +1,5 @@
 @import "../valo/valo.scss";
+//@import "../base/base.scss";
 
 @import "icons/fontello.scss";
 @import "icons/ore-icons.scss";
@@ -32,11 +33,12 @@
 @mixin ore {
 	
 	@include valo;
+	//@include base;
 	
 	@include dashboard-loading-indicator;
 	@include dashboard-common;
 	
-	@include dashboard-button;
+//	@include dashboard-button;
 	@include dashboard-combobox;
 	@include dashboard-label;
 	@include dashboard-notification;
@@ -711,7 +713,7 @@
 	  	text-align:center;
 	  	
 	  	.icon {
-	  		font-size: 200px;
+	  		font-size: 100px;
 	  		//text-align: center;
 	  		display:block;
 		}
@@ -1005,6 +1007,7 @@ div.footnote {
 	padding-left:0px;
 }
 
+/*
 .v-popupview-popup .filterTable {
 	background: #343638;
 	background: rgba(52, 54, 56, 0.92);
@@ -1026,5 +1029,5 @@ div.footnote {
 	animation: fade-in 160ms ease-out;
 	opacity: 1;
 }
-
+*/
 }

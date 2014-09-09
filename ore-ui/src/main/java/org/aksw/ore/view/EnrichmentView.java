@@ -275,6 +275,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		return form;
 	}
 	
+	private void showAdvancedOptions(boolean show){
+		useInferenceBox.setVisible(show);
+		maxExecutionTimeSpinner.setVisible(show);
+		maxNrOfReturnedAxiomsSpinner.setVisible(show);
+		thresholdSlider.setVisible(show);
+	}
+	
 	private void onLearning(){
 		axiomsPanel.removeAllComponents();
 		tables = new HashSet<EvaluatedAxiomsTable>();

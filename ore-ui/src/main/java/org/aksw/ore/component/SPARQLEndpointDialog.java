@@ -30,6 +30,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class SPARQLEndpointDialog extends Window implements Action.Handler{
 	
@@ -50,6 +51,8 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		setModal(true);
 		setWidth("400px");
 		setHeight(null);
+		setClosable(false);
+		setCloseShortcut(KeyCode.ESCAPE);
 		
 		initUI();
 		
@@ -67,6 +70,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		VerticalLayout main = new VerticalLayout();
 		main.setSizeFull();
 		main.setHeight(null);
+		main.setSpacing(true);
 		main.setMargin(true);
 		setContent(main);
 		FormLayout form = new FormLayout();
@@ -147,6 +151,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		buttons.setSpacing(true);
 		
 		okButton = new Button("Ok");
+		okButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		okButton.addClickListener(new ClickListener() {
 			
 			@Override
