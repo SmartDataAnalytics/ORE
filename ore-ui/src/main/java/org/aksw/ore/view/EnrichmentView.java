@@ -2,6 +2,7 @@ package org.aksw.ore.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -208,10 +209,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	private Component createConfigForm(){
 		VerticalLayout form = new VerticalLayout();
 		form.setWidth("100%");
-		form.setHeight(null);
-		form.setSizeFull();
+		form.setHeightUndefined();
+//		form.setSizeFull();
 		form.setSpacing(true);
 		form.addStyleName("enrichment-options");
+		form.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
 		
 		resourceURIField = new TextField();
 		resourceURIField.setInputPrompt("Enter resource URI");
@@ -224,7 +226,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			public void handleAction(Object sender, Object target) {
 				try {
 					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType(resourceURIField.getValue());
-					axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(resourceType));
+					onResourceTypeChanged(resourceType);
 				} catch (OREException e) {
 					e.printStackTrace();
 				}
@@ -236,7 +238,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 //		form.addComponent(resourceTypeField);
 		
 		useInferenceBox = new CheckBox();
-		useInferenceBox.setCaption("Inference");
+		useInferenceBox.setCaption("Use Inference");
+		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
+				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
 		form.addComponent(useInferenceBox);
 		
 		maxExecutionTimeSpinner = new IntStepper();
@@ -401,9 +405,14 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		return resourceTypeField.getResourceType();
 	}
 	
-	private void onResourceTypeChanged(){
-		ResourceType type = getSelectedResourceType();
-		axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(type));
+	private void onResourceTypeChanged(ResourceType resourceType){
+		if(resourceType == ResourceType.UNKNOWN){
+//			axiomTypesField.updateVisibleAxiomTypes(Collections.EMPTY_SET);
+			axiomTypesField.setVisible(false);
+		} else {
+			axiomTypesField.setVisible(true);
+			axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(resourceType));
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -416,8 +425,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	public void reset(){
 		axiomsPanel.removeAllComponents();
 		resourceURIField.setValue("");
-		resourceTypeField.setResourceType(ResourceType.UNKNOWN);
-		resourceTypeField.setResourceType(ResourceType.CLASS);
+		onResourceTypeChanged(ResourceType.UNKNOWN);
 		startButton.setEnabled(false);
 		try {
 			thresholdSlider.setValue(70d);
@@ -435,6 +443,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			setCaption("Axiom types");
 			setDescription("Choose the axiom types for which axiom suggestions will be generated.");
 			setSizeFull();
+			
 			//(de)select all checkbox
 			CheckBox allCheckBox = new CheckBox("All");
 			allCheckBox.addStyleName("select-all-axiomtypes-checkbox");
@@ -452,11 +461,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				}
 			});
 			addComponent(allCheckBox);
+			
 			//table
 			axiomTypesTable = new Table();
 			axiomTypesTable.setSizeFull();
+			axiomTypesTable.setHeightUndefined();
 			axiomTypesTable.setImmediate(true);
-//			axiomTypesTable.setPageLength(0);
+			axiomTypesTable.setPageLength(0);
 			axiomTypesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 			axiomTypesContainer = new BeanItemContainer<AxiomType<OWLAxiom>>(AxiomType.class);
 			this.visibleAxiomTypes = ORESession.getEnrichmentManager().getAxiomTypes(ResourceType.UNKNOWN);
@@ -485,6 +496,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				}
 			});
 			axiomTypesTable.setVisibleColumns(new String[] {"selected", "name"});
+			axiomTypesTable.setColumnExpandRatio("name", 1f);
 			addComponent(axiomTypesTable);
 			setExpandRatio(axiomTypesTable, 1f);
 			
@@ -520,7 +532,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			autoDetectBox.addValueChangeListener(new ValueChangeListener() {
 				@Override
 				public void valueChange(ValueChangeEvent event) {
-					onResourceTypeChanged();
+					onResourceTypeChanged(ResourceType.UNKNOWN);
 					if((Boolean) event.getProperty().getValue()){
 						resourceTypeGroup.setEnabled(false);
 					} else {
@@ -540,7 +552,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				@Override
 				public void valueChange(
 						com.vaadin.data.Property.ValueChangeEvent event) {
-					onResourceTypeChanged();
+					onResourceTypeChanged(getResourceType());
 				}
 			});
 			addComponent(resourceTypeGroup);

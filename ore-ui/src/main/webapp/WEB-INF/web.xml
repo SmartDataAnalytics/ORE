@@ -26,8 +26,4 @@
 			<param-value>org.aksw.ore.AppWidgetSet</param-value>
 		</init-param>
 	</servlet>
-	<servlet-mapping>
-		<servlet-name>Vaadin Application Servlet</servlet-name>
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
 </web-app>
