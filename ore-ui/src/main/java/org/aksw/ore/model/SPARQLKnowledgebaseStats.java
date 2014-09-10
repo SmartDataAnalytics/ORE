@@ -3,6 +3,8 @@
  */
 package org.aksw.ore.model;
 
+import java.util.Set;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -22,11 +24,24 @@ public class SPARQLKnowledgebaseStats {
 	int owlClassCnt = -1;
 	int owlObjectPropertyCnt = -1;
 	int owlDataPropertyCnt = -1;
+	private Set<String> classes;
+	private Set<String> objectProperties;
+	private Set<String> dataProperties;
 
 	public SPARQLKnowledgebaseStats(int owlClassCnt, int owlObjectPropertyCnt, int owlDataPropertyCnt) {
 		this.owlClassCnt = owlClassCnt;
 		this.owlObjectPropertyCnt = owlObjectPropertyCnt;
 		this.owlDataPropertyCnt = owlDataPropertyCnt;
+	}
+	
+	public SPARQLKnowledgebaseStats(Set<String> classes, Set<String> objectProperties, Set<String> dataProperties) {
+		this.classes = classes;
+		this.objectProperties = objectProperties;
+		this.dataProperties = dataProperties;
+		
+		this.owlClassCnt = classes.size();
+		this.owlObjectPropertyCnt = objectProperties.size();
+		this.owlDataPropertyCnt = dataProperties.size();
 	}
 
 	/**
@@ -48,6 +63,27 @@ public class SPARQLKnowledgebaseStats {
 	 */
 	public int getOwlDataPropertyCnt() {
 		return owlDataPropertyCnt;
+	}
+	
+	/**
+	 * @return the classes
+	 */
+	public Set<String> getClasses() {
+		return classes;
+	}
+	
+	/**
+	 * @return the objectProperties
+	 */
+	public Set<String> getObjectProperties() {
+		return objectProperties;
+	}
+	
+	/**
+	 * @return the dataProperties
+	 */
+	public Set<String> getDataProperties() {
+		return dataProperties;
 	}
 	
 	public static void main(String[] args) throws Exception {

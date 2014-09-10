@@ -54,6 +54,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class EvaluatedAxiomsTable extends Table{
 	
@@ -71,6 +72,7 @@ public class EvaluatedAxiomsTable extends Table{
 		this.axioms = axioms;
 		
 		addStyleName("enrichment-axioms-table");
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
 		setSizeFull();
 		setPageLength(0);
 		setHeight(null);

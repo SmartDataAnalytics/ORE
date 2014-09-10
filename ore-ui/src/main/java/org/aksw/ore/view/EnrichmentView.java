@@ -2,7 +2,6 @@ package org.aksw.ore.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,16 +31,19 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -91,6 +93,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private void initUI(){
 		addStyleName("dashboard-view");
+		addStyleName("enrichment-view");
 		setSizeFull();
 		setSplitPosition(25);
 		
@@ -98,6 +101,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		addComponent(new WhitePanel(leftSide));
 		
 		VerticalLayout rightSide = new VerticalLayout();
+		rightSide.addStyleName("enrichment-axioms-panel");
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
 		rightSide.setCaption("Learned axioms");
@@ -214,6 +218,15 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		form.setSpacing(true);
 		form.addStyleName("enrichment-options");
 		form.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
+		
+		SPARQLEndpointKnowledgebase kb = (SPARQLEndpointKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase();
+		ComboBox cb = new ComboBox("Resource URI");
+		cb.addStyleName("entity-combobox");
+		cb.setWidth("100%");
+		cb.setFilteringMode(FilteringMode.CONTAINS);
+		cb.setNewItemsAllowed(false);
+		cb.setContainerDataSource(new IndexedContainer(kb.getStats().getObjectProperties()));
+//		form.addComponent(cb);
 		
 		resourceURIField = new TextField();
 		resourceURIField.setInputPrompt("Enter resource URI");
@@ -393,7 +406,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				tables.add(table);
 				WhitePanel c = new WhitePanel(table);
 				c.setHeight(null);
-				axiomsPanel.addComponent(table);
+				axiomsPanel.addComponent(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

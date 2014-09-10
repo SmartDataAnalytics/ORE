@@ -15,6 +15,7 @@
 @import "common.scss";
 
 /* TODO move new notification theme to base as the default when they are ready */
+
 @import "components/notification.scss";
 @import "components/button.scss";
 @import "components/textfield.scss";
@@ -30,19 +31,21 @@
 @import "views/naming.scss";
 @import "views/debugging.scss";
 
+$v-app-loading-text: "Loading ORE...";
+
 @mixin ore {
 	
 	@include valo;
 	//@include base;
 	
-	@include dashboard-loading-indicator;
+	//@include dashboard-loading-indicator;
 	@include dashboard-common;
 	
-//	@include dashboard-button;
-	@include dashboard-combobox;
+	//@include dashboard-button;
+	//@include dashboard-combobox;
 	@include dashboard-label;
-	@include dashboard-notification;
-//	@include dashboard-table;
+	//@include dashboard-notification;
+	@include dashboard-table;
 	@include dashboard-tabsheet;
 	@include dashboard-textfield;
 	@include dashboard-window;
@@ -53,6 +56,7 @@
 	@include ore-constraints-view;
 	@include ore-knowledgebase-view;
 
+	
 
 	.v-view {
 		overflow: hidden;
@@ -565,7 +569,7 @@
 		font-weight: 600;
 		font-size: 13px;
 		color: #349aff;
-		text-transform: uppercase;
+		text-transform: capitalize;
 		padding: 0 20px;
 		line-height: 38px;
 		border-bottom: 1px solid #eee;
@@ -707,44 +711,7 @@
 	
 	/////////////////////////////////
 	
-	.no-kb-label {
-  
-	  	opacity:0.3;
-	  	text-align:center;
-	  	
-	  	.icon {
-	  		font-size: 100px;
-	  		//text-align: center;
-	  		display:block;
-		}
-		
-		.text {
-			font-weight:600;
-			font-size:2em;
-		}
-  	}
-  
-  .kb-info {
-		.v-nativebutton {
-			//background: transparent;
-			//border:none;
-			cursor:pointer;
-			
-			.v-icon {
-				visibility:visible;
-				display:block;
-			}
-			
-			span {
-				visibility:visible;
-			}
-			
-			&:focus,&:hover {
-	    		visibility:visible;
-	  		}
-	  		visibility: hidden;
-		}
-	}
+	
 	
 	.v-tree-node-unsatisfiable-class{
 		color:red;
@@ -752,10 +719,6 @@
 
 	.v-tree-node-caption-empty-class{
 		color: graytext;
-	}
-	
-	.dashboard-view .enrichment-axioms-table .v-horizontallayout {
-	padding: initial;
 	}
 	
 	.dashboard-view .enrichment-options .v-caption {
@@ -773,20 +736,6 @@
 	border-bottom: none;
 }
 
-.dashboard-view .v-caption .enrichment-axioms-table {
-	font-weight: 0;
-	font-size: 13px;
-	color: #349aff;
-	padding: 3px 3px 3px 3px;
-	line-height: 1em;
-	border-bottom: 1px solid #eee;
-	top: 0;
-	left: 0;
-	right: 0;
-	text-transform: none;
-	position: relative;
-	border-bottom: none;
-}
 
 .dashboard-view .enrichment-options .v-spacing{
 	height:5px;
@@ -1030,4 +979,124 @@ div.footnote {
 	opacity: 1;
 }
 */
+
+.no-kb-label {
+  
+	  	opacity:0.3;
+	  	text-align:center;
+	  	
+	  	.icon {
+	  		font-size: 100px;
+	  		//text-align: center;
+	  		display:block;
+		}
+		
+		.text {
+			font-weight:600;
+			font-size:2em;
+		}
+  	}
+  	
+  	.kb-info-label {
+  		border-radius: $v-border-radius;
+  		margin-left: 20px;
+  	
+  		@include box-shadow(valo-bevel-and-shadow($bevel: $v-bevel, $shadow: $v-shadow, $background-color: $v-background-color, $gradient: $v-gradient));
+    	@include valo-border-with-gradient($border: $v-border, $color: darkest-color($v-background-color, $v-background-color), $gradient: $v-gradient);
+    	@include valo-gradient($v-background-color, $v-gradient);
+    	
+    	padding:5px;
+    	h4 {
+    		margin: 10px auto;
+    	}
+  	}
+  	
+  	
+  
+  .kb-info {
+		.v-nativebutton {
+			//background: transparent;
+			//border:none;
+			cursor:pointer;
+			
+			.v-icon {
+				visibility:visible;
+				display:block;
+			}
+			
+			span {
+				visibility:visible;
+			}
+			
+			&:focus,&:hover {
+	    		visibility:visible;
+	  		}
+	  		visibility: hidden;
+		}
+	}
+	
+	.enrichment-view {
+		.v-filterselect-suggestpopup{
+			text-shadow: none;
+			background: transparent;
+		}
+		.entity-combobox {
+			text-shadow: none;
+			background: transparent;
+			padding-bottom: 0;
+			padding:0;
+			
+			.v-filterselect{
+				padding-bottom: 0;
+				padding: 0;
+			}
+			
+			.v-filterselect-input {
+				border:none;
+				
+			}
+		}
+		
+	}
+	
+	.v-filterselect-suggestpopup-entity-combobox{
+		text-shadow: none;
+		background: transparent;
+	}
+	
+	.enrichment-axioms-panel {
+		
+		.v-csslayout{
+			padding:50px 0 0;
+		}
+		
+		.v-caption{
+			margin:10px auto;
+		}
+		*/
+		.enrichment-axioms-table{
+			margin-top: -10px; //-20px auto;
+		} 	
+	}
+	
+	.dashboard-view .enrichment-axioms-table .v-horizontallayout {
+		padding: initial;
+	}
+	
+	.dashboard-view .v-caption .enrichment-axioms-table {
+		font-weight: 0;
+		font-size: 13px;
+		color: #349aff;
+		padding: 3px 3px 3px 3px;
+		line-height: 1em;
+		border-bottom: 1px solid #eee;
+		top: 0;
+		left: 0;
+		right: 0;
+		text-transform: none;
+		position: relative;
+		border-bottom: none;
+	}
+
+
 }

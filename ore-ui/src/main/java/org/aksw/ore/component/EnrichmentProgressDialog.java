@@ -23,6 +23,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
@@ -59,13 +60,12 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
         setDraggable(false);
         addStyleName("dialog");
         setClosable(false);
-        
         axiomType2Label = new HashMap<AxiomType<OWLAxiom>, Label>(axiomTypes.size());
         for (AxiomType<OWLAxiom> axiomType : axiomTypes) {
         	message = new Label(
-                    axiomType.getName() + "..." + FontAwesome.SPINNER.getHtml(), ContentMode.HTML);
+                    axiomType.getName() + "...");// + FontAwesome.SPINNER.getHtml(), ContentMode.HTML);
             message.setImmediate(true);
-            message.addStyleName("fa-spin");
+//            message.addStyleName(ValoTheme.LABEL_SPINNER);
             l.addComponent(message);
             axiomType2Label.put(axiomType, message);
 		}

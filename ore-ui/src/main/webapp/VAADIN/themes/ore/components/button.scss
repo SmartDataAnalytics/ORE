@@ -95,7 +95,7 @@
 		background: -webkit-linear-gradient(top, #4fa8f7 0%,#499bea 6%,#207ce5 100%);
 		background: -o-linear-gradient(top, #4fa8f7 0%,#499bea 6%,#207ce5 100%);
 		background: -ms-linear-gradient(top, #4fa8f7 0%,#499bea 6%,#207ce5 100%);
-		/* background: linear-gradient(to bottom, #4fa8f7 0%,#499bea 6%,#207ce5 100%); */
+		
 	}
 	
 	.default.v-button:focus {
@@ -116,7 +116,7 @@
 		background: -webkit-linear-gradient(top, #3d80bf 0%,#408ac9 6%,#1a6abf 100%);
 		background: -o-linear-gradient(top, #3d80bf 0%,#408ac9 6%,#1a6abf 100%);
 		background: -ms-linear-gradient(top, #3d80bf 0%,#408ac9 6%,#1a6abf 100%);
-		/* background: linear-gradient(to bottom, #3d80bf 0%,#408ac9 6%,#1a6abf 100%); */
+		
 	
 		@include box-shadow($outline);
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
@@ -24,6 +25,8 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 
 public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
@@ -102,17 +105,50 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		if(kb.getCache()!= null){
 			qef = new QueryExecutionFactoryCacheEx(qef, kb.getCache());
 		}
-		//get number of OWL classes
-		String query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
-		int clsCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
-		//get number of OWL object properties
-		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
-		int opCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
-		//get number of OWL data properties
-		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
-		int dpCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+//		//get number of OWL classes
+//		String query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
+//		int clsCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+//		//get number of OWL object properties
+//		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
+//		int opCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
+//		//get number of OWL data properties
+//		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
+//		int dpCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
 		
-		kb.setStats(new SPARQLKnowledgebaseStats(clsCnt, opCnt, dpCnt));
+		//pre load entities
+		//get OWL classes
+		String query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
+		QueryExecution qe = qef.createQueryExecution(query);
+		ResultSet rs = qe.execSelect();
+		Set<String> classes = asSet(rs, "s");
+		System.out.println(classes.size());
+		
+		//get OWL object properties
+		query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
+		qe = qef.createQueryExecution(query);
+		rs = qe.execSelect();
+		Set<String> objectProperties = asSet(rs, "s");
+		
+		//get OWL data properties
+		query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
+		qe = qef.createQueryExecution(query);
+		rs = qe.execSelect();
+		Set<String> dataProperties = asSet(rs, "s");
+		
+		qe.close();
+		
+		kb.setStats(new SPARQLKnowledgebaseStats(classes, objectProperties, dataProperties));
+	}
+	
+	private Set<String> asSet(ResultSet rs, String targetVar){
+		Set<String> result = new TreeSet<String>();
+		
+		while(rs.hasNext()){
+			QuerySolution qs = rs.next();
+			result.add(qs.get(targetVar).toString());
+		}
+		
+		return result;
 	}
 	
 	public void addChange(OWLOntologyChange change){

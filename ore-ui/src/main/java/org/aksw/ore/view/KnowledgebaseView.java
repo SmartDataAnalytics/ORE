@@ -20,7 +20,6 @@ import org.aksw.ore.component.KnowledgebaseChangesTable;
 import org.aksw.ore.component.LoadFromURIDialog;
 import org.aksw.ore.component.OntologyRepositoryDialog;
 import org.aksw.ore.component.SPARQLEndpointDialog;
-import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -38,6 +37,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
+import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.google.common.base.Joiner;
 import com.vaadin.navigator.View;
@@ -59,7 +59,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -73,7 +72,7 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class KnowledgebaseView extends VerticalLayout implements View, KnowledgebaseLoadingListener {
 	
-	private Label kbInfo;
+	private Label kbInfoLabel;
 	private OntologyRepositoryDialog repositoryDialog;
 	private KnowledgebaseChangesTable table;
 	private VerticalLayout kbInfoPanel;
@@ -182,7 +181,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 //		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
 		
 		//OWL Ontology
-		Button ontologyButton = new Button("OWL Ontology");
+		Button ontologyButton = new PopupButton("OWL Ontology");
 		ontologyButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 //		ontologyButton.addStyleName("ontology-button");
 		ThemeResource icon = new ThemeResource("img/owl-ontology-128.png");
@@ -195,7 +194,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);
-//		ontologyButton.setContent(popupLayout);
+		((PopupButton)ontologyButton).setContent(popupLayout);
 		Button button = new Button("From file", new ClickListener() {
 			
 			@Override
@@ -310,7 +309,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	public void refresh(){
 		Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
 		if(knowledgebase != null){
-			kbInfo.setVisible(true);
+			kbInfoLabel.setVisible(true);
 			noKBLabel.setVisible(false);
 			if(knowledgebase instanceof OWLOntologyKnowledgebase){
 				visualizeOntology((OWLOntologyKnowledgebase) knowledgebase);
@@ -332,18 +331,23 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		label.setHeight(null);
 		kbInfoPanel.addComponent(label);
 		
-		kbInfo = new Label("</br>");
-		kbInfo.setContentMode(ContentMode.HTML);
-		kbInfoPanel.addComponent(kbInfo);
-		kbInfo.setVisible(false);
+		kbInfoLabel = new Label("</br>");
+		kbInfoLabel.addStyleName("kb-info-label");
+//		kbInfoLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+		kbInfoLabel.setWidthUndefined();
+		kbInfoLabel.setContentMode(ContentMode.HTML);
 		
-		kbInfoPanel.setExpandRatio(kbInfo, 1f);
+		kbInfoPanel.addComponent(kbInfoLabel);
+		kbInfoPanel.setExpandRatio(kbInfoLabel, 1f);
+		
+		// hidden on start
+		kbInfoLabel.setVisible(false);
 		
 		return kbInfoPanel;
 	}
 	
 	private void showNoKBInfo(){
-		kbInfo.setVisible(false);
+		kbInfoLabel.setVisible(false);
 		FontAwesome fontIcon = FontAwesome.FROWN_O;
 		String html = "<span class='icon' style=\"display:block;font-family: " + fontIcon.getFontFamily()
                 + ";\">&#x" + Integer.toHexString(fontIcon.getCodepoint()) + ";</span>";
@@ -396,6 +400,10 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private void visualizeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
 		SparqlEndpoint endpoint = kb.getEndpoint();
 		SPARQLKnowledgebaseStats stats = kb.getStats();
+		
+		String header = "<h4>SPARQL Endpoint</h4><hr>";
+		
+		
 		String url = endpoint.getURL().toString();
 		String htmlTable = 
 				"<table>" +
@@ -420,7 +428,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		}
 		htmlTable += "</table>";	
 		
-		kbInfo.setValue("<h4>SPARQL Endpoint</h4>" + htmlTable);
+		kbInfoLabel.setValue(header + htmlTable);
 	}
 	
 	private void visualizeOntology(OWLOntologyKnowledgebase kb){
@@ -450,7 +458,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		
 		htmlTable += "</table>";
 		kbInfoPanel.setCaption("OWL Ontology");
-		kbInfo.setValue(htmlTable);
+		kbInfoLabel.setValue(htmlTable);
 	}
 
 	/* (non-Javadoc)
