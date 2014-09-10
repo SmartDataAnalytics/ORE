@@ -65,6 +65,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * @author Lorenz Buehmann
@@ -170,6 +171,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setWidth(null);
+		buttons.setSpacing(true);
 		buttons.setStyleName("kb-info");
 		layout.addComponent(buttons);
 		layout.setExpandRatio(buttons, 1f);
@@ -180,8 +182,9 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 //		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
 		
 		//OWL Ontology
-		Button ontologyButton = new NativeButton("OWL Ontology");
-		ontologyButton.addStyleName("ontology-button");
+		Button ontologyButton = new Button("OWL Ontology");
+		ontologyButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
+//		ontologyButton.addStyleName("ontology-button");
 		ThemeResource icon = new ThemeResource("img/owl-ontology-128.png");
 		ontologyButton.setIcon(icon);
 //		ontologyButton.addStyleName("borderless");
@@ -220,7 +223,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		}));
 		
 		//SPARQL endpoint
-		Button endpointButton = new NativeButton("SPARQL Endpoint", new ClickListener() {
+		Button endpointButton = new Button("SPARQL Endpoint", new ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -228,6 +231,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			}
 		});
 		endpointButton.setIcon(new ThemeResource("img/sparql-128.png"));
+		endpointButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 //		endpointButton.setHeight("140px");
 //		endpointButton.addStyleName("borderless");
 //		endpointButton.setHeight("100%");
