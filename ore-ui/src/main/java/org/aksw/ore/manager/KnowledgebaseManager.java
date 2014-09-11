@@ -121,7 +121,6 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		QueryExecution qe = qef.createQueryExecution(query);
 		ResultSet rs = qe.execSelect();
 		Set<String> classes = asSet(rs, "s");
-		System.out.println(classes.size());
 		
 		//get OWL object properties
 		query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
@@ -261,5 +260,10 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		return true;
 	}
 	
+	public static void main(String[] args) throws Exception {
+		KnowledgebaseManager kbMan = new KnowledgebaseManager();
+		SPARQLEndpointKnowledgebase kb = new SPARQLEndpointKnowledgebase(SparqlEndpoint.getEndpointDBpedia());
+		kbMan.analyzeSPARQLEndpoint(kb);
+	}
 
 }

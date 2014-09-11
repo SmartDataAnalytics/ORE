@@ -116,7 +116,7 @@ public class TONESRepository implements OntologyRepository{
         public RepositoryEntry(URI ontologyIRI) {
             this.ontologyURI = ontologyIRI;
             OntologyIRIShortFormProvider sfp = new OntologyIRIShortFormProvider();
-            shortName = sfp.getShortForm(IRI.create(ontologyIRI));
+            shortName = sfp.getShortForm(IRI.create(ontologyIRI));   System.out.println(ontologyIRI + "\n" +shortName);
             physicalURI = URI.create(repositoryLocation + "/download?ontology=" + ontologyIRI);
         }
 
@@ -153,4 +153,13 @@ public class TONESRepository implements OntologyRepository{
             return null;
         }
     }
+    
+    public static void main(String[] args) throws Exception {
+    	System.out.println("koala.owl".substring(0,"koala.owl".length() - ".owl".length()));
+    	OntologyIRIShortFormProvider sfp = new OntologyIRIShortFormProvider();
+    	IRI iri = IRI.create("http://protege.stanford.edu/plugins/owl/owl-library/koala.owl");
+		String shortForm = sfp.getShortForm(iri);
+    	System.out.println(shortForm);
+//		new TONESRepository().fillRepository();
+	}
 }

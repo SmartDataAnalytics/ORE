@@ -6,10 +6,8 @@ package org.aksw.ore;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.manager.ConstraintValidationManager;
@@ -97,13 +95,15 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		//dummy SPARQL endpoint
 		try {
 			SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
-			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
+			
 			//SPARQL cache
 			long timeToLive = TimeUnit.DAYS.toMillis(30);
-			CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
-			CacheEx cache = new CacheExImpl(cacheBackend);
+			CacheFrontend cache = CacheUtilsH2.createCacheFrontend(OREConfiguration.getCacheDirectory(), true, timeToLive);
+			
+			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, cache);
+			
 			//dummy constraint manager
-			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
+			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//dummy enrichment manager
 			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
@@ -154,10 +154,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
 			SparqlEndpoint endpoint = ((SPARQLEndpointKnowledgebase) knowledgebase).getEndpoint();
-			CacheEx cache = ((SPARQLEndpointKnowledgebase) knowledgebase).getCache();
+			CacheFrontend cache = ((SPARQLEndpointKnowledgebase) knowledgebase).getCache();
 			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, cache);
 			//constraint manager
-			ConstraintValidationManager valMan = new ConstraintValidationManager(ks, cache);
+			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//enrichment manager
 			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);

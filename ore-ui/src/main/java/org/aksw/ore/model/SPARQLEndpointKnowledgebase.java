@@ -3,10 +3,11 @@ package org.aksw.ore.model;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
+import org.aksw.jena_sparql_api.cache.extra.CacheBackend;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
+import org.aksw.jena_sparql_api.cache.h2.CacheCoreH2;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.ore.OREConfiguration;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -21,7 +22,7 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 	private OWLOntologyManager manager;
 	
 	private SparqlEndpoint endpoint;
-	private CacheEx cache;
+	private CacheFrontend cache;
 	
 	private SPARQLKnowledgebaseStats stats;
 	
@@ -36,15 +37,9 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 		}
 		
 		//create the cache
-		try {
-			long timeToLive = TimeUnit.DAYS.toMillis(30);
-			CacheCoreEx cacheBackend = CacheCoreH2.create(true, OREConfiguration.getCacheDirectory(), "sparql", timeToLive, true);
-			cache = new CacheExImpl(cacheBackend);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		long timeToLive = TimeUnit.DAYS.toMillis(30);
+		cache = CacheUtilsH2.createCacheFrontend(OREConfiguration.getCacheDirectory(), true, timeToLive);
+		
 	}
 	
 	@Override
@@ -72,7 +67,7 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 	/**
 	 * @return the cache
 	 */
-	public CacheEx getCache() {
+	public CacheFrontend getCache() {
 		return cache;
 	}
 	

@@ -4,7 +4,7 @@
 package org.aksw.mole.ore.validation.constraint.spin;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
@@ -25,7 +25,7 @@ public class SPINConstraintValidator {
 		this(endpoint, null);
 	}
 
-	public SPINConstraintValidator(SparqlEndpoint endpoint, CacheEx cache) {
+	public SPINConstraintValidator(SparqlEndpoint endpoint, CacheFrontend cache) {
 		qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
 		if(cache != null){
 			qef = new QueryExecutionFactoryCacheEx(qef, cache);

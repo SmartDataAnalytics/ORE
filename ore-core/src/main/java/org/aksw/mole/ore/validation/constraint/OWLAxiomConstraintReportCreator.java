@@ -1,18 +1,14 @@
 package org.aksw.mole.ore.validation.constraint;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
-import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryIterated;
 import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
 import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.ExtractionDBCache;
@@ -20,7 +16,6 @@ import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.kb.sparql.SparqlQuery;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
 import com.google.common.collect.Maps;
 import com.hp.hpl.jena.query.Query;
@@ -90,16 +85,9 @@ public class OWLAxiomConstraintReportCreator {
 	
 	private Model executeConstructQuery(Query query){
 		QueryExecutionFactory qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
-		try {
 			long timeToLive = TimeUnit.DAYS.toMillis(30);
-			CacheCoreEx cacheBackend = CacheCoreH2.create("wkd-cache", timeToLive, true);
-			CacheEx cacheFrontend = new CacheExImpl(cacheBackend);
+			CacheFrontend cacheFrontend = CacheUtilsH2.createCacheFrontend("cache", true, timeToLive);
 			qef = new QueryExecutionFactoryCacheEx(qef, cacheFrontend);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 		qef = new QueryExecutionFactoryPaginated(qef, 10000);
 		QueryExecution qe = qef.createQueryExecution(query);
 		Model model = qe.execConstruct();

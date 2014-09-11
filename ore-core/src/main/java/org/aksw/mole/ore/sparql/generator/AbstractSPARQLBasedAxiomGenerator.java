@@ -6,18 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
-import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
 import org.dllearner.core.AbstractAxiomLearningAlgorithm;
 import org.dllearner.kb.LocalModelBasedSparqlEndpointKS;
 import org.dllearner.kb.SparqlEndpointKS;
@@ -60,16 +56,9 @@ public abstract class AbstractSPARQLBasedAxiomGenerator implements SPARQLBasedAx
 			SparqlEndpoint endpoint = ks.getEndpoint();
 			qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
 			if(cacheDirectory != null){
-				try {
 					long timeToLive = TimeUnit.DAYS.toMillis(30);
-					CacheCoreEx cacheBackend = CacheCoreH2.create(cacheDirectory, timeToLive, true);
-					CacheEx cacheFrontend = new CacheExImpl(cacheBackend);
+					CacheFrontend cacheFrontend = CacheUtilsH2.createCacheFrontend(cacheDirectory, true, timeToLive);
 					qef = new QueryExecutionFactoryCacheEx(qef, cacheFrontend);
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 			} else if(ks.getCache() != null){
 				qef = new QueryExecutionFactoryCacheEx(qef, ks.getCache());
 			}

@@ -71,7 +71,7 @@ public class OntologyRepositoryDialog extends Window {
 	private void initUI() {
 		VerticalLayout main = new VerticalLayout();
 		main.setSizeFull();
-		main.setMargin(new MarginInfo(true, false, true, false));
+		main.setMargin(new MarginInfo(true, true, true, true));
 		main.setSpacing(true);
 		setContent(main);
 

@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
@@ -56,13 +55,11 @@ public class ConstraintValidationManager {
 	OWLAxiomConstraintToSPARQLConstructConverter conv = new OWLAxiomConstraintToSPARQLConstructConverter();
 	OWLAxiomConstraintToSPARQLConverter conv2 = new OWLAxiomConstraintToSPARQLConverter();
 
-	public ConstraintValidationManager(SparqlEndpointKS ks, CacheEx cache) {
+	public ConstraintValidationManager(SparqlEndpointKS ks) {
 		if(ks.isRemote()){
 			SparqlEndpoint endpoint = ks.getEndpoint();
 			qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
-			if(cache != null){
-				qef = new QueryExecutionFactoryCacheEx(qef, cache);
-			}
+			qef = new QueryExecutionFactoryCacheEx(qef, ks.getCache());
 //			qef = new QueryExecutionFactoryPaginated(qef, 10000);
 			
 		} else {
@@ -171,7 +168,7 @@ public class ConstraintValidationManager {
 	}
 
 	public static void main(String[] args) throws Exception {
-		ConstraintValidationManager constraintMan = new ConstraintValidationManager(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia()), null);
+		ConstraintValidationManager constraintMan = new ConstraintValidationManager(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia()));
 		
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory df = man.getOWLDataFactory();

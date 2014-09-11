@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,10 +13,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
-import org.aksw.jena_sparql_api.cache.extra.CacheExImpl;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.mole.ore.util.PrefixedShortFromProvider;
@@ -31,17 +28,11 @@ import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataHasValue;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectHasValue;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLPropertyExpression;
-import org.semanticweb.owlapi.model.OWLPropertyRange;
 import org.semanticweb.owlapi.model.OWLRestriction;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
@@ -78,16 +69,10 @@ public class WoltersKluwerUseCase {
 		OWLAxiomConstraintReportCreator constraintValidator = new OWLAxiomConstraintReportCreator(endpoint, new ExtractionDBCache("wkd-cache"));
 		OWLClassExpressionToSPARQLConverter converter = new OWLClassExpressionToSPARQLConverter();
 		QueryExecutionFactory qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
-		try {
 			long timeToLive = TimeUnit.DAYS.toMillis(30);
-			CacheCoreEx cacheBackend = CacheCoreH2.create("wkd-cache", timeToLive, true);
-			CacheEx cacheFrontend = new CacheExImpl(cacheBackend);
+			
+			CacheFrontend cacheFrontend = CacheUtilsH2.createCacheFrontend("wkd-cache", true, timeToLive);
 			qef = new QueryExecutionFactoryCacheEx(qef, cacheFrontend);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 		
 		
 		

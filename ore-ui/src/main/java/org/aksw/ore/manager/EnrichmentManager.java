@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.aksw.jena_sparql_api.cache.extra.CacheEx;
+import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.exception.OREException;
@@ -201,7 +201,7 @@ public class EnrichmentManager {
 	private int maxNrOfPositiveExamples = 10;
 	private int maxNrOfNegativeExamples = 20;
 	
-	public EnrichmentManager(SparqlEndpoint endpoint, CacheEx cache) {
+	public EnrichmentManager(SparqlEndpoint endpoint, CacheFrontend cache) {
 		this.endpoint = endpoint;
 		
 		reasoner = new SPARQLReasoner(new SparqlEndpointKS(endpoint), cache);

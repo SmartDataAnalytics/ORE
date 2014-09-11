@@ -125,11 +125,6 @@
 				<version>20090211</version>
 			</dependency>
 			<dependency>
-				<groupId>org.aksw.commons</groupId>
-				<artifactId>sparql</artifactId>
-				<version>0.2-SNAPSHOT</version>
-			</dependency>
-			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
 				<version>3.5.1</version>
@@ -224,6 +219,16 @@
 				<artifactId>explanation-api</artifactId>
 				<version>3.3.0</version>
 			</dependency>
+	<dependency>
+		<groupId>org.aksw.jena-sparql-api</groupId>
+		<artifactId>jena-sparql-api-core</artifactId>
+		<version>2.11.2-56</version>
+	</dependency>
+	<dependency>
+		<groupId>org.aksw.jena-sparql-api</groupId>
+		<artifactId>jena-sparql-api-cache-h2</artifactId>
+		<version>2.11.2-56</version>
+	</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>

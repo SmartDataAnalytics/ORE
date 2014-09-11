@@ -1,17 +1,14 @@
 package org.aksw.mole.ore.sparql;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCache;
-import org.aksw.jena_sparql_api.cache.extra.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.extra.CacheImpl;
+import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.mole.ore.explanation.api.Explanation;
@@ -1514,7 +1511,6 @@ public class IncrementalInconsistencyFinder {
 		logger.trace("Sending query\n" + queryString);
 		long startTime = System.currentTimeMillis();
 		ResultSet rs = null;
-		try {
 			if(limit > 0){
 				queryString += " LIMIT " + limit;
 			}
@@ -1523,19 +1519,12 @@ public class IncrementalInconsistencyFinder {
 			}
 			QueryExecutionFactory f = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
 			if(useCache){
-				f = new QueryExecutionFactoryCache(f, new CacheImpl(CacheCoreH2.create(true, cacheDir, URLEncoder.encode(endpoint.getURL().toString(), "UTF-8"), 1 * 24 * 60 * 60 * 1000)));
+				f = new QueryExecutionFactoryCacheEx(f, CacheUtilsH2.createCacheFrontend(cacheDir, true, TimeUnit.DAYS.toMillis(7)));
 			}
 			currentQuery = f.createQueryExecution(queryString);
 			rs = currentQuery.execSelect();
 			currentQuery.close();
 			logger.trace("... done in " + (System.currentTimeMillis() - startTime) + "ms");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
 		return rs;
 	}
 	
@@ -1547,22 +1536,14 @@ public class IncrementalInconsistencyFinder {
 		logger.trace("Sending query\n" + queryString);
 		long startTime = System.currentTimeMillis();
 		boolean ret = false;
-		try {
 			QueryExecutionFactory f = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
 			if(useCache){
-				f = new QueryExecutionFactoryCache(f, new CacheImpl(CacheCoreH2.create(true, cacheDir, URLEncoder.encode(endpoint.getURL().toString(), "UTF-8"), 1 * 24 * 60 * 60 * 1000)));
+				f = new QueryExecutionFactoryCacheEx(f, CacheUtilsH2.createCacheFrontend(cacheDir, true, TimeUnit.DAYS.toMillis(7)));
 			}
 			currentQuery = f.createQueryExecution(queryString);
 			ret = currentQuery.execAsk();
 			currentQuery.close();
 			logger.trace("... done in " + (System.currentTimeMillis() - startTime) + "ms");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
 		return ret;
 	}
 
