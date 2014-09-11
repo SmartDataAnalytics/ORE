@@ -5,7 +5,6 @@ package org.aksw.ore.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.manager.ExplanationManager;
 import org.aksw.ore.manager.ExplanationManagerListener;
 import org.aksw.ore.manager.ExplanationProgressMonitorExtended;
+import org.aksw.ore.model.OWLAxiomBean;
 import org.aksw.ore.rendering.Renderer;
 import org.apache.log4j.Logger;
 import org.semanticweb.owl.explanation.api.Explanation;
@@ -41,6 +41,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -53,6 +54,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -84,6 +86,8 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
 	
 	private boolean firstViewVisit = true;
+	
+	private Map<OWLAxiom, OWLAxiomBean> axiom2Bean = new HashMap<OWLAxiom, OWLAxiomBean>();
 	
 	public DebuggingView() {
 		addStyleName("dashboard-view");
@@ -378,11 +382,80 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			ORESession.getRepairManager().addListener(t);
 			WhitePanel c = new WhitePanel(t);
 			c.setHeight(null);
-			explanationsPanel.addComponent(c);
+//			explanationsPanel.addComponent(c);
 			explanationTables.add(t);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		explanationsPanel.addComponent(generateTable(explanation));
+		explanationsPanel.addComponent(generateTable(explanation));
+	}
+	
+	private Collection<OWLAxiomBean> getBeans(Set<OWLAxiom> axioms){
+		Collection<OWLAxiomBean> beans = new HashSet<OWLAxiomBean>();
+		
+		for (OWLAxiom axiom : axioms) {
+			OWLAxiomBean bean = axiom2Bean.get(axiom);
+			if(bean == null){
+				bean = new OWLAxiomBean(axiom);
+				axiom2Bean.put(axiom, bean);
+			}
+			beans.add(bean);
+		}
+		
+		return beans;
+	}
+	
+	private Table generateTable(Explanation<OWLAxiom> explanation){
+		final BeanItemContainer<OWLAxiomBean> container = new BeanItemContainer<OWLAxiomBean>(OWLAxiomBean.class);
+		container.addAll(getBeans(explanation.getAxioms()));
+		
+		Table table = new Table("axioms", container);
+		table.setImmediate(true);
+		table.addGeneratedColumn("selected", new ColumnGenerator() {
+
+            @Override
+            public Component generateCell(final Table source, final Object itemId, final Object columnId) {
+
+                final OWLAxiomBean bean = (OWLAxiomBean) itemId;
+
+                final CheckBox checkBox = new CheckBox();
+                checkBox.setImmediate(true);
+                checkBox.addValueChangeListener(new Property.ValueChangeListener() {
+                    @Override
+                    public void valueChange(final ValueChangeEvent event) {
+                    	boolean value = (Boolean) event.getProperty().getValue();
+                    	container.getItem(itemId).getItemProperty("selected").setValue(value);
+                        bean.setSelected(value);
+                    }
+                });
+
+                if (bean.isSelected()) {
+                    checkBox.setValue(true);
+                } else {
+                    checkBox.setValue(false);
+                }
+                return checkBox;
+            }
+        });
+		table.addGeneratedColumn("axiom", new ColumnGenerator() {
+			
+			@Override
+			public Object generateCell(Table source, Object itemId, Object columnId) {
+				 final OWLAxiomBean bean = (OWLAxiomBean) itemId;
+				 
+				 return ORESession.getRenderer().render(bean.getAxiom());
+			}
+		});
+		table.setVisibleColumns("selected", "axiom");
+		table.setColumnHeader("selected", "");
+		table.setColumnHeader("axiom", "Axiom");
+		table.setColumnExpandRatio("axiom", 1f);
+		table.setWidth("100%");
+		table.setPageLength(0);
+		table.setHeightUndefined();
+		return table;
 	}
 	
 	private void onAxiomSelectionChanged(){
