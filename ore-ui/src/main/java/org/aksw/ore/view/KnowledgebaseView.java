@@ -440,6 +440,8 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		OWLProfileReport report = new OWL2Profile().checkOntology(ontology);
 		OWLProfile profile = report.getProfile();
 		
+		String header = "<h4>OWL Ontology</h4><hr>";
+		
 		String htmlTable = 
 				"<table>" +
 				"<tr class=\"even\"><td>#Classes</td><td>" + nrOfClasses + "</td></tr>" +
@@ -455,10 +457,9 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			}
 					
 		}
-		
 		htmlTable += "</table>";
-		kbInfoPanel.setCaption("OWL Ontology");
-		kbInfoLabel.setValue(htmlTable);
+		
+		kbInfoLabel.setValue(header + htmlTable);
 	}
 
 	/* (non-Javadoc)

@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.aksw.commons.util.Pair;
+import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
@@ -218,7 +219,7 @@ public class NamingIssueDetection {
 	
 	private String buildNewURI(String subClassURI, String superClassHead){
 		String shortForm = sfp.getShortForm(IRI.create(subClassURI));
-		String newShortForm = shortForm + edu.stanford.nlp.util.StringUtils.capitalize(superClassHead);
+		String newShortForm = shortForm + StringUtils.capitalize(superClassHead);
 		String newClassURI = subClassURI.replace(shortForm, newShortForm);
 		return newClassURI;
 	}

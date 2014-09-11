@@ -194,6 +194,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 		explanationsPanel = new ExplanationsPanel();
 		explanationsPanel.setCaption("Explanations");
 		explanationsPanel.setHeight(null);
+		explanationsPanel.addStyleName("explanations-panel");
 		
 		//put the options in the header of the portal
 		optionsPanel = new ExplanationOptionsPanel(explanationsPanel);

@@ -40,6 +40,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Button;
@@ -60,7 +61,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @Theme("ore")
 @Title("ORE")
-@Push
+@Push(value=PushMode.AUTOMATIC,transport=Transport.LONG_POLLING)
 @VaadinServletConfiguration(productionMode = false, ui = OREUI.class, widgetset="org.aksw.ore.AppWidgetSet")
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener

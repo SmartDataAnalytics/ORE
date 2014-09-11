@@ -116,7 +116,7 @@ public class TONESRepository implements OntologyRepository{
         public RepositoryEntry(URI ontologyIRI) {
             this.ontologyURI = ontologyIRI;
             OntologyIRIShortFormProvider sfp = new OntologyIRIShortFormProvider();
-            shortName = sfp.getShortForm(IRI.create(ontologyIRI));   System.out.println(ontologyIRI + "\n" +shortName);
+            shortName = sfp.getShortForm(IRI.create(ontologyIRI));
             physicalURI = URI.create(repositoryLocation + "/download?ontology=" + ontologyIRI);
         }
 

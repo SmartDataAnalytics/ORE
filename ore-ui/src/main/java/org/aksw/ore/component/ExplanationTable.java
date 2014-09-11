@@ -17,6 +17,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class ExplanationTable extends Table implements RepairManagerListener{
@@ -33,13 +34,16 @@ public class ExplanationTable extends Table implements RepairManagerListener{
 		this.explanation = explanation;
 		selectedObjects.addAll(selectedAxioms);
 		
+		addStyleName("explanation-table");
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
+		
 		setSizeFull();
 		setPageLength(0);
 		setHeight(null);
-		setColumnWidth("Selected", 30);
+//		setColumnWidth("Selected", 30);
 		setColumnExpandRatio("Axiom", 1.0f);
 //		setColumnWidth("Frequency", 60);
-		setColumnWidth("Usage", 40);
+//		setColumnWidth("Usage", 40);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);

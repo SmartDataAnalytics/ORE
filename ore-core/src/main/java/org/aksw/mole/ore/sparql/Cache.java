@@ -15,7 +15,7 @@ import org.dllearner.kb.sparql.SparqlQuery;
 import org.dllearner.utilities.Files;
 import org.dllearner.utilities.JamonMonitorLogger;
 
-import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.jamonapi.Monitor;
 
 public class Cache {

@@ -10,6 +10,7 @@ import java.util.Set;
 import org.aksw.ore.ORESession;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.util.IRIShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleIRIShortFormProvider;
@@ -48,6 +49,7 @@ public class ExplanationsPanel extends VerticalLayout {
 		}
 	}
 	
+	/*
 	public void addExplanation(Explanation<OWLAxiom> explanation){
 		final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
 		if(explanation.getEntailment() != null){
@@ -69,6 +71,28 @@ public class ExplanationsPanel extends VerticalLayout {
 		addComponent(t);
 		
 	}
+	*/
+	
+	public void addExplanation(Explanation<OWLAxiom> explanation){
+		final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
+		if(explanation.getEntailment() != null){
+			OWLClass cls = ((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().asOWLClass();
+			t.setCaption(ORESession.getRenderer().render(cls));
+		}
+	t.addValueChangeListener(new Property.ValueChangeListener() {
+		{table2Listener.put(t, this);}
+		
+		@Override
+		public void valueChange(ValueChangeEvent event) {
+			selectedAxioms.removeAll(t.getExplanation().getAxioms());
+			selectedAxioms.addAll((Collection<OWLAxiom>) event.getProperty().getValue());
+			onAxiomSelectionChanged();
+		}
+	});
+		tables.add(t);
+	
+		ORESession.getRepairManager().addListener(t);
+	}
 	
 	public void addExplanations(Collection<Explanation<OWLAxiom>> explanations){
 		for(Explanation exp : explanations){
@@ -82,7 +106,7 @@ public class ExplanationsPanel extends VerticalLayout {
 		tables.clear();
 		table2Listener.clear();
 		selectedAxioms.clear();
-		explanations = null;
+		explanations = new HashSet<Explanation<OWLAxiom>>();
 	}
 	
 	public void showAggregatedView(boolean aggregatedView) {
@@ -91,13 +115,17 @@ public class ExplanationsPanel extends VerticalLayout {
 	}
 	
 	private void showAggregatedTable(){
-		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
-		for(Explanation<OWLAxiom> exp : explanations){
-			axioms.addAll(exp.getAxioms());
+		try {
+			Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+			for(Explanation<OWLAxiom> exp : explanations){
+				axioms.addAll(exp.getAxioms());
+			}
+			Explanation<OWLAxiom> aggregatedExplanation = new Explanation<OWLAxiom>(null, axioms);
+			ExplanationTable aggregatedTable = new ExplanationTable(aggregatedExplanation, selectedAxioms, false);
+			addComponent(aggregatedTable);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		Explanation<OWLAxiom> aggregatedExplanation = new Explanation<OWLAxiom>(null, axioms);
-		ExplanationTable aggregatedTable = new ExplanationTable(aggregatedExplanation, selectedAxioms, false);
-		addComponent(aggregatedTable);
 	}
 	
 	private void showSeparateTables(){

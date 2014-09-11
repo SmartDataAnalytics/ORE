@@ -49,10 +49,10 @@
 			<artifactId>pellet</artifactId>
 		</dependency>
 		<dependency>
-				<groupId>org.semanticweb.hermit</groupId>
-				<artifactId>hermit</artifactId>
-				<version>1.3.8</version>
-			</dependency>
+			<groupId>org.semanticweb.hermit</groupId>
+			<artifactId>hermit</artifactId>
+			<version>1.3.8</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
@@ -61,7 +61,7 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-core</artifactId>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.coode.oppl</groupId>
 			<artifactId>api</artifactId>
 		</dependency>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.cz.vse.keg</groupId>
 			<artifactId>transformation</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>edu.mit</groupId>
 			<artifactId>jwi</artifactId>
@@ -110,21 +110,18 @@
 			<artifactId>kxml2-min</artifactId>
 		</dependency>
 		<!-- Explanation generation API from M. Horridge -->
-		<!-- <dependency>
-    <groupId>net.sourceforge.owlapi</groupId>
-    <artifactId>owlexplanation</artifactId>
-    <version>1.0.0</version>
-</dependency> -->
+		<!-- <dependency>     <groupId>net.sourceforge.owlapi</groupId>     <artifactId>owlexplanation</artifactId> 
+			    <version>1.0.0</version> </dependency> -->
 
 		<dependency>
 			<groupId>org.semanticweb.owl.explanation</groupId>
 			<artifactId>explanation-api</artifactId>
 		</dependency>
-	<dependency>
-		<groupId>org.apache.commons</groupId>
-		<artifactId>commons-io</artifactId>
-		<version>1.3.2</version>
-	</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
@@ -137,12 +134,17 @@
 			<classifier>models</classifier>
 		</dependency>
 		<dependency>
-		<groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-core</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-cache-h2</artifactId>
-	</dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-cache-h2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
 	</dependencies>
 </project>
