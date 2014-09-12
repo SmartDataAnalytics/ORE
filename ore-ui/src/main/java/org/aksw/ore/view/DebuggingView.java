@@ -37,12 +37,15 @@ import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.MethodProperty;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
@@ -88,6 +91,9 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	private boolean firstViewVisit = true;
 	
 	private Map<OWLAxiom, OWLAxiomBean> axiom2Bean = new HashMap<OWLAxiom, OWLAxiomBean>();
+
+	private Set<Table> tables;
+
 	
 	public DebuggingView() {
 		addStyleName("dashboard-view");
@@ -388,8 +394,13 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			e.printStackTrace();
 		}
 		
-		explanationsPanel.addComponent(generateTable(explanation));
-		explanationsPanel.addComponent(generateTable(explanation));
+		tables = new HashSet<Table>();
+		Table table = generateTable(explanation);
+		tables.add(table);
+		explanationsPanel.addComponent(table);
+		table = generateTable(explanation);
+		tables.add(table);
+		explanationsPanel.addComponent(table);
 	}
 	
 	private Collection<OWLAxiomBean> getBeans(Set<OWLAxiom> axioms){
@@ -426,9 +437,12 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
                     @Override
                     public void valueChange(final ValueChangeEvent event) {
                     	boolean value = (Boolean) event.getProperty().getValue();
-                    	container.getItem(itemId).getItemProperty("selected").setValue(value);
+                    	BeanItem<OWLAxiomBean> beanItem = container.getItem(itemId);
+						beanItem.getItemProperty("selected").setValue(value);
                         bean.setSelected(value);
+                        fireAxiomSelectionChanged(source, bean);
                     }
+
                 });
 
                 if (bean.isSelected()) {
@@ -456,6 +470,24 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 		table.setPageLength(0);
 		table.setHeightUndefined();
 		return table;
+	}
+	
+	private void fireAxiomSelectionChanged(Table sourceTable, OWLAxiomBean bean) {
+		for (Table table : tables) {
+			if(table != sourceTable){
+				BeanItemContainer container = (BeanItemContainer) table.getContainerDataSource();
+				MethodProperty<OWLAxiomBean> p = (MethodProperty<OWLAxiomBean>) container.getItem(bean).getItemProperty("selected");
+				p.fireValueChange();
+//				table.valueChange(new ValueChangeEvent() {
+//					
+//					@Override
+//					public Property getProperty() {
+//						// TODO Auto-generated method stub
+//						return null;
+//					}
+//				});
+			}
+		}
 	}
 	
 	private void onAxiomSelectionChanged(){
