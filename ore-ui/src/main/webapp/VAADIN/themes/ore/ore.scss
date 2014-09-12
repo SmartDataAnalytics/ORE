@@ -45,7 +45,7 @@ $v-app-loading-text: "Loading ORE...";
 	//@include dashboard-combobox;
 	@include dashboard-label;
 	//@include dashboard-notification;
-	@include dashboard-table;
+	//@include dashboard-table;
 	@include dashboard-tabsheet;
 	@include dashboard-textfield;
 	@include dashboard-window;
@@ -1122,7 +1122,7 @@ div.footnote {
 			border:0;
 			-webkit-box-shadow: none;
 			-moz-box-shadow: none;
-			/* box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5); */
+			box-shadow: none;
 		}
 	}
 
