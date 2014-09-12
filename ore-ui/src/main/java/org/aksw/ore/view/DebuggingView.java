@@ -388,19 +388,19 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			ORESession.getRepairManager().addListener(t);
 			WhitePanel c = new WhitePanel(t);
 			c.setHeight(null);
-//			explanationsPanel.addComponent(c);
+			explanationsPanel.addComponent(c);
 			explanationTables.add(t);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		tables = new HashSet<Table>();
-		Table table = generateTable(explanation);
-		tables.add(table);
-		explanationsPanel.addComponent(table);
-		table = generateTable(explanation);
-		tables.add(table);
-		explanationsPanel.addComponent(table);
+//		tables = new HashSet<Table>();
+//		Table table = generateTable(explanation);
+//		tables.add(table);
+//		explanationsPanel.addComponent(table);
+//		table = generateTable(explanation);
+//		tables.add(table);
+//		explanationsPanel.addComponent(table);
 	}
 	
 	private Collection<OWLAxiomBean> getBeans(Set<OWLAxiom> axioms){

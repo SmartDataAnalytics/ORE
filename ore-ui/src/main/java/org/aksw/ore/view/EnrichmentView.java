@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
+import org.aksw.ore.component.CollapsibleBox;
 import org.aksw.ore.component.EnrichmentProgressDialog;
 import org.aksw.ore.component.EvaluatedAxiomsTable;
 import org.aksw.ore.component.WhitePanel;
@@ -15,7 +17,12 @@ import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.dllearner.algorithms.properties.AsymmetricObjectPropertyAxiomLearner;
+import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
 import org.dllearner.core.EvaluatedAxiom;
+import org.dllearner.core.owl.ObjectProperty;
+import org.dllearner.kb.SparqlEndpointKS;
+import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
@@ -27,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.vaadin.risto.stepper.IntStepper;
 
+import com.google.common.collect.Sets;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -66,7 +74,7 @@ import com.vaadin.ui.Window.CloseListener;
 
 public class EnrichmentView extends HorizontalSplitPanel implements View, Refreshable{
 	
-	private TextField resourceURIField;
+	private ComboBox resourceURIField;
 	private ResourceTypeField resourceTypeField;
 	private CheckBox useInferenceBox;
 	private IntStepper maxExecutionTimeSpinner;
@@ -210,6 +218,46 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		return leftSide;
 	}
 	
+	private Component createAdvancedOptionsPanel(){
+		VerticalLayout panel = new VerticalLayout();
+		panel.setSizeFull();
+		
+		useInferenceBox = new CheckBox();
+		useInferenceBox.setCaption("Use Inference");
+		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
+				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
+		panel.addComponent(useInferenceBox);
+		
+		maxExecutionTimeSpinner = new IntStepper();
+		maxExecutionTimeSpinner.setValue(10);
+		maxExecutionTimeSpinner.setStepAmount(1);
+		maxExecutionTimeSpinner.setWidth("100%");
+		maxExecutionTimeSpinner.setCaption("Max. execution time");
+		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
+		panel.addComponent(maxExecutionTimeSpinner);
+		
+		maxNrOfReturnedAxiomsSpinner = new IntStepper();
+		maxNrOfReturnedAxiomsSpinner.setValue(10);
+		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
+		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
+		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
+		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "
+				+ "axiom type with a confidence score above the chosen threshold below.");
+		panel.addComponent(maxNrOfReturnedAxiomsSpinner);
+		
+		thresholdSlider = new Slider(1, 100);
+		thresholdSlider.setWidth("100%");
+		thresholdSlider.setImmediate(true);
+		thresholdSlider.setCaption("Threshold");
+		thresholdSlider.setDescription("The minimum confidence score for the learned axioms.");
+		panel.addComponent(thresholdSlider);
+		
+		CollapsibleBox collapsibleBox = new CollapsibleBox("Advanced", panel);
+		collapsibleBox.setSizeFull();
+		
+		return collapsibleBox;
+	}
+	
 	private Component createConfigForm(){
 		VerticalLayout form = new VerticalLayout();
 		form.setWidth("100%");
@@ -220,25 +268,23 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		form.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
 		
 		SPARQLEndpointKnowledgebase kb = (SPARQLEndpointKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase();
-		ComboBox cb = new ComboBox("Resource URI");
-		cb.addStyleName("entity-combobox");
-		cb.setWidth("100%");
-		cb.setFilteringMode(FilteringMode.CONTAINS);
-		cb.setNewItemsAllowed(false);
-		cb.setContainerDataSource(new IndexedContainer(kb.getStats().getObjectProperties()));
-//		form.addComponent(cb);
-		
-		resourceURIField = new TextField();
-		resourceURIField.setInputPrompt("Enter resource URI");
+		resourceURIField = new ComboBox("Resource URI");
+		resourceURIField.addStyleName("entity-combobox");
 		resourceURIField.setWidth("100%");
-		resourceURIField.setCaption("Resource URI");
-		resourceURIField.setRequired(true);
-		resourceURIField.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.ENTER, null) {
+		resourceURIField.setFilteringMode(FilteringMode.CONTAINS);
+		resourceURIField.setNewItemsAllowed(false);
+		Set<String> entities = new TreeSet<String>();
+		entities.addAll(kb.getStats().getClasses());
+		entities.addAll(kb.getStats().getObjectProperties());
+		entities.addAll(kb.getStats().getDataProperties());
+		IndexedContainer container = new IndexedContainer(entities);
+		resourceURIField.setContainerDataSource(container);
+		resourceURIField.addValueChangeListener(new ValueChangeListener() {
 			
 			@Override
-			public void handleAction(Object sender, Object target) {
+			public void valueChange(ValueChangeEvent event) {
 				try {
-					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType(resourceURIField.getValue());
+					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType((String)resourceURIField.getValue());
 					onResourceTypeChanged(resourceType);
 				} catch (OREException e) {
 					e.printStackTrace();
@@ -247,38 +293,29 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		});
 		form.addComponent(resourceURIField);
 		
+//		resourceURIField = new TextField();
+//		resourceURIField.setInputPrompt("Enter resource URI");
+//		resourceURIField.setWidth("100%");
+//		resourceURIField.setCaption("Resource URI");
+//		resourceURIField.setRequired(true);
+//		resourceURIField.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.ENTER, null) {
+//			
+//			@Override
+//			public void handleAction(Object sender, Object target) {
+//				try {
+//					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType(resourceURIField.getValue());
+//					onResourceTypeChanged(resourceType);
+//				} catch (OREException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//		form.addComponent(resourceURIField);
+		
 		resourceTypeField = new ResourceTypeField();
 //		form.addComponent(resourceTypeField);
 		
-		useInferenceBox = new CheckBox();
-		useInferenceBox.setCaption("Use Inference");
-		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
-				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
-		form.addComponent(useInferenceBox);
-		
-		maxExecutionTimeSpinner = new IntStepper();
-		maxExecutionTimeSpinner.setValue(10);
-		maxExecutionTimeSpinner.setStepAmount(1);
-		maxExecutionTimeSpinner.setWidth("100%");
-		maxExecutionTimeSpinner.setCaption("Max. execution time");
-		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
-		form.addComponent(maxExecutionTimeSpinner);
-		
-		maxNrOfReturnedAxiomsSpinner = new IntStepper();
-		maxNrOfReturnedAxiomsSpinner.setValue(10);
-		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
-		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
-		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
-		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "
-				+ "axiom type with a confidence score above the chosen threshold below.");
-		form.addComponent(maxNrOfReturnedAxiomsSpinner);
-		
-		thresholdSlider = new Slider(1, 100);
-		thresholdSlider.setWidth("100%");
-		thresholdSlider.setImmediate(true);
-		thresholdSlider.setCaption("Threshold");
-		thresholdSlider.setDescription("The minimum confidence score for the learned axioms.");
-		form.addComponent(thresholdSlider);
+		form.addComponent(createAdvancedOptionsPanel());
 		
 		axiomTypesField = new AxiomTypesField();
 		axiomTypesField.setSizeFull();
@@ -607,5 +644,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		for (EvaluatedAxiomsTable evaluatedAxiomsTable : tables) {
 			evaluatedAxiomsTable.refreshRowCache();
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		ObjectPropertyDomainAxiomLearner la = new ObjectPropertyDomainAxiomLearner(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW()));
+		la.setPropertyToDescribe(new ObjectProperty("http://dbpedia.org/ontology/league"));
+		la.init();
+		la.start();
+		System.out.println(la.getCurrentlyBestEvaluatedAxioms());
 	}
 }

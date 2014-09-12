@@ -1112,6 +1112,19 @@ div.footnote {
 			margin-top: -10px; //-20px auto;
 		} 	
 	}
+	
+	.collapsiblebox .v-csslayout {
+		overflow:hidden;
+		padding:0;
+		
+		.v-button:focus:after {
+			/* border-color: #197de1; */
+			border:0;
+			-webkit-box-shadow: none;
+			-moz-box-shadow: none;
+			/* box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5); */
+		}
+	}
 
 
 }

@@ -186,11 +186,18 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 //		ontologyButton.addStyleName("ontology-button");
 		ThemeResource icon = new ThemeResource("img/owl-ontology-128.png");
 		ontologyButton.setIcon(icon);
-//		ontologyButton.addStyleName("borderless");
-//		ontologyButton.setHeight("140px");
-//		ontologyButton.setHeight("100%");
 		buttons.addComponent(ontologyButton);
 		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
+		
+//		MenuBar split = new MenuBar();
+//        MenuBar.MenuItem dropdown = split.addItem("OWL Ontology", null);
+//        dropdown.setIcon(icon);
+//        dropdown.addItem("Another Action", null);
+//        dropdown.addItem("Secondary Action", null);
+//        dropdown.addItem("Last Action", null);
+//        split.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
+//        buttons.addComponent(split);
+//		buttons.setComponentAlignment(split, Alignment.MIDDLE_RIGHT);
 		
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);

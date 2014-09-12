@@ -36,8 +36,6 @@ import org.aksw.ore.exception.OREException;
 import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
-import org.apache.commons.collections15.BidiMap;
-import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.apache.jena.riot.checker.CheckerLiterals;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.dllearner.algorithms.DisjointClassesLearner;
@@ -105,6 +103,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import com.clarkparsia.owlapiv3.XSD;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -170,7 +169,7 @@ public class EnrichmentManager {
 	private List<Class<? extends LearningAlgorithm>> dataPropertyAlgorithms;
 	private List<Class<? extends LearningAlgorithm>> classAlgorithms;
 	
-	private BidiMap<AxiomType, Class<? extends LearningAlgorithm>> axiomType2Class;
+	private HashBiMap<AxiomType, Class<? extends LearningAlgorithm>> axiomType2Class;
 	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private KeywordColorMap colorMap = new KeywordColorMap();
@@ -233,7 +232,7 @@ public class EnrichmentManager {
 		classAlgorithms.add(SimpleSubclassLearner.class);
 		classAlgorithms.add(CELOE.class);
 		
-		axiomType2Class = new DualHashBidiMap<AxiomType, Class<? extends LearningAlgorithm>>();
+		axiomType2Class = HashBiMap.create();
 		axiomType2Class.put(AxiomType.SUBCLASS_OF, SimpleSubclassLearner.class);
 		axiomType2Class.put(AxiomType.EQUIVALENT_CLASSES, CELOE.class);
 		axiomType2Class.put(AxiomType.DISJOINT_CLASSES, DisjointClassesLearner.class);
@@ -349,7 +348,7 @@ public class EnrichmentManager {
 		}
 		
 		for(Class<? extends LearningAlgorithm> alg : algorithms){
-			types.add(axiomType2Class.getKey(alg));
+			types.add(axiomType2Class.inverse().get(alg));
 		}
 		
 		return types;
@@ -477,7 +476,7 @@ public class EnrichmentManager {
 	}	
 	
 	private List<EvaluatedAxiom> applyLearningAlgorithm(Class<? extends LearningAlgorithm> algorithmClass, SparqlEndpointKS ks, Entity entity) throws ComponentInitException {
-		if(axiomTypes != null && !axiomTypes.contains(axiomType2Class.getKey(algorithmClass))){
+		if(axiomTypes != null && !axiomTypes.contains(axiomType2Class.inverse().get(algorithmClass))){
 			return Collections.<EvaluatedAxiom>emptyList();
 		}
 		
