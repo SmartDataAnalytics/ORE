@@ -54,7 +54,7 @@ import com.vaadin.ui.Table;
 public class AxiomTypesTable extends Table{
 	
 	 @SuppressWarnings("unchecked")
-	 public static final Set<AxiomType<? extends OWLAxiom>> CLASS_AXIOM_TYPES = new TreeSet<AxiomType<? extends OWLAxiom>>(
+	 public static final Collection<AxiomType<? extends OWLAxiom>> CLASS_AXIOM_TYPES = new ArrayList<AxiomType<? extends OWLAxiom>>(
 	            Arrays.asList(SUBCLASS_OF, EQUIVALENT_CLASSES, DISJOINT_CLASSES
 	                    //DISJOINT_UNION, HAS_KEY
 	                    ));
@@ -71,7 +71,7 @@ public class AxiomTypesTable extends Table{
 	                   
 	            		));
 	 @SuppressWarnings("unchecked")
-	 public static final Set<AxiomType<? extends OWLAxiom>> DATA_PROPERTY_AXIOM_TYPES = new TreeSet<AxiomType<? extends OWLAxiom>>(
+	 public static final Collection<AxiomType<? extends OWLAxiom>> DATA_PROPERTY_AXIOM_TYPES = new ArrayList<AxiomType<? extends OWLAxiom>>(
 			 Lists.newArrayList(
 					 SUB_DATA_PROPERTY, EQUIVALENT_DATA_PROPERTIES, DISJOINT_DATA_PROPERTIES,
 					 DATA_PROPERTY_DOMAIN, DATA_PROPERTY_RANGE,
@@ -151,7 +151,7 @@ public class AxiomTypesTable extends Table{
 		default:
 			break;
 		}
-		container.sort(new String[]{"name"}, new boolean[]{true});
+//		container.sort(new String[]{"name"}, new boolean[]{true});
 	}
 	
 	private static AxiomType allAxioms(){

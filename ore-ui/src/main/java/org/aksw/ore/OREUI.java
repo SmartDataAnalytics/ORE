@@ -184,13 +184,15 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     }
     
     private void enter(String fragment) {
-    	if(fragment.startsWith("!")){
-    		fragment = fragment.substring(1);
+    	if(fragment != null){
+    		if(fragment.startsWith("!")){
+        		fragment = fragment.substring(1);
+        	}
+    		Class<? extends View> cls = view2Route.inverse().get(fragment);
+    		if(cls == EnrichmentView.class){
+    			navigator.navigateTo(fragment);
+    		}
     	}
-		Class<? extends View> cls = view2Route.inverse().get(fragment);
-		if(cls == EnrichmentView.class){
-			navigator.navigateTo(fragment);
-		}
 	}
 
 	private void updateAvailableViews(){

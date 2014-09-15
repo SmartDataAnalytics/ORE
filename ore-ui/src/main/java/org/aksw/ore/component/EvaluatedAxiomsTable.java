@@ -131,8 +131,8 @@ public class EvaluatedAxiomsTable extends Table{
 				
 				HorizontalLayout cell = new HorizontalLayout();
 				cell.setSizeFull();
-				cell.setWidth(null);
-				cell.setSpacing(true);
+				cell.setWidthUndefined();
+//				cell.setSpacing(true);
 				
 				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom) itemId).getScore().getAccuracy()));
 				accuracyLabel.setDescription(getAccuracyDescription((EvaluatedAxiom)itemId));
@@ -142,7 +142,8 @@ public class EvaluatedAxiomsTable extends Table{
 				
 				Button explain = new Button("?");
 				explain.setHeight(null);
-				explain.addStyleName(BaseTheme.BUTTON_LINK);
+				explain.addStyleName(ValoTheme.BUTTON_LINK);
+				explain.setWidthUndefined();
 				explain.setDescription("Explain the score.");
 				explain.addClickListener(new Button.ClickListener() {
 					

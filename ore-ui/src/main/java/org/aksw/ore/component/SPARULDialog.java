@@ -25,8 +25,8 @@ import com.vaadin.ui.Window;
 public class SPARULDialog extends Window{
 	
 	public SPARULDialog(List<OWLOntologyChange> changes) {
-		super("SPARUL Statements");
-		setWidth("1000px");
+		super("SPARQL 1.1 Update Statements");
+		setWidth("800px");
 		setHeight("400px");
 		center();
 		
@@ -35,7 +35,7 @@ public class SPARULDialog extends Window{
 			OWLOntology ontology = man.createOntology();
 			SPARULTranslator translator = new SPARULTranslator(man, ontology, false);
 			
-			String sparulString = translator.translate(changes);
+			String sparulString = translator.translate(changes, true);
 			
 			VerticalLayout content = new VerticalLayout();
 			setContent(content);
