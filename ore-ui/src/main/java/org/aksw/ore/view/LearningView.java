@@ -24,10 +24,9 @@ import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.util.ClassHierarchyContainer;
 import org.aksw.ore.util.ClassHierarchyContainer.ClassHierarchy;
 import org.dllearner.core.EvaluatedDescription;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.NamedClass;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
@@ -52,7 +51,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Table;
@@ -310,8 +308,8 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
     	if(classExpressionTable.getValue() != null){
     		EvaluatedDescriptionClass ec = (EvaluatedDescriptionClass)classExpressionTable.getValue();
     		
-    		Set<Individual> falsePositives = ec.getAdditionalInstances();
-        	Set<Individual> falseNegatives = ec.getNotCoveredInstances();
+    		Set<OWLIndividual> falsePositives = ec.getAdditionalInstances();
+        	Set<OWLIndividual> falseNegatives = ec.getNotCoveredInstances();
         	
         	falsePositivesTable.setIndividuals(falsePositives);
         	falseNegativesTable.setIndividuals(falseNegatives);
@@ -328,7 +326,7 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 		final LearningManager manager = ORESession.getLearningManager();
 		
 		LearningSetting learningSetting = new LearningSetting(
-				new NamedClass(tree.getSelectedClass().toStringID()), 
+				tree.getSelectedClass(), 
 				optionsPanel.getMaxNrOfResults(), 
 				optionsPanel.getMaxExecutionTimeInSeconds(), 
 				optionsPanel.getNoiseInPercentage()/100, 

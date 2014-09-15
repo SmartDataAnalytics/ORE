@@ -9,16 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.mole.ore.util.PrefixedShortFromProvider;
-import org.dllearner.core.owl.Axiom;
-import org.dllearner.core.owl.Description;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.utilities.owl.OWLAPIConverter;
-import org.dllearner.utilities.owl.OWLAPIDescriptionConvertVisitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLObjectRenderer;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -148,30 +141,6 @@ public class Renderer {
 	
 	public String render(String iri){
 		return render(IRI.create(iri));
-	}
-	
-	public String render(Individual ind){
-		return render(IRI.create(ind.getName()));
-	}
-	
-	public String render(Description desc){
-		OWLClassExpression ce = OWLAPIDescriptionConvertVisitor.getOWLClassExpression(desc);
-		return render(ce);
-	}
-	
-	public String renderHTML(Description desc){
-		OWLClassExpression ce = OWLAPIDescriptionConvertVisitor.getOWLClassExpression(desc);
-		return renderHTML(ce);
-	}
-	
-	public String renderHTML(Axiom axiom){
-		OWLAxiom ax = OWLAPIConverter.getOWLAPIAxiom(axiom);
-		return renderHTML(ax);
-	}
-	
-	public String render(Axiom axiom){
-		OWLAxiom ax = OWLAPIConverter.getOWLAPIAxiom(axiom);
-		return render(ax);
 	}
 	
 	public String render(OWLObject owlObject) {

@@ -3,7 +3,7 @@
  */
 package org.aksw.ore.model;
 
-import org.dllearner.core.owl.NamedClass;
+import org.semanticweb.owlapi.model.OWLClass;
 
 /**
  * @author Lorenz Buehmann
@@ -11,7 +11,7 @@ import org.dllearner.core.owl.NamedClass;
  */
 public class LearningSetting {
 	
-	private NamedClass classToDescribe;
+	private OWLClass classToDescribe;
 	private int maxNrOfResults;
 	private int maxExecutionTimeInSeconds;
 	
@@ -26,7 +26,7 @@ public class LearningSetting {
 	
 	private int cardinalityLimit;
 
-	public LearningSetting(NamedClass classToDescribe, int maxNrOfResults, int maxExecutionTimeInSeconds, double noise,
+	public LearningSetting(OWLClass classToDescribe, int maxNrOfResults, int maxExecutionTimeInSeconds, double noise,
 			double threshold, boolean useUniversalQuantifier, boolean useExistentialQuantifier, boolean useNegation,
 			boolean useHasValue, boolean useCardinality, int cardinalityLimit) {
 		super();
@@ -43,11 +43,11 @@ public class LearningSetting {
 		this.cardinalityLimit = cardinalityLimit;
 	}
 	
-	public void setClassToDescribe(NamedClass classToDescribe) {
+	public void setClassToDescribe(OWLClass classToDescribe) {
 		this.classToDescribe = classToDescribe;
 	}
 
-	public NamedClass getClassToDescribe() {
+	public OWLClass getClassToDescribe() {
 		return classToDescribe;
 	}
 

@@ -18,16 +18,14 @@ import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
-import org.dllearner.algorithms.properties.AsymmetricObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
 import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.core.owl.ObjectProperty;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -35,14 +33,12 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.vaadin.risto.stepper.IntStepper;
 
-import com.google.common.collect.Sets;
+import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.MarginInfo;
@@ -63,10 +59,6 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -138,7 +130,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				for(EvaluatedAxiomsTable table : tables){
 					Set<Object> selectedObjects = table.getSelectedObjects();
 					for(Object o : selectedObjects){
-						changes.add(new AddAxiom(ontology, OWLAPIConverter.getOWLAPIAxiom(((EvaluatedAxiom)o).getAxiom())));
+						changes.add(new AddAxiom(ontology, ((EvaluatedAxiom)o).getAxiom()));
 					}
 				}
 				if(!changes.isEmpty()){
@@ -385,7 +377,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			for(EvaluatedAxiomsTable table : tables){
 				Set<Object> selectedObjects = table.getSelectedObjects();
 				for(Object o : selectedObjects){
-					changes.add(new AddAxiom(ontology, OWLAPIConverter.getOWLAPIAxiom(((EvaluatedAxiom)o).getAxiom())));
+					changes.add(new AddAxiom(ontology, ((EvaluatedAxiom)o).getAxiom()));
 				}
 			}
 			if(!changes.isEmpty()){
@@ -589,7 +581,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	public static void main(String[] args) throws Exception {
 		ObjectPropertyDomainAxiomLearner la = new ObjectPropertyDomainAxiomLearner(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW()));
-		la.setPropertyToDescribe(new ObjectProperty("http://dbpedia.org/ontology/league"));
+		la.setPropertyToDescribe(new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/league")));
 		la.init();
 		la.start();
 		System.out.println(la.getCurrentlyBestEvaluatedAxioms());

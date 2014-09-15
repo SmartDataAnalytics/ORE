@@ -4,14 +4,14 @@ import java.util.Set;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
-import org.dllearner.core.owl.Individual;
+import org.semanticweb.owlapi.model.OWLIndividual;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Table;
 
 public class IndividualsTable extends Table {
 	
-	private BeanItemContainer<Individual> container = new BeanItemContainer<Individual>(Individual.class);
+	private BeanItemContainer<OWLIndividual> container = new BeanItemContainer<OWLIndividual>(OWLIndividual.class);
 	private Renderer renderer = ORESession.getRenderer();
 	
 	public IndividualsTable() {
@@ -27,10 +27,10 @@ public class IndividualsTable extends Table {
 		setContainerDataSource(container);
 	}
 	
-	public void setIndividuals(Set<Individual> individuals){
+	public void setIndividuals(Set<OWLIndividual> individuals){
 //		container.addAll(individuals);
 		container.removeAllItems();
-		for (Individual individual : individuals) {
+		for (OWLIndividual individual : individuals) {
 			addItem(individual).getItemProperty("name").setValue(renderer.render(individual));
 		}
 	}
