@@ -19,7 +19,7 @@ import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
 public class OWLAxiomConstraintValidator {
 	
-	private static final Logger logger = Logger.getLogger(OWLAxiomConstraintValidator.class.getName());
+	private static final Logger logger = Logger.getLogger(OWLAxiomConstraintValidator.class);
 	
 	private SparqlEndpoint endpoint;
 	private ExtractionDBCache cache;

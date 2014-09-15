@@ -1,37 +1,37 @@
 package org.aksw.mole.ore.validation;
 
 import org.aksw.mole.ore.util.HTML;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
-import org.dllearner.core.owl.Property;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 public class InverseFunctionalityViolation implements Violation{
 	
-	private Property property;
-	private KBElement object;
-	private Individual subject1;
-	private Individual subject2;
+	private OWLProperty property;
+	private OWLObject object;
+	private OWLIndividual subject1;
+	private OWLIndividual subject2;
 
-	public InverseFunctionalityViolation(Property property, KBElement object, Individual subject1, Individual subject2) {
+	public InverseFunctionalityViolation(OWLProperty property, OWLObject object, OWLIndividual subject1, OWLIndividual subject2) {
 		this.property = property;
 		this.object = object;
 		this.subject1 = subject1;
 		this.subject2 = subject2;
 	}
 	
-	public Property getProperty() {
+	public OWLProperty getProperty() {
 		return property;
 	}
 	
-	public KBElement getObject() {
+	public OWLObject getObject() {
 		return object;
 	}
 	
-	public Individual getSubject1() {
+	public OWLIndividual getSubject1() {
 		return subject1;
 	}
 	
-	public Individual getSubject2() {
+	public OWLIndividual getSubject2() {
 		return subject2;
 	}
 	
@@ -39,8 +39,8 @@ public class InverseFunctionalityViolation implements Violation{
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------------------------------------------------------------------------\n");
-		sb.append(property.getName() + "(" + subject1.toString() + ", " + object.toString() + ")\n"); 
-		sb.append(property.getName() + "(" + subject2.toString() + ", " + object.toString() + ")");
+		sb.append(property.toStringID() + "(" + subject1.toString() + ", " + object.toString() + ")\n"); 
+		sb.append(property.toStringID() + "(" + subject2.toString() + ", " + object.toString() + ")");
 		return sb.toString();
 	}
 
@@ -86,8 +86,8 @@ public class InverseFunctionalityViolation implements Violation{
 	public String asHTML() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------------------------------------------------------------------------\n");
-		sb.append(HTML.asLink(property.getName()) + "(" + HTML.asLink(subject1.toString()) + ", " + HTML.asLink(object.toString()) + ")\n"); 
-		sb.append(HTML.asLink(property.getName()) + "(" + HTML.asLink(subject2.toString()) + ", " + HTML.asLink(object.toString()) + ")");
+		sb.append(HTML.asLink(property.toStringID()) + "(" + HTML.asLink(subject1.toString()) + ", " + HTML.asLink(object.toString()) + ")\n"); 
+		sb.append(HTML.asLink(property.toStringID()) + "(" + HTML.asLink(subject2.toString()) + ", " + HTML.asLink(object.toString()) + ")");
 		return sb.toString();
 	}
 

@@ -4,17 +4,19 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.ObjectProperty;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
-public class IrreflexivityConsistencyValidator extends SPARQLConsistencyValidator<IrreflexivityViolation, ObjectProperty>{
+public class IrreflexivityConsistencyValidator extends SPARQLConsistencyValidator<IrreflexivityViolation, OWLObjectProperty>{
 	
 	public IrreflexivityConsistencyValidator(Model model) {
 		super(model);
@@ -48,9 +50,9 @@ public class IrreflexivityConsistencyValidator extends SPARQLConsistencyValidato
 				);
 	}
 	
-	public Collection<IrreflexivityViolation> getViolations(ObjectProperty op){
+	public Collection<IrreflexivityViolation> getViolations(OWLObjectProperty op){
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", op.getURI().toString());
+		queryTemplate.setIri("p", op.toStringID());
 		
 		Set<IrreflexivityViolation> violations = new HashSet<IrreflexivityViolation>();
 		
@@ -58,21 +60,9 @@ public class IrreflexivityConsistencyValidator extends SPARQLConsistencyValidato
 		QuerySolution qs;
 		while(rs.hasNext()){
 			qs = rs.next();
-			violations.add(new IrreflexivityViolation(op, new Individual(qs.getResource("s").getURI())));
+			violations.add(new IrreflexivityViolation(op, new OWLNamedIndividualImpl(IRI.create(qs.getResource("s").getURI()))));
 		}
 		return violations;
-	}
-	
-	public static void main(String[] args) {
-		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpediaLiveAKSW();
-		ObjectProperty op = new ObjectProperty("http://dbpedia.org/ontology/bandMember");
-		IrreflexivityConsistencyValidator validator = new IrreflexivityConsistencyValidator(endpoint);
-		System.out.println("Consistent: " + validator.isConsistent(op));
-		Collection<IrreflexivityViolation> violations = validator.getViolations(op);
-		System.out.println(violations.size());
-		for(IrreflexivityViolation v : violations){
-			System.out.println(v);
-		}
 	}
 
 }

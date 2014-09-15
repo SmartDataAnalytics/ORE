@@ -1,30 +1,30 @@
 package org.aksw.mole.ore.validation;
 
 import org.aksw.mole.ore.util.HTML;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.ObjectProperty;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 public class IrreflexivityViolation implements Violation{
 	
-	private Individual individual;
-	private ObjectProperty property;
+	private OWLIndividual individual;
+	private OWLObjectProperty property;
 
-	public IrreflexivityViolation(ObjectProperty property, Individual individual) {
+	public IrreflexivityViolation(OWLObjectProperty property, OWLIndividual individual) {
 		this.property = property;
 		this.individual = individual;
 	}
 	
-	public ObjectProperty getProperty() {
+	public OWLObjectProperty getProperty() {
 		return property;
 	}
 	
-	public Individual getIndividual() {
+	public OWLIndividual getIndividual() {
 		return individual;
 	}
 	
 	@Override
 	public String toString() {
-		return property.getName() + "(" + individual.getName() + ", " + individual.getName() + ")";
+		return property.toStringID() + "(" + individual.toStringID() + ", " + individual.toStringID() + ")";
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class IrreflexivityViolation implements Violation{
 	
 	@Override
 	public String asHTML() {
-		return HTML.asLink(property.getName()) + "(" + HTML.asLink(individual.getName()) + ", " + HTML.asLink(individual.getName()) + ")";
+		return HTML.asLink(property.toStringID()) + "(" + HTML.asLink(individual.toStringID()) + ", " + HTML.asLink(individual.toStringID()) + ")";
 	}
 	
 	

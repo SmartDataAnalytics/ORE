@@ -5,34 +5,31 @@ import java.util.Set;
 
 import org.aksw.mole.ore.explanation.api.Explanation;
 import org.dllearner.core.KnowledgeSource;
-import org.dllearner.core.owl.Axiom;
-import org.dllearner.core.owl.ClassAssertionAxiom;
-import org.dllearner.core.owl.Description;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.Intersection;
-import org.dllearner.core.owl.Union;
 import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.reasoning.FastInstanceChecker;
-import org.dllearner.utilities.owl.DLLearnerDescriptionConvertVisitor;
-import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.PrefixManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class ClosedWorldExplanationGenerator {
 	
 	private FastInstanceChecker reasoner;
+	OWLDataFactory df = new OWLDataFactoryImpl();
 	
 	public ClosedWorldExplanationGenerator(FastInstanceChecker reasoner) {
 		this.reasoner = reasoner;
@@ -46,25 +43,25 @@ public class ClosedWorldExplanationGenerator {
 	 * @param ind
 	 * @return
 	 */
-	public Set<Explanation> getEntailmentExplanation(Description desc, Individual ind){
+	public Set<Explanation> getEntailmentExplanation(OWLClassExpression desc, OWLIndividual ind){
 		Set<Explanation> explanations = new HashSet<Explanation>();
-		explanations.add(new ExplanationImpl(OWLAPIConverter.getOWLAPIAxiom(new ClassAssertionAxiom(desc, ind)), new HashSet<OWLAxiom>()));
+		explanations.add(new ExplanationImpl(df.getOWLClassAssertionAxiom(desc, ind), new HashSet<OWLAxiom>()));
 		explainEntailment(desc, ind, explanations);
 		return explanations;
 	}
 	
-	private Set<Explanation> explainEntailment(Description desc, Individual ind, Set<Explanation> existingExplanations){
-		if(desc instanceof Union){
+	private Set<Explanation> explainEntailment(OWLClassExpression desc, OWLIndividual ind, Set<Explanation> existingExplanations){
+		if(desc instanceof OWLObjectUnionOf){
 			Set<Explanation> tmp = new HashSet<Explanation>();
-			for(Description child : desc.getChildren()){
+			for(OWLClassExpression child : ((OWLObjectUnionOf) desc).getOperands()){
 				if(reasoner.hasType(child, ind)){
 					tmp.addAll(explainEntailment(child, ind, new HashSet<Explanation>(existingExplanations)));
 				}
 			}
 			existingExplanations.clear();
 			existingExplanations.addAll(tmp);
-		} else if(desc instanceof Intersection){
-			for(Description child : desc.getChildren()){
+		} else if(desc instanceof OWLObjectIntersectionOf){
+			for(OWLClassExpression child : ((OWLObjectIntersectionOf) desc).getOperands()){
 				if(reasoner.hasType(child, ind)){
 					explainEntailment(child, ind, existingExplanations);
 				}
@@ -72,8 +69,8 @@ public class ClosedWorldExplanationGenerator {
 		} else {
 			Set<Explanation> tmp = new HashSet<Explanation>();
 			for(Explanation exp : existingExplanations){
-				Set<OWLAxiom> axioms = new HashSet(exp.getAxioms());
-				axioms.add(OWLAPIConverter.getOWLAPIAxiom(new ClassAssertionAxiom(desc, ind)));
+				Set<OWLAxiom> axioms = new HashSet<OWLAxiom>(exp.getAxioms());
+				axioms.add(df.getOWLClassAssertionAxiom(desc, ind));
 				Explanation newExp = new ExplanationImpl(exp.getEntailment(), axioms);
 				tmp.add(newExp);
 			}
@@ -84,25 +81,25 @@ public class ClosedWorldExplanationGenerator {
 		return existingExplanations;
 	}
 	
-	public Set<Explanation> getNonEntailmentExplanation(Description desc, Individual ind){
+	public Set<Explanation> getNonEntailmentExplanation(OWLClassExpression desc, OWLIndividual ind){
 		Set<Explanation> explanations = new HashSet<Explanation>();
-		explanations.add(new ExplanationImpl(OWLAPIConverter.getOWLAPIAxiom(new ClassAssertionAxiom(desc, ind)), new HashSet<OWLAxiom>()));
+		explanations.add(new ExplanationImpl(df.getOWLClassAssertionAxiom(desc, ind), new HashSet<OWLAxiom>()));
 		explainNonEntailment(desc, ind, explanations);
 		return explanations;
 	}
 	
-	private Set<Explanation> explainNonEntailment(Description desc, Individual ind, Set<Explanation> existingExplanations){
-		if(desc instanceof Union){
+	private Set<Explanation> explainNonEntailment(OWLClassExpression desc, OWLIndividual ind, Set<Explanation> existingExplanations){
+		if(desc instanceof OWLObjectUnionOf){
 			Set<Explanation> tmp = new HashSet<Explanation>();
-			for(Description child : desc.getChildren()){
+			for(OWLClassExpression child : ((OWLObjectUnionOf) desc).getOperands()){
 				if(reasoner.hasType(child, ind)){
 					tmp.addAll(explainEntailment(child, ind, new HashSet<Explanation>(existingExplanations)));
 				}
 			}
 			existingExplanations.clear();
 			existingExplanations.addAll(tmp);
-		} else if(desc instanceof Intersection){
-			for(Description child : desc.getChildren()){
+		} else if(desc instanceof OWLObjectIntersectionOf){
+			for(OWLClassExpression child : ((OWLObjectIntersectionOf) desc).getOperands()){
 				if(reasoner.hasType(child, ind)){
 					explainEntailment(child, ind, existingExplanations);
 				}
@@ -110,8 +107,8 @@ public class ClosedWorldExplanationGenerator {
 		} else {
 			Set<Explanation> tmp = new HashSet<Explanation>();
 			for(Explanation exp : existingExplanations){
-				Set<OWLAxiom> axioms = new HashSet(exp.getAxioms());
-				axioms.add(OWLAPIConverter.getOWLAPIAxiom(new ClassAssertionAxiom(desc, ind)));
+				Set<OWLAxiom> axioms = new HashSet<OWLAxiom>(exp.getAxioms());
+				axioms.add(df.getOWLClassAssertionAxiom(desc, ind));
 				Explanation newExp = new ExplanationImpl(exp.getEntailment(), axioms);
 				tmp.add(newExp);
 			}
@@ -169,15 +166,12 @@ public class ClosedWorldExplanationGenerator {
 		OWLReasoner reasoner = PelletReasonerFactory.getInstance().createNonBufferingReasoner(ont);
 		System.out.println(reasoner.isEntailed(f.getOWLClassAssertionAxiom(expr1, x)));
 		
-		Description d1 = DLLearnerDescriptionConvertVisitor.getDLLearnerDescription(expr1);
-		Description d2 = DLLearnerDescriptionConvertVisitor.getDLLearnerDescription(expr2);
-		Individual i = new Individual(x.asOWLNamedIndividual().toStringID());
-		System.out.println(checker.hasType(d1, i));
-		System.out.println(checker.hasType(d2, i));
+		System.out.println(checker.hasType(expr1, x));
+		System.out.println(checker.hasType(expr2, x));
 		
 		ClosedWorldExplanationGenerator expGen = new ClosedWorldExplanationGenerator(checker);
-		expGen.getEntailmentExplanation(d1, i);
-		expGen.getEntailmentExplanation(d2, i);
+		expGen.getEntailmentExplanation(expr1, x);
+		expGen.getEntailmentExplanation(expr2, x);
 	}
 
 }

@@ -1,37 +1,37 @@
 package org.aksw.mole.ore.validation;
 
 import org.aksw.mole.ore.util.HTML;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
-import org.dllearner.core.owl.Property;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 public class FunctionalityViolation implements Violation{
 	
-	private Property property;
-	private Individual subject;
-	private KBElement object1;
-	private KBElement object2;
+	private OWLProperty property;
+	private OWLIndividual subject;
+	private OWLObject object1;
+	private OWLObject object2;
 
-	public FunctionalityViolation(Property property, Individual subject, KBElement object1, KBElement object2) {
+	public FunctionalityViolation(OWLProperty property, OWLIndividual subject, OWLObject object1, OWLObject object2) {
 		this.property = property;
 		this.subject = subject;
 		this.object1 = object1;
 		this.object2 = object2;
 	}
 	
-	public Property getProperty() {
+	public OWLProperty getProperty() {
 		return property;
 	}
 	
-	public Individual getSubject() {
+	public OWLIndividual getSubject() {
 		return subject;
 	}
 	
-	public KBElement getObject1() {
+	public OWLObject getObject1() {
 		return object1;
 	}
 	
-	public KBElement getObject2() {
+	public OWLObject getObject2() {
 		return object2;
 	}
 	
@@ -39,8 +39,8 @@ public class FunctionalityViolation implements Violation{
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------------------------------------------------------------------------\n");
-		sb.append(property.getName() + "(" + subject.getName() + ", " + object1.toString() + ")\n");
-		sb.append(property.getName() + "(" + subject.getName() + ", " + object2.toString() + ")");
+		sb.append(property.toStringID() + "(" + subject.toStringID() + ", " + object1.toString() + ")\n");
+		sb.append(property.toStringID() + "(" + subject.toStringID() + ", " + object2.toString() + ")");
 		return sb.toString();
 	}
 
@@ -84,8 +84,8 @@ public class FunctionalityViolation implements Violation{
 	public String asHTML() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("------------------------------------------------------------------------\n");
-		sb.append(HTML.asLink(property.getName()) + "(" + HTML.asLink(subject.getName()) + ", " + ((object1 instanceof Individual) ? HTML.asLink(object1.toString()) : object1.toString()) + ")\n");
-		sb.append(HTML.asLink(property.getName()) + "(" + HTML.asLink(subject.getName()) + ", " + ((object2 instanceof Individual) ? HTML.asLink(object2.toString()) : object2.toString()) + ")");
+		sb.append(HTML.asLink(property.toStringID()) + "(" + HTML.asLink(subject.toStringID()) + ", " + ((object1 instanceof OWLIndividual) ? HTML.asLink(object1.toString()) : object1.toString()) + ")\n");
+		sb.append(HTML.asLink(property.toStringID()) + "(" + HTML.asLink(subject.toStringID()) + ", " + ((object2 instanceof OWLIndividual) ? HTML.asLink(object2.toString()) : object2.toString()) + ")");
 		return sb.toString();
 	}
 

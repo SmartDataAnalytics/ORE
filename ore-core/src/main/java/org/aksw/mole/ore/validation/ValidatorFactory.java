@@ -6,11 +6,11 @@ import static org.semanticweb.owlapi.model.AxiomType.FUNCTIONAL_OBJECT_PROPERTY;
 import static org.semanticweb.owlapi.model.AxiomType.INVERSE_FUNCTIONAL_OBJECT_PROPERTY;
 import static org.semanticweb.owlapi.model.AxiomType.IRREFLEXIVE_OBJECT_PROPERTY;
 
-import org.dllearner.core.owl.Property;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLProperty;
 
 public class ValidatorFactory {
 	
@@ -26,7 +26,7 @@ public class ValidatorFactory {
 		this.cache = cache;
 	}
 	
-	public SPARQLConsistencyValidator<? extends Violation, ? extends Property> createValidator(AxiomType<? extends OWLAxiom> axiomType){
+	public SPARQLConsistencyValidator<? extends Violation, ? extends OWLProperty> createValidator(AxiomType<? extends OWLAxiom> axiomType){
 		if(axiomType == FUNCTIONAL_OBJECT_PROPERTY || axiomType == FUNCTIONAL_DATA_PROPERTY){
 			return new FunctionalityConsistencyValidator(endpoint, cache);
 		} else if(axiomType == INVERSE_FUNCTIONAL_OBJECT_PROPERTY){

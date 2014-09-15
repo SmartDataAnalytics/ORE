@@ -4,20 +4,21 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.dllearner.core.owl.DatatypeProperty;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
-import org.dllearner.core.owl.ObjectProperty;
-import org.dllearner.core.owl.Property;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
-public class FunctionalityConsistencyValidator extends SPARQLConsistencyValidator<FunctionalityViolation, Property>{
+public class FunctionalityConsistencyValidator extends SPARQLConsistencyValidator<FunctionalityViolation, OWLProperty>{
 	
 	public FunctionalityConsistencyValidator(Model model) {
 		super(model);
@@ -75,19 +76,20 @@ public class FunctionalityConsistencyValidator extends SPARQLConsistencyValidato
 	}
 	
 	@Override
-	public long getNumberOfViolations(Property p) {
+	public long getNumberOfViolations(OWLProperty p) {
 		//Should always be divided by 2, because result is always redundant
 		return super.getNumberOfViolations(p)/2;
 	}
 	
-	public Collection<FunctionalityViolation> getViolations(Property p){
+	@Override
+	public Collection<FunctionalityViolation> getViolations(OWLProperty p){
 		ParameterizedSparqlString tmp = null;
 		if(literalAwareQueryTemplate != null && isXSDDateRange(p)){
 			tmp = queryTemplate;
 			queryTemplate = literalAwareQueryTemplate;
 		}
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", p.getURI().toString());
+		queryTemplate.setIri("p", p.toStringID());
 		
 		Set<FunctionalityViolation> violations = new HashSet<FunctionalityViolation>();
 		
@@ -95,9 +97,9 @@ public class FunctionalityConsistencyValidator extends SPARQLConsistencyValidato
 		QuerySolution qs;
 		while(rs.hasNext()){
 			qs = rs.next();
-			Individual subject = new Individual(qs.getResource("s").getURI());
-			KBElement object1 = parseNode(qs.get("o1"));
-			KBElement object2 = parseNode(qs.get("o2"));
+			OWLIndividual subject = new OWLNamedIndividualImpl(IRI.create(qs.getResource("s").getURI()));
+			OWLObject object1 = parseNode(qs.get("o1"));
+			OWLObject object2 = parseNode(qs.get("o2"));
 			
 			violations.add(new FunctionalityViolation(p, subject, object1, object2));
 		}
@@ -105,34 +107,6 @@ public class FunctionalityConsistencyValidator extends SPARQLConsistencyValidato
 			queryTemplate = tmp;
 		}
 		return violations;
-	}
-	
-	public static void main(String[] args) {
-		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpediaLiveAKSW();
-		ObjectProperty op = new ObjectProperty("http://dbpedia.org/ontology/productionStartDate");
-		FunctionalityConsistencyValidator validator = new FunctionalityConsistencyValidator(endpoint, new ExtractionDBCache("cache"));
-		System.out.println("Consistent: " + validator.isConsistent(op));
-		Collection<FunctionalityViolation> violations = validator.getViolations(op);
-		System.out.println(violations.size());
-		for(FunctionalityViolation v : violations){
-			System.out.println(v);
-		}
-		System.out.println(validator.getNumberOfViolations(op));
-		
-		DatatypeProperty dp = new DatatypeProperty("http://dbpedia.org/ontology/closed");
-		System.out.println("Consistent: " + validator.isConsistent(dp));
-		violations = validator.getViolations(dp);
-		System.out.println(violations.size());
-		for(FunctionalityViolation v : violations){
-			System.out.println(v);
-		}
-		
-//		System.out.println("Consistent: " + validator.isConsistent(op));
-//		violations = validator.getViolations(op);
-//		System.out.println(violations.size());
-//		for(FunctionalityViolation v : violations){
-//			System.out.println(v);
-//		}
 	}
 
 }

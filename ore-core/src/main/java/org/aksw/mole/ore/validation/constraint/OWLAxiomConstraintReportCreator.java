@@ -27,7 +27,7 @@ import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 
 public class OWLAxiomConstraintReportCreator {
 	
-	private static final Logger logger = Logger.getLogger(OWLAxiomConstraintReportCreator.class.getName());
+	private static final Logger logger = Logger.getLogger(OWLAxiomConstraintReportCreator.class);
 	
 	private SparqlEndpoint endpoint;
 	private ExtractionDBCache cache;

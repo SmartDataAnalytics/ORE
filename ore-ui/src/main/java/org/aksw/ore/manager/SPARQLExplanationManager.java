@@ -12,12 +12,9 @@ import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2.FormattedExplanation;
 import org.aksw.mole.ore.explanation.impl.laconic.RemainingAxiomPartsGenerator;
-import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.RepairManager.RepairManagerListener;
 import org.apache.log4j.Logger;
-import org.dllearner.core.owl.Individual;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owl.explanation.api.ExplanationException;
 import org.semanticweb.owl.explanation.api.ExplanationGeneratorFactory;
@@ -28,13 +25,11 @@ import org.semanticweb.owl.explanation.impl.blackbox.checker.BlackBoxExplanation
 import org.semanticweb.owl.explanation.impl.blackbox.checker.InconsistentOntologyExplanationGeneratorFactory;
 import org.semanticweb.owl.explanation.impl.blackbox.checker.SatisfiabilityEntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.laconic.LaconicExplanationGeneratorFactory;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
@@ -177,8 +172,10 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 		return getInconsistencyExplanations(type, Integer.MAX_VALUE);
 	}
 	
-	public Set<Explanation<OWLAxiom>> getClassAssertionExplanations(Individual ind, EvaluatedDescriptionClass evalDesc){
-		OWLAxiom entailment = dataFactory.getOWLClassAssertionAxiom(OWLAPIConverter.getOWLAPIDescription(evalDesc.getDescription()), dataFactory.getOWLNamedIndividual(IRI.create(ind.getName())));
+	public Set<Explanation<OWLAxiom>> getClassAssertionExplanations(OWLIndividual ind, EvaluatedDescriptionClass evalDesc){
+		OWLAxiom entailment = dataFactory.getOWLClassAssertionAxiom(
+				evalDesc.getDescription(), 
+				ind);
 		return getExplanations(entailment, explanationType, explanationLimit);
 	}
 	

@@ -26,7 +26,8 @@ import org.aksw.ore.rendering.Renderer;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.dllearner.reasoning.PelletReasoner;
+import org.dllearner.reasoning.FastInstanceChecker;
+import org.dllearner.reasoning.OWLAPIReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -80,13 +81,15 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
 			//learning manager
-			PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
+			FastInstanceChecker closedWorldReasoner = new FastInstanceChecker();
+			closedWorldReasoner.setReasonerComponent(new OWLAPIReasoner(reasoner));
 			try {
-				pelletReasoner.init();
+				closedWorldReasoner.init();
 			} catch (ComponentInitException e) {
 				e.printStackTrace();
 			}
-			LearningManager learnMan = new LearningManager(pelletReasoner);
+			//learning manager
+			LearningManager learnMan = new LearningManager(closedWorldReasoner);
 			VaadinSession.getCurrent().setAttribute(LearningManager.class, learnMan);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -132,14 +135,15 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			OWLReasoner reasoner = ontologyKB.getReasoner();
 			VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
 			
-			PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
+			FastInstanceChecker closedWorldReasoner = new FastInstanceChecker();
+			closedWorldReasoner.setReasonerComponent(new OWLAPIReasoner(reasoner));
 			try {
-				pelletReasoner.init();
+				closedWorldReasoner.init();
 			} catch (ComponentInitException e) {
 				e.printStackTrace();
 			}
 			//learning manager
-			LearningManager learnMan = new LearningManager(pelletReasoner);
+			LearningManager learnMan = new LearningManager(closedWorldReasoner);
 			VaadinSession.getCurrent().setAttribute(LearningManager.class, learnMan);
 			//explanation manager
 			ExplanationManager expMan = new ExplanationManager(reasoner, reasonerFactory);

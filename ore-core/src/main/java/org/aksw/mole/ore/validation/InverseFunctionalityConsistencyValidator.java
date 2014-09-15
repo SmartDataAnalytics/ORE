@@ -4,14 +4,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
-import org.dllearner.core.owl.ObjectProperty;
-import org.dllearner.core.owl.Property;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.QueryException;
@@ -20,7 +22,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
-public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyValidator<InverseFunctionalityViolation, ObjectProperty>{
+public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyValidator<InverseFunctionalityViolation, OWLObjectProperty>{
 	
 	private static final Logger log = Logger.getLogger(InverseFunctionalityConsistencyValidator.class);
 	
@@ -64,9 +66,9 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 				);
 	}
 	
-	public Collection<InverseFunctionalityViolation> getViolations(ObjectProperty p){
+	public Collection<InverseFunctionalityViolation> getViolations(OWLObjectProperty p){
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", p.getURI().toString());
+		queryTemplate.setIri("p", p.toStringID());
 		
 		Set<InverseFunctionalityViolation> violations = new HashSet<InverseFunctionalityViolation>();
 		
@@ -75,9 +77,9 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 			QuerySolution qs;
 			while(rs.hasNext()){
 				qs = rs.next();
-				KBElement object = parseNode(qs.get("o"));
-				Individual subject1 = new Individual(qs.getResource("s1").getURI());
-				Individual subject2 = new Individual(qs.getResource("s2").getURI());
+				OWLObject object = parseNode(qs.get("o"));
+				OWLIndividual subject1 = new OWLNamedIndividualImpl(IRI.create(qs.getResource("s1").getURI()));
+				OWLIndividual subject2 = new OWLNamedIndividualImpl(IRI.create(qs.getResource("s2").getURI()));
 				
 				violations.add(new InverseFunctionalityViolation(p, object, subject1, subject2));
 			}
@@ -88,16 +90,16 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 		return violations;
 	}
 	
-	private Set<InverseFunctionalityViolation> getViolationsIterative(Property p){
+	private Set<InverseFunctionalityViolation> getViolationsIterative(OWLProperty p){
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", p.getURI().toString());
+		queryTemplate.setIri("p", p.toStringID());
 		
 		Set<InverseFunctionalityViolation> violations = new HashSet<InverseFunctionalityViolation>();
 		
 		//get distinct objects
 		Set<RDFNode> objects = new HashSet<RDFNode>();
 		ParameterizedSparqlString query = new ParameterizedSparqlString("SELECT DISTINCT ?o WHERE {?s ?p ?o.}");
-		query.setIri("p", p.getName());
+		query.setIri("p", p.toStringID());
 		ResultSet rs = executeSelect(query.asQuery());
 		QuerySolution qs;
 		while(rs.hasNext()){
@@ -116,9 +118,9 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 				rs = executeSelect(queryTemplate.asQuery());
 				while(rs.hasNext()){
 					qs = rs.next();
-					KBElement object = parseNode(o);
-					Individual subject1 = new Individual(qs.getResource("s1").getURI());
-					Individual subject2 = new Individual(qs.getResource("s2").getURI());
+					OWLObject object = parseNode(o);
+					OWLIndividual subject1 = new OWLNamedIndividualImpl(IRI.create(qs.getResource("s1").getURI()));
+					OWLIndividual subject2 = new OWLNamedIndividualImpl(IRI.create(qs.getResource("s2").getURI()));
 					
 					violations.add(new InverseFunctionalityViolation(p, object, subject1, subject2));
 				}
@@ -130,9 +132,9 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 	}
 	
 	@Override
-	public long getNumberOfViolations(Property p){
+	public long getNumberOfViolations(OWLProperty p){
 		countQueryTemplate.clearParams();
-		countQueryTemplate.setIri("p", p.getURI().toString());
+		countQueryTemplate.setIri("p", p.toStringID());
 		long cnt = -1;
 		try {
 			ResultSet rs = executeSelect(countQueryTemplate.asQuery(), 40000, 40000);
@@ -142,20 +144,20 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 				cnt = qs.getLiteral("cnt").getLong();
 			}
 		} catch (QueryException e) {
-			log.error(p.getName() + ": Got exception. Fallback to iterative counting for each distinct object.");
+			log.error(p.toStringID() + ": Got exception. Fallback to iterative counting for each distinct object.");
 			return getNumberOfViolationsIterative(p);
 		}
 		return cnt;
 	}
 	
-	private long getNumberOfViolationsIterative(Property p){
+	private long getNumberOfViolationsIterative(OWLProperty p){
 		countQueryTemplate.clearParams();
-		countQueryTemplate.setIri("p", p.getURI().toString());
+		countQueryTemplate.setIri("p", p.toStringID());
 		
 		//get distinct objects
 		Set<RDFNode> objects = new HashSet<RDFNode>();
 		ParameterizedSparqlString query = new ParameterizedSparqlString("SELECT DISTINCT ?o WHERE {?s ?p ?o.}");
-		query.setIri("p", p.getName());
+		query.setIri("p", p.toStringID());
 		ResultSet rs = executeSelect(query.asQuery());
 		QuerySolution qs;
 		while(rs.hasNext()){
@@ -185,20 +187,4 @@ public class InverseFunctionalityConsistencyValidator extends SPARQLConsistencyV
 		}
 		return cnt;
 	}
-	
-	public static void main(String[] args) {
-		Logger.getRootLogger().setLevel(Level.TRACE);
-		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpediaLiveAKSW();
-		ObjectProperty op = new ObjectProperty("http://dbpedia.org/ontology/kingdom");
-		InverseFunctionalityConsistencyValidator validator = new InverseFunctionalityConsistencyValidator(endpoint);
-//		System.out.println("Consistent: " + validator.isConsistent(op));
-		long cnt = validator.getNumberOfViolations(op);
-		System.out.println(cnt);
-		Collection<InverseFunctionalityViolation> violations = validator.getViolations(op);
-		System.out.println(violations.size());
-		for(InverseFunctionalityViolation v : violations){
-			System.out.println(v);
-		}
-	}
-
 }

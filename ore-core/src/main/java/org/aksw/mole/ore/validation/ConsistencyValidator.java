@@ -1,7 +1,7 @@
 package org.aksw.mole.ore.validation;
 
-import org.dllearner.core.owl.Property;
+import org.semanticweb.owlapi.model.OWLProperty;
 
-public interface ConsistencyValidator<T extends Violation, P extends Property> extends Validator<T, P>{
+public interface ConsistencyValidator<T extends Violation, P extends OWLProperty> extends Validator<T, P>{
 	boolean isConsistent(P property);
 }

@@ -4,11 +4,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.ObjectProperty;
-import org.dllearner.core.owl.Property;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.Query;
@@ -16,7 +19,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
-public class AsymmetryConsistencyValidator extends SPARQLConsistencyValidator<AsymmetryViolation, ObjectProperty>{
+public class AsymmetryConsistencyValidator extends SPARQLConsistencyValidator<AsymmetryViolation, OWLObjectProperty>{
 	
 	private boolean ignoreReflexivity = false;
 	
@@ -56,9 +59,9 @@ public class AsymmetryConsistencyValidator extends SPARQLConsistencyValidator<As
 				);
 	}
 	
-	public Collection<AsymmetryViolation> getViolations(ObjectProperty op){
+	public Collection<AsymmetryViolation> getViolations(OWLObjectProperty op){
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", op.getURI().toString());
+		queryTemplate.setIri("p", op.toStringID());
 		
 		Set<AsymmetryViolation> violations = new HashSet<AsymmetryViolation>();
 		
@@ -66,22 +69,25 @@ public class AsymmetryConsistencyValidator extends SPARQLConsistencyValidator<As
 		QuerySolution qs;
 		while(rs.hasNext()){
 			qs = rs.next();
-			violations.add(new AsymmetryViolation(op, new Individual(qs.getResource("s").getURI()), new Individual(qs.getResource("o").getURI())));
+			violations.add(new AsymmetryViolation(
+					op, 
+					new OWLNamedIndividualImpl(IRI.create(qs.getResource("s").getURI())), 
+					new OWLNamedIndividualImpl(IRI.create(qs.getResource("o").getURI()))));
 		}
 		return violations;
 	}
 	
 	@Override
-	public long getNumberOfViolations(Property p){
+	public long getNumberOfViolations(OWLProperty p){
 		//count number of reflexive triples
 		ParameterizedSparqlString s = new ParameterizedSparqlString("SELECT (COUNT(*) AS ?cnt) WHERE {?s ?p ?s.}");
-		s.setIri("p", p.getURI().toString());
+		s.setIri("p", p.toStringID());
 		Query q = s.asQuery();
 		ResultSet rs = executeSelect(q);
 		long reflexiveCnt = rs.next().getLiteral("cnt").getLong(); 
 		//count number of asymmetric violations 
 		countQueryTemplate.clearParams();
-		countQueryTemplate.setIri("p", p.getURI().toString());
+		countQueryTemplate.setIri("p", p.toStringID());
 		long cnt = -1;
 		rs = executeSelect(countQueryTemplate.asQuery());
 		QuerySolution qs;
@@ -96,7 +102,7 @@ public class AsymmetryConsistencyValidator extends SPARQLConsistencyValidator<As
 	
 	public static void main(String[] args) {
 		SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpediaLiveAKSW();
-		ObjectProperty op = new ObjectProperty("http://dbpedia.org/ontology/servingRailwayLine");
+		OWLObjectProperty op = new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/servingRailwayLine"));
 		AsymmetryConsistencyValidator validator = new AsymmetryConsistencyValidator(endpoint);
 		System.out.println("Consistent: " + validator.isConsistent(op));
 		System.out.println("#Violations: " + validator.getNumberOfViolations(op));

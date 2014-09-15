@@ -1,14 +1,16 @@
 package org.aksw.mole.ore.validation;
 
-import org.dllearner.core.owl.Datatype;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
-import org.dllearner.core.owl.Property;
-import org.dllearner.core.owl.TypedConstant;
-import org.dllearner.core.owl.UntypedConstant;
 import org.dllearner.kb.sparql.ExtractionDBCache;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.kb.sparql.SparqlQuery;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLProperty;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLNamedIndividualImpl;
 
 import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.query.Query;
@@ -21,7 +23,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.vocabulary.XSD;
 
-public abstract class SPARQLConsistencyValidator<T extends Violation, P extends Property> implements ConsistencyValidator<T, P> {
+public abstract class SPARQLConsistencyValidator<T extends Violation, P extends OWLProperty> implements ConsistencyValidator<T, P> {
 	
 	protected ParameterizedSparqlString queryTemplate;
 	protected ParameterizedSparqlString countQueryTemplate;
@@ -30,6 +32,8 @@ public abstract class SPARQLConsistencyValidator<T extends Violation, P extends 
 	protected SparqlEndpoint endpoint;
 	protected ExtractionDBCache cache;
 	protected Model model;
+	
+	protected OWLDataFactory df = new OWLDataFactoryImpl();
 	
 	public SPARQLConsistencyValidator(Model model) {
 		this.model = model;
@@ -94,14 +98,14 @@ public abstract class SPARQLConsistencyValidator<T extends Violation, P extends 
 		return executeSelect(query, 0);
 	}
 	
-	public long getNumberOfViolations(Property p){
+	public long getNumberOfViolations(OWLProperty p){
 		ParameterizedSparqlString tmp = null;
 		if(literalAwareCountQueryTemplate != null && isXSDDateRange(p)){
 			tmp = countQueryTemplate;
 			countQueryTemplate = literalAwareCountQueryTemplate;
 		}
 		countQueryTemplate.clearParams();
-		countQueryTemplate.setIri("p", p.getURI().toString());
+		countQueryTemplate.setIri("p", p.toStringID());
 		long cnt = -1;
 		ResultSet rs = executeSelect(countQueryTemplate.asQuery());
 		QuerySolution qs;
@@ -115,8 +119,19 @@ public abstract class SPARQLConsistencyValidator<T extends Violation, P extends 
 		return cnt;
 	}
 	
-	protected boolean isXSDDateRange(Property p){
-		String query = String.format("SELECT ?range WHERE {<%s> <http://www.w3.org/2000/01/rdf-schema#range> ?range}", p.getURI().toString());
+	protected OWLLiteral convertLiteral(Literal lit) {
+		String datatypeURI = lit.getDatatypeURI();
+		OWLLiteral owlLiteral;
+		if (datatypeURI == null) {// rdf:PlainLiteral
+			owlLiteral = df.getOWLLiteral(lit.getLexicalForm(), lit.getLanguage());
+		} else {
+			owlLiteral = df.getOWLLiteral(lit.getLexicalForm(), df.getOWLDatatype(IRI.create(datatypeURI)));
+		}
+		return owlLiteral;
+	}
+	
+	protected boolean isXSDDateRange(OWLProperty p){
+		String query = String.format("SELECT ?range WHERE {<%s> <http://www.w3.org/2000/01/rdf-schema#range> ?range}", p.toStringID());
 		ResultSet rs = executeSelect(query);
 		if(rs.hasNext()){
 			if(rs.next().getResource("range").equals(XSD.date)){
@@ -126,22 +141,11 @@ public abstract class SPARQLConsistencyValidator<T extends Violation, P extends 
 		return false;
 	}
 	
-	protected KBElement parseNode(RDFNode node){
+	protected OWLObject parseNode(RDFNode node){
 		if(node.isURIResource()){
-			return new Individual(node.asResource().getURI());
+			return new OWLNamedIndividualImpl(IRI.create(node.asResource().getURI()));
 		} else if(node.isLiteral()){
-			Literal lit = node.asLiteral();
-			KBElement object;
-			if(lit.getDatatypeURI() != null){
-				object = new TypedConstant(lit.getLexicalForm(), new Datatype(lit.getDatatypeURI()));
-			} else {
-				if(lit.getLanguage() != null){
-					object = new UntypedConstant(lit.getLexicalForm(), lit.getLanguage());
-				} else {
-					object = new UntypedConstant(lit.getLexicalForm());
-				}
-			}
-			return object;
+			return convertLiteral(node.asLiteral());
 		} else {
 			throw new UnsupportedOperationException("Can not handle node type: " + node);
 		}
@@ -154,7 +158,7 @@ public abstract class SPARQLConsistencyValidator<T extends Violation, P extends 
 			queryTemplate = literalAwareQueryTemplate;
 		}
 		queryTemplate.clearParams();
-		queryTemplate.setIri("p", p.getURI().toString());
+		queryTemplate.setIri("p", p.toStringID());
 		
 		Query query = queryTemplate.asQuery();
 		query.setLimit(1);
