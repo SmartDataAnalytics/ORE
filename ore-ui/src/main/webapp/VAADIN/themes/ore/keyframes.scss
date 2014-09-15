@@ -1,5 +1,6 @@
 @mixin dashboard-keyframes {
 
+	/*
 @-webkit-keyframes spinner {
 	0% { background-position: 0 0;}
 	100% { background-position: -528px 0;}
@@ -19,7 +20,7 @@
 	0% { background-position: 0 0;}
 	100% { background-position: -528px 0;}
 }
-
+*/
 
 
 
@@ -152,35 +153,6 @@
 	100% {height: 0; opacity: 0;}
 }
 
-/*FontAwesome*/
-// Spinning Icons
-// --------------------------
 
-.#{$fa-css-prefix}-spin {
-  -webkit-animation: fa-spin 2s infinite linear;
-          animation: fa-spin 2s infinite linear;
-}
-
-@-webkit-keyframes fa-spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(359deg);
-            transform: rotate(359deg);
-  }
-}
-
-@keyframes fa-spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(359deg);
-            transform: rotate(359deg);
-  }
-}
 
 }

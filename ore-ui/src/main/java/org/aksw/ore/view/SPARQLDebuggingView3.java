@@ -40,6 +40,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -56,7 +57,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, Refreshable, ExplanationManagerListener, ValueChangeListener{
+public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable, ExplanationManagerListener, ValueChangeListener{
 	
 	private ExplanationOptionsPanel optionsPanel;
 	private RepairPlanTable repairPlanTable;
@@ -83,7 +84,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	SPARQLBasedTrivialInconsistencyFinder incFinder;
 	Set<Explanation<OWLAxiom>> explanations;
 	
-	public SPARQLDebuggingView() {
+	public SPARQLDebuggingView3() {
 		addStyleName("dashboard-view");
 		addStyleName("sparql-debugging-view");
 		initUI();
@@ -112,23 +113,36 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	
 	private void initUI(){
 		setSizeFull();
-		setSplitPosition(25);
-		
-		Component leftSide = createLeftSide();
-		addComponent(leftSide);
 		
 		Component rightSide = createRightSide();
 		addComponent(rightSide);
 		
+		final Component options = createLeftSide();
+		addComponent(options);
+		options.setVisible(false);
+		options.setWidth("100px");
+		
+		Button optionsButton = new Button(FontAwesome.COG);
+		optionsButton.addStyleName("options-button");
+		optionsButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+		optionsButton.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				options.setVisible(!options.isVisible());
+			}
+		});
+		addComponent(optionsButton);
 		
 //		reset();
 	}
 	
 	private Component createLeftSide(){
 		VerticalLayout l = new VerticalLayout();
+		l.addStyleName("debugging-options-panel");
 		l.setSizeFull();
 		l.setSpacing(true);
-		l.setCaption("Options");
+//		l.setCaption("Options");
 		
 		Component configForm = createConfigForm();
 		l.addComponent(configForm);
@@ -148,7 +162,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		l.addComponent(startButton);
 		l.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
-		return new WhitePanel(l);
+		return l;
 	}
 	
 	private Component createConfigForm(){

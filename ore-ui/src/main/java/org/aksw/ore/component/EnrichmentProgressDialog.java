@@ -65,6 +65,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
         	message = new Label(
                     axiomType.getName() + "...");// + FontAwesome.SPINNER.getHtml(), ContentMode.HTML);
             message.setImmediate(true);
+            message.addStyleName(ValoTheme.LABEL_SPINNER);
 //            message.addStyleName(ValoTheme.LABEL_SPINNER);
             l.addComponent(message);
             axiomType2Label.put(axiomType, message);

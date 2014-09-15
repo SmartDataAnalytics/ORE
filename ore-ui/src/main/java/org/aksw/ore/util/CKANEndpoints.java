@@ -62,6 +62,7 @@ public class CKANEndpoints {
 		String query = "SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o.}}";
 		
 		QueryExecution qe = qef.createQueryExecution(query);
+		qe.setTimeout(60, TimeUnit.SECONDS);
 		ResultSet rs = qe.execSelect();
 		while(rs.hasNext()){
 			QuerySolution qs = rs.next();

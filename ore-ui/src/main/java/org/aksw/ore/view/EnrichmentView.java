@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
+import org.aksw.ore.component.AxiomTypesTable;
 import org.aksw.ore.component.CollapsibleBox;
 import org.aksw.ore.component.EnrichmentProgressDialog;
 import org.aksw.ore.component.EvaluatedAxiomsTable;
@@ -71,6 +72,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class EnrichmentView extends HorizontalSplitPanel implements View, Refreshable{
 	
@@ -81,8 +83,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	private IntStepper maxNrOfReturnedAxiomsSpinner;
 	private Slider thresholdSlider;
 	
-	private Table axiomTypesTable;
-	private BeanItemContainer<AxiomType<OWLAxiom>> axiomTypesContainer;
+	private AxiomTypesTable axiomTypesTable;
 	private AxiomTypesField axiomTypesField;
 	
 	private Button startButton;
@@ -195,13 +196,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		leftSide.setMargin(new MarginInfo(false, false, true, false));
 		
 		Component configForm = createConfigForm();
-		Panel p = new Panel();
-		p.setSizeFull();
-		p.setContent(configForm);
-		leftSide.addComponent(p);
-		leftSide.setExpandRatio(p, 1f);
+//		configForm = new Panel(configForm);
+//		configForm.setSizeFull();
+		leftSide.addComponent(configForm);
+		leftSide.setExpandRatio(configForm, 1f);
 		
 		startButton = new Button("Start");
+		startButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		startButton.setDescription("Click to start the learning process.");
 //		startButton.setDisableOnClick(true);
 		startButton.addClickListener(new Button.ClickListener() {
@@ -216,46 +217,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		leftSide.setComponentAlignment(startButton, Alignment.MIDDLE_CENTER);
 		
 		return leftSide;
-	}
-	
-	private Component createAdvancedOptionsPanel(){
-		VerticalLayout panel = new VerticalLayout();
-		panel.setSizeFull();
-		
-		useInferenceBox = new CheckBox();
-		useInferenceBox.setCaption("Use Inference");
-		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
-				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
-		panel.addComponent(useInferenceBox);
-		
-		maxExecutionTimeSpinner = new IntStepper();
-		maxExecutionTimeSpinner.setValue(10);
-		maxExecutionTimeSpinner.setStepAmount(1);
-		maxExecutionTimeSpinner.setWidth("100%");
-		maxExecutionTimeSpinner.setCaption("Max. execution time");
-		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
-		panel.addComponent(maxExecutionTimeSpinner);
-		
-		maxNrOfReturnedAxiomsSpinner = new IntStepper();
-		maxNrOfReturnedAxiomsSpinner.setValue(10);
-		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
-		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
-		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
-		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "
-				+ "axiom type with a confidence score above the chosen threshold below.");
-		panel.addComponent(maxNrOfReturnedAxiomsSpinner);
-		
-		thresholdSlider = new Slider(1, 100);
-		thresholdSlider.setWidth("100%");
-		thresholdSlider.setImmediate(true);
-		thresholdSlider.setCaption("Threshold");
-		thresholdSlider.setDescription("The minimum confidence score for the learned axioms.");
-		panel.addComponent(thresholdSlider);
-		
-		CollapsibleBox collapsibleBox = new CollapsibleBox("Advanced", panel);
-		collapsibleBox.setSizeFull();
-		
-		return collapsibleBox;
 	}
 	
 	private Component createConfigForm(){
@@ -293,43 +254,64 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		});
 		form.addComponent(resourceURIField);
 		
-//		resourceURIField = new TextField();
-//		resourceURIField.setInputPrompt("Enter resource URI");
-//		resourceURIField.setWidth("100%");
-//		resourceURIField.setCaption("Resource URI");
-//		resourceURIField.setRequired(true);
-//		resourceURIField.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.ENTER, null) {
-//			
-//			@Override
-//			public void handleAction(Object sender, Object target) {
-//				try {
-//					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType(resourceURIField.getValue());
-//					onResourceTypeChanged(resourceType);
-//				} catch (OREException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//		form.addComponent(resourceURIField);
-		
 		resourceTypeField = new ResourceTypeField();
 //		form.addComponent(resourceTypeField);
 		
-		form.addComponent(createAdvancedOptionsPanel());
+		// advanced options
+		Component advancedOptionsPanel = createAdvancedOptionsPanel();
+		form.addComponent(advancedOptionsPanel);
 		
+		// axiom types
 		axiomTypesField = new AxiomTypesField();
 		axiomTypesField.setSizeFull();
 		form.addComponent(axiomTypesField);
 		form.setExpandRatio(axiomTypesField, 1f);
 		
+		form.setComponentAlignment(resourceURIField, Alignment.TOP_CENTER);
+		form.setComponentAlignment(advancedOptionsPanel, Alignment.TOP_CENTER);
+		
 		return form;
 	}
 	
-	private void showAdvancedOptions(boolean show){
-		useInferenceBox.setVisible(show);
-		maxExecutionTimeSpinner.setVisible(show);
-		maxNrOfReturnedAxiomsSpinner.setVisible(show);
-		thresholdSlider.setVisible(show);
+	private Component createAdvancedOptionsPanel(){
+		VerticalLayout panel = new VerticalLayout();
+//		panel.setSizeFull();
+		panel.setHeightUndefined();
+		
+		useInferenceBox = new CheckBox();
+		useInferenceBox.setCaption("Use Inference");
+		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
+				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
+		panel.addComponent(useInferenceBox);
+		
+		maxExecutionTimeSpinner = new IntStepper();
+		maxExecutionTimeSpinner.setValue(10);
+		maxExecutionTimeSpinner.setStepAmount(1);
+		maxExecutionTimeSpinner.setWidth("100%");
+		maxExecutionTimeSpinner.setCaption("Max. execution time");
+		maxExecutionTimeSpinner.setDescription("The maximum runtime in seconds for each particlar axiom type.");
+		panel.addComponent(maxExecutionTimeSpinner);
+		
+		maxNrOfReturnedAxiomsSpinner = new IntStepper();
+		maxNrOfReturnedAxiomsSpinner.setValue(10);
+		maxNrOfReturnedAxiomsSpinner.setStepAmount(1);
+		maxNrOfReturnedAxiomsSpinner.setWidth("100%");
+		maxNrOfReturnedAxiomsSpinner.setCaption("Max. returned axioms");
+		maxNrOfReturnedAxiomsSpinner.setDescription("The maximum number of shown axioms per "
+				+ "axiom type with a confidence score above the chosen threshold below.");
+		panel.addComponent(maxNrOfReturnedAxiomsSpinner);
+		
+		thresholdSlider = new Slider(1, 100);
+		thresholdSlider.setWidth("100%");
+		thresholdSlider.setImmediate(true);
+		thresholdSlider.setCaption("Threshold");
+		thresholdSlider.setDescription("The minimum confidence score for the learned axioms.");
+		panel.addComponent(thresholdSlider);
+		
+		CollapsibleBox collapsibleBox = new CollapsibleBox("Advanced", panel);
+		collapsibleBox.setSizeFull();
+		
+		return collapsibleBox;
 	}
 	
 	private void onLearning(){
@@ -468,7 +450,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			axiomTypesField.setVisible(false);
 		} else {
 			axiomTypesField.setVisible(true);
-			axiomTypesField.updateVisibleAxiomTypes(ORESession.getEnrichmentManager().getAxiomTypes(resourceType));
+			axiomTypesTable.show(resourceType);
 		}
 	}
 	
@@ -498,8 +480,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		public AxiomTypesField() {
 			setCaption("Axiom types");
-			setDescription("Choose the axiom types for which axiom suggestions will be generated.");
+			setDescription("Choose the types of axioms for which suggestions will be generated.");
 			setSizeFull();
+			setHeightUndefined();
 			
 			//(de)select all checkbox
 			CheckBox allCheckBox = new CheckBox("All");
@@ -508,66 +491,24 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			allCheckBox.addValueChangeListener(new Property.ValueChangeListener() {
 				@Override
 				public void valueChange(Property.ValueChangeEvent event) {
-					if((Boolean) event.getProperty().getValue()){
-						selectedAxiomsTypes.addAll(visibleAxiomTypes);
-					} else {
-						selectedAxiomsTypes.clear();
-					}
-					startButton.setEnabled(!selectedAxiomsTypes.isEmpty());
-					axiomTypesTable.refreshRowCache();
+					axiomTypesTable.selectAll((Boolean) event.getProperty().getValue());
 				}
 			});
 			addComponent(allCheckBox);
 			
 			//table
-			axiomTypesTable = new Table();
-			axiomTypesTable.setSizeFull();
-			axiomTypesTable.setHeightUndefined();
-			axiomTypesTable.setImmediate(true);
-			axiomTypesTable.setPageLength(0);
-			axiomTypesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-			axiomTypesContainer = new BeanItemContainer<AxiomType<OWLAxiom>>(AxiomType.class);
-			this.visibleAxiomTypes = ORESession.getEnrichmentManager().getAxiomTypes(ResourceType.UNKNOWN);
-			axiomTypesContainer.addAll(visibleAxiomTypes);
-			axiomTypesTable.setContainerDataSource(axiomTypesContainer);
-			axiomTypesTable.addGeneratedColumn("selected", new ColumnGenerator() {
-				
-				@SuppressWarnings("unchecked")
+			axiomTypesTable = new AxiomTypesTable(new ValueChangeListener() {
 				@Override
-				public Object generateCell(Table source, final Object itemId, Object columnId) {
-					CheckBox box = new CheckBox();
-					box.setValue(selectedAxiomsTypes.contains((AxiomType<OWLAxiom>) itemId));
-					box.setImmediate(true);
-					box.addValueChangeListener(new Property.ValueChangeListener() {
-						@Override
-						public void valueChange(Property.ValueChangeEvent event) {
-							if((Boolean) event.getProperty().getValue()){
-								selectedAxiomsTypes.add((AxiomType<OWLAxiom>) itemId);
-							} else {
-								selectedAxiomsTypes.remove((AxiomType<OWLAxiom>) itemId);
-							}
-							startButton.setEnabled(!selectedAxiomsTypes.isEmpty());
-						}
-					});
-					return box;
+				public void valueChange(ValueChangeEvent event) {
+					startButton.setEnabled(!axiomTypesTable.getSelectedAxiomsTypes().isEmpty());
 				}
 			});
-			axiomTypesTable.setVisibleColumns(new String[] {"selected", "name"});
-			axiomTypesTable.setColumnExpandRatio("name", 1f);
 			addComponent(axiomTypesTable);
-			setExpandRatio(axiomTypesTable, 1f);
 			
 		}
 		
-		public void updateVisibleAxiomTypes(Collection<AxiomType<OWLAxiom>> visibleAxiomTypes){
-			this.visibleAxiomTypes = visibleAxiomTypes;
-			selectedAxiomsTypes.retainAll(visibleAxiomTypes);
-			axiomTypesContainer.removeAllItems();
-			axiomTypesContainer.addAll(visibleAxiomTypes);
-		}
-		
 		public Set<AxiomType<OWLAxiom>> getSelectedAxiomsTypes() {
-			return selectedAxiomsTypes;
+			return axiomTypesTable.getSelectedAxiomsTypes();
 		}
 	}
 	

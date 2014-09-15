@@ -32,6 +32,7 @@
 	appearance: $a;
 }
 
+
 @mixin transition ($t) {
 	-webkit-transition: $t;
 	-moz-transition: $t;
@@ -39,6 +40,7 @@
 	-o-transition: $t;
 	transition: $t;
 }
+
 
 @mixin transform ($t) {
 	-webkit-transform: $t;
@@ -48,7 +50,7 @@
 	transform: $t;
 }
 
-@mixin animation ($name, $duration, $easing) {
+/* @mixin animation ($name, $duration, $easing) {
 	-webkit-animation: $name $duration $easing;
 	-moz-animation: $name $duration $easing;
 	-ms-animation: $name $duration $easing;
@@ -78,7 +80,7 @@
 	-ms-animation-fill-mode: $fm;
 	-o-animation-fill-mode: $fm;
 	animation-fill-mode: $fm;
-}
+} */
 
 @mixin fade-in ($duration: 160ms){
 /* 	TODO this will freak out the Sass compiler */

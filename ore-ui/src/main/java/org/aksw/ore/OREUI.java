@@ -22,10 +22,7 @@ import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.NamingView;
 import org.aksw.ore.view.Refreshable;
 import org.aksw.ore.view.SPARQLDebuggingView;
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
-
-import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -41,7 +38,6 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
