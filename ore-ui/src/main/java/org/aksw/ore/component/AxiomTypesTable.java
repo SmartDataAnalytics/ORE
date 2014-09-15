@@ -72,10 +72,10 @@ public class AxiomTypesTable extends Table{
 	            		));
 	 @SuppressWarnings("unchecked")
 	 public static final Set<AxiomType<? extends OWLAxiom>> DATA_PROPERTY_AXIOM_TYPES = new TreeSet<AxiomType<? extends OWLAxiom>>(
-			 Lists.newArrayList(DATA_PROPERTY_DOMAIN,
-	                    DATA_PROPERTY_RANGE, FUNCTIONAL_DATA_PROPERTY,
-	                    DISJOINT_DATA_PROPERTIES,
-	                    SUB_DATA_PROPERTY, EQUIVALENT_DATA_PROPERTIES
+			 Lists.newArrayList(
+					 SUB_DATA_PROPERTY, EQUIVALENT_DATA_PROPERTIES, DISJOINT_DATA_PROPERTIES,
+					 DATA_PROPERTY_DOMAIN, DATA_PROPERTY_RANGE,
+					 FUNCTIONAL_DATA_PROPERTY
 	            		));
 	 
 	private static final AxiomType allAxiomsAxiomType = allAxioms();
