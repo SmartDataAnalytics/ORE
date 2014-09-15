@@ -178,9 +178,22 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         });
     	
     	ORESession.getKnowledgebaseManager().addListener(this);
+    	
+    	String fragment = getPage().getUriFragment();
+    	enter(fragment);
     }
     
-    private void updateAvailableViews(){
+    private void enter(String fragment) {
+    	if(fragment.startsWith("!")){
+    		fragment = fragment.substring(1);
+    	}
+		Class<? extends View> cls = view2Route.inverse().get(fragment);
+		if(cls == EnrichmentView.class){
+			navigator.navigateTo(fragment);
+		}
+	}
+
+	private void updateAvailableViews(){
     	Knowledgebase knowledgebase = ORESession.getKnowledgebaseManager().getKnowledgebase();
     	if(knowledgebase != null){
     		View view;
