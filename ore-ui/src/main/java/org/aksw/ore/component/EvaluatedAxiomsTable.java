@@ -11,42 +11,24 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.util.ScoreExplanationPattern;
 import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.core.owl.AsymmetricObjectPropertyAxiom;
-import org.dllearner.core.owl.Axiom;
-import org.dllearner.core.owl.DatatypePropertyDomainAxiom;
-import org.dllearner.core.owl.DatatypePropertyRangeAxiom;
-import org.dllearner.core.owl.Description;
-import org.dllearner.core.owl.DisjointClassesAxiom;
-import org.dllearner.core.owl.DisjointDatatypePropertyAxiom;
-import org.dllearner.core.owl.DisjointObjectPropertyAxiom;
-import org.dllearner.core.owl.EquivalentDatatypePropertiesAxiom;
-import org.dllearner.core.owl.EquivalentObjectPropertiesAxiom;
-import org.dllearner.core.owl.FunctionalDatatypePropertyAxiom;
-import org.dllearner.core.owl.FunctionalObjectPropertyAxiom;
-import org.dllearner.core.owl.InverseFunctionalObjectPropertyAxiom;
-import org.dllearner.core.owl.IrreflexiveObjectPropertyAxiom;
-import org.dllearner.core.owl.ObjectProperty;
-import org.dllearner.core.owl.ObjectPropertyDomainAxiom;
-import org.dllearner.core.owl.ObjectPropertyRangeAxiom;
-import org.dllearner.core.owl.ReflexiveObjectPropertyAxiom;
-import org.dllearner.core.owl.SubClassAxiom;
-import org.dllearner.core.owl.SubDatatypePropertyAxiom;
-import org.dllearner.core.owl.SubObjectPropertyAxiom;
-import org.dllearner.core.owl.SymmetricObjectPropertyAxiom;
-import org.dllearner.core.owl.TransitiveObjectPropertyAxiom;
 import org.dllearner.learningproblems.AxiomScore;
-import org.dllearner.utilities.owl.OWLAPIConverter;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
+import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
+import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLNaryPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyCharacteristicAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLPropertyExpression;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 
 import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
@@ -62,7 +44,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class EvaluatedAxiomsTable extends Table{
@@ -72,11 +53,11 @@ public class EvaluatedAxiomsTable extends Table{
 	private Set<Object> selectedObjects = new HashSet<Object>();
 	
 	private AxiomType axiomType;
-	private Collection<EvaluatedAxiom> axioms;
+	private Collection<EvaluatedAxiom<OWLAxiom>> axioms;
 	
 	private Renderer renderer = ORESession.getRenderer();
 	
-	public EvaluatedAxiomsTable(final AxiomType axiomType, Collection<EvaluatedAxiom> axioms) {
+	public EvaluatedAxiomsTable(final AxiomType axiomType, Collection<EvaluatedAxiom<OWLAxiom>> axioms) {
 		this.axiomType = axiomType;
 		this.axioms = axioms;
 		
@@ -99,8 +80,8 @@ public class EvaluatedAxiomsTable extends Table{
 		setContainerDataSource(container);
 		
 		Set<String> renderedAxioms = Sets.newHashSetWithExpectedSize(axioms.size());
-		final Set<EvaluatedAxiom> axiomsToBePrefixed = Sets.newHashSetWithExpectedSize(axioms.size());
-		for (EvaluatedAxiom axiom : axioms) {
+		final Set<EvaluatedAxiom<OWLAxiom>> axiomsToBePrefixed = Sets.newHashSetWithExpectedSize(axioms.size());
+		for (EvaluatedAxiom<OWLAxiom> axiom : axioms) {
 			String s = renderer.render(axiom.getAxiom());
 			if(!renderedAxioms.add(s)){
 				axiomsToBePrefixed.add(axiom);
@@ -143,8 +124,8 @@ public class EvaluatedAxiomsTable extends Table{
 				cell.setWidthUndefined();
 //				cell.setSpacing(true);
 				
-				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom) itemId).getScore().getAccuracy()));
-				accuracyLabel.setDescription(getAccuracyDescription((EvaluatedAxiom)itemId));
+				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom<OWLAxiom>) itemId).getScore().getAccuracy()));
+				accuracyLabel.setDescription(getAccuracyDescription((EvaluatedAxiom<OWLAxiom>)itemId));
 				cell.addComponent(accuracyLabel);
 				cell.setExpandRatio(accuracyLabel, 1f);
 				cell.setComponentAlignment(accuracyLabel, Alignment.MIDDLE_RIGHT);
@@ -158,7 +139,7 @@ public class EvaluatedAxiomsTable extends Table{
 					
 					@Override
 					public void buttonClick(ClickEvent event) {
-						AxiomScoreExplanationDialog dialog = new AxiomScoreExplanationDialog(axiomType, (EvaluatedAxiom)itemId);
+						AxiomScoreExplanationDialog dialog = new AxiomScoreExplanationDialog(axiomType, (EvaluatedAxiom<OWLAxiom>)itemId);
 						UI.getCurrent().addWindow(dialog);
 						dialog.center();
 					}
@@ -237,44 +218,39 @@ public class EvaluatedAxiomsTable extends Table{
 		} else if (axiom instanceof OWLSubObjectPropertyOfAxiom) {
 			prop1 = ((OWLSubObjectPropertyOfAxiom)axiom).getSubProperty().toString();
 			prop2 = ((OWLSubObjectPropertyOfAxiom)axiom).getSuperProperty().toString();
+		} else if (axiom instanceof OWLDisjointObjectPropertiesAxiom) {
+			Set<OWLObjectPropertyExpression> properties = ((OWLDisjointObjectPropertiesAxiom) axiom).getProperties();
+			Iterator<OWLObjectPropertyExpression> iter = properties.iterator();
+			prop1 = iter.next().toString();
+			prop2 = iter.next().toString();
 		} else if (axiom instanceof OWLNaryPropertyAxiom) {
-			((OWLNaryPropertyAxiom) axiom).getProperties();
-			prop1 = ((DisjointObjectPropertyAxiom)axiom).getRole().getName();
-			prop2 = ((DisjointObjectPropertyAxiom)axiom).getDisjointRole().getName();
-		} else if (axiom instanceof EquivalentObjectPropertiesAxiom) {
-			Collection<ObjectProperty> properties = ((EquivalentObjectPropertiesAxiom)axiom).getEquivalentProperties();
-			Iterator<ObjectProperty> iter = properties.iterator();
-			prop1 = iter.next().getName();
-			prop2 = iter.next().getName();
+			Collection<OWLPropertyExpression> properties = ((OWLNaryPropertyAxiom)axiom).getProperties();
+			Iterator<OWLPropertyExpression> iter = properties.iterator();
+			prop1 = iter.next().toString();
+			prop2 = iter.next().toString();
 		} else if (axiom instanceof OWLObjectPropertyDomainAxiom) {
 			prop1 = ((OWLObjectPropertyDomainAxiom)axiom).getProperty().toString();
 			cls1 = ((OWLObjectPropertyDomainAxiom)axiom).getDomain().toString();
 		} else if (axiom instanceof OWLObjectPropertyRangeAxiom) {
-			prop1 = ((OWLObjectPropertyRangeAxiom)axiom).getProperty().getName();
+			prop1 = ((OWLObjectPropertyRangeAxiom)axiom).getProperty().toString();
 			cls1 = ((OWLObjectPropertyRangeAxiom)axiom).getRange().toString();
 		} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
 			prop1 = ((OWLSubDataPropertyOfAxiom)axiom).getSubProperty().toString();
 			prop2 = ((OWLSubDataPropertyOfAxiom)axiom).getSuperProperty().toString();
-		} else if (axiom instanceof EquivalentDatatypePropertiesAxiom) {
-			prop1 = ((EquivalentDatatypePropertiesAxiom)axiom).getRole().getName();
-			prop2 = ((EquivalentDatatypePropertiesAxiom)axiom).getEquivalentRole().getName();
-		} else if (axiom instanceof DisjointDatatypePropertyAxiom) {
-			prop1 = ((DisjointDatatypePropertyAxiom)axiom).getRole().getName();
-			prop2 = ((DisjointDatatypePropertyAxiom)axiom).getDisjointRole().getName();
-		} else if (axiom instanceof FunctionalDatatypePropertyAxiom) {
-			prop1 = ((FunctionalDatatypePropertyAxiom)axiom).getRole().getName();
-		} else if (axiom instanceof DatatypePropertyDomainAxiom) {
-			prop1 = ((DatatypePropertyDomainAxiom)axiom).getProperty().getName();
-			cls1 = ((DatatypePropertyDomainAxiom)axiom).getDomain().toString();
-		} else if (axiom instanceof DatatypePropertyRangeAxiom) {
-			prop1 = ((DatatypePropertyRangeAxiom)axiom).getProperty().getName();
-			datatype = ((DatatypePropertyRangeAxiom)axiom).getRange().toString();
-		} else if (axiom instanceof SubClassAxiom) {
-			cls1 = ((SubClassAxiom)axiom).getSubConcept().toString();
-			cls2 = ((SubClassAxiom)axiom).getSuperConcept().toString();
-		} else if (axiom instanceof DisjointClassesAxiom) {
-			Collection<Description> classes = ((DisjointClassesAxiom)axiom).getDescriptions();
-			Iterator<Description> iter = classes.iterator();
+		} else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
+			prop1 = ((OWLFunctionalDataPropertyAxiom)axiom).getProperty().asOWLDataProperty().toStringID();
+		} else if (axiom instanceof OWLDataPropertyDomainAxiom) {
+			prop1 = ((OWLDataPropertyDomainAxiom)axiom).getProperty().toString();
+			cls1 = ((OWLDataPropertyDomainAxiom)axiom).getDomain().toString();
+		} else if (axiom instanceof OWLDataPropertyRangeAxiom) {
+			prop1 = ((OWLDataPropertyRangeAxiom)axiom).getProperty().toString();
+			datatype = ((OWLDataPropertyRangeAxiom)axiom).getRange().toString();
+		} else if (axiom instanceof OWLSubClassOfAxiom) {
+			cls1 = ((OWLSubClassOfAxiom)axiom).getSubClass().toString();
+			cls2 = ((OWLSubClassOfAxiom)axiom).getSuperClass().toString();
+		} else if (axiom instanceof OWLDisjointClassesAxiom) {
+			Collection<OWLClassExpression> classes = ((OWLDisjointClassesAxiom)axiom).getClassExpressions();
+			Iterator<OWLClassExpression> iter = classes.iterator();
 			cls1 = iter.next().toString();
 			cls2 = iter.next().toString();
 		}

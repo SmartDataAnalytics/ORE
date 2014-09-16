@@ -18,22 +18,16 @@ import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
-import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
 import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.kb.SparqlEndpointKS;
-import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.vaadin.risto.stepper.IntStepper;
-
-import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -352,7 +346,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				@Override
 				public void run() {
 					try {
-						final List<EvaluatedAxiom> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms2(resourceURI, axiomType);
+						final List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms2(resourceURI, axiomType);
 						UI.getCurrent().access(new Runnable() {
 							
 							@Override
@@ -403,7 +397,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		}
 	}
 	
-	public void showTable(AxiomType<OWLAxiom> axiomType, List<EvaluatedAxiom> axioms){
+	public void showTable(AxiomType<OWLAxiom> axiomType, List<EvaluatedAxiom<OWLAxiom>> axioms){
 		if(!axioms.isEmpty()){
 			try {
 				EvaluatedAxiomsTable table = new EvaluatedAxiomsTable(axiomType, axioms);
@@ -577,13 +571,5 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		for (EvaluatedAxiomsTable evaluatedAxiomsTable : tables) {
 			evaluatedAxiomsTable.refreshRowCache();
 		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		ObjectPropertyDomainAxiomLearner la = new ObjectPropertyDomainAxiomLearner(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpediaLiveAKSW()));
-		la.setPropertyToDescribe(new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/league")));
-		la.init();
-		la.start();
-		System.out.println(la.getCurrentlyBestEvaluatedAxioms());
 	}
 }

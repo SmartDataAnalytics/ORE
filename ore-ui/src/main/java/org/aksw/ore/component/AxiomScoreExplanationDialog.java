@@ -9,9 +9,10 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.util.ScoreExplanationPattern;
 import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.KBElement;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObject;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.ExternalResource;
@@ -34,7 +35,7 @@ public class AxiomScoreExplanationDialog extends Window{
 	private DecimalFormat df = new DecimalFormat("0.00%");
 	Renderer renderer = ORESession.getRenderer();
 	
-	public AxiomScoreExplanationDialog(AxiomType axiomType, EvaluatedAxiom axiom) {
+	public AxiomScoreExplanationDialog(AxiomType axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
 		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");
@@ -60,8 +61,8 @@ public class AxiomScoreExplanationDialog extends Window{
 		content.setExpandRatio(label, 0f);
 		
 		//get the positive and negative examples
-		Set<KBElement> positives = ORESession.getEnrichmentManager().getPositives(axiomType, axiom);
-		Set<KBElement> negatives = ORESession.getEnrichmentManager().getNegatives(axiomType, axiom);
+		Set<OWLObject> positives = ORESession.getEnrichmentManager().getPositives(axiomType, axiom);
+		Set<OWLObject> negatives = ORESession.getEnrichmentManager().getNegatives(axiomType, axiom);
 		
 		//show the positive examples, if exist
 		if(positives.isEmpty()){
@@ -77,23 +78,23 @@ public class AxiomScoreExplanationDialog extends Window{
 				positiveExamplesTable.setSizeFull();
 				positiveExamplesTable.addContainerProperty("element", String.class, null);
 				positiveExamplesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-				for (KBElement element : positives) {
+				for (OWLObject element : positives) {
 					positiveExamplesTable.addItem(element).getItemProperty("element").setValue(element.toString());
 				}
 				//show the URIs as links
 				positiveExamplesTable.addGeneratedColumn("element", new Table.ColumnGenerator() {
 		            public Component generateCell(Table source, Object itemId,
 		                    Object columnId) {
-		                KBElement element = (KBElement) itemId;
-		                if(element instanceof Individual){
-		                	Individual ind = (Individual) element;
-		                	String decodedURI = ind.getName();
+		                OWLObject element = (OWLObject) itemId;
+		                if(element instanceof OWLIndividual){
+		                	OWLIndividual ind = (OWLIndividual) element;
+		                	String decodedURI = ind.toString();
 		                	try {
-								decodedURI = URLDecoder.decode(ind.getName(), "UTF-8");
+								decodedURI = URLDecoder.decode(ind.toStringID(), "UTF-8");
 							} catch (UnsupportedEncodingException e) {
 								e.printStackTrace();
 							}
-		                	Link link = new Link(decodedURI, new ExternalResource(ind.getName()));
+		                	Link link = new Link(decodedURI, new ExternalResource(ind.toStringID()));
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {
@@ -121,23 +122,23 @@ public class AxiomScoreExplanationDialog extends Window{
 				negativeExamplesTable.setSizeFull();
 				negativeExamplesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 				negativeExamplesTable.addContainerProperty("element", String.class, null);
-				for (KBElement element : negatives) {
+				for (OWLObject element : negatives) {
 					negativeExamplesTable.addItem(element).getItemProperty("element").setValue(element.toString());
 				}
 				//show the URIs as links
 				negativeExamplesTable.addGeneratedColumn("element", new Table.ColumnGenerator() {
 		            public Component generateCell(Table source, Object itemId,
 		                    Object columnId) {
-		                KBElement element = (KBElement) itemId;
-		                if(element instanceof Individual){
-		                	Individual ind = (Individual) element;
-		                	String decodedURI = ind.getName();
+		                OWLObject element = (OWLObject) itemId;
+		                if(element instanceof OWLIndividual){
+		                	OWLIndividual ind = (OWLIndividual) element;
+		                	String decodedURI = ind.toStringID();
 		                	try {
-								decodedURI = URLDecoder.decode(ind.getName(), "UTF-8");
+								decodedURI = URLDecoder.decode(ind.toStringID(), "UTF-8");
 							} catch (UnsupportedEncodingException e) {
 								e.printStackTrace();
 							}
-		                	Link link = new Link(decodedURI, new ExternalResource(ind.getName()));
+		                	Link link = new Link(decodedURI, new ExternalResource(ind.toStringID()));
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {

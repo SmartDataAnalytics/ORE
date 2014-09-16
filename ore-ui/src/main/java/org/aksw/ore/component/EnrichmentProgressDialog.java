@@ -42,12 +42,12 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	private Map<AxiomType<OWLAxiom>, Label> axiomType2Label;
 	
 	private Collection<AxiomType<OWLAxiom>> pendingAxiomTypes;
-	private Collection<AxiomType<OWLAxiom>> finishedAxiomTypes;
+	private Collection<AxiomType<? extends OWLAxiom>> finishedAxiomTypes;
 
 	public EnrichmentProgressDialog(Collection<AxiomType<OWLAxiom>> axiomTypes) {
 		super("Computing axioms...");
 		this.pendingAxiomTypes = axiomTypes;
-		finishedAxiomTypes = new HashSet<AxiomType<OWLAxiom>>(axiomTypes.size());
+		finishedAxiomTypes = new HashSet<AxiomType<? extends OWLAxiom>>(axiomTypes.size());
 		
 		VerticalLayout l = new VerticalLayout();
         l.setWidth("400px");
@@ -125,7 +125,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	 * @see org.aksw.ore.manager.EnrichmentManager.EnrichmentProgressListener#onEnrichmentStarted(org.semanticweb.owlapi.model.AxiomType)
 	 */
 	@Override
-	public void onEnrichmentStarted(AxiomType<OWLAxiom> axiomType) {
+	public void onEnrichmentStarted(AxiomType<?extends OWLAxiom> axiomType) {
 	}
 
 
@@ -133,7 +133,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	 * @see org.aksw.ore.manager.EnrichmentManager.EnrichmentProgressListener#onEnrichmentFinished(org.semanticweb.owlapi.model.AxiomType)
 	 */
 	@Override
-	public void onEnrichmentFinished(final AxiomType<OWLAxiom> axiomType) {
+	public void onEnrichmentFinished(final AxiomType<?extends OWLAxiom> axiomType) {
 		finishedAxiomTypes.add(axiomType);
 		
 		UI.getCurrent().access(new Runnable() {
@@ -153,6 +153,6 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	 * @see org.aksw.ore.manager.EnrichmentManager.EnrichmentProgressListener#onEnrichmentFailed(org.semanticweb.owlapi.model.AxiomType)
 	 */
 	@Override
-	public void onEnrichmentFailed(AxiomType<OWLAxiom> axiomType) {
+	public void onEnrichmentFailed(AxiomType<?extends OWLAxiom> axiomType) {
 	}
 }

@@ -30,11 +30,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
-import org.aksw.ore.ORESession;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.model.ResourceType;
-import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
 import org.apache.jena.riot.checker.CheckerLiterals;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -42,6 +41,7 @@ import org.dllearner.algorithms.DisjointClassesLearner;
 import org.dllearner.algorithms.SimpleSubclassLearner;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.algorithms.properties.AsymmetricObjectPropertyAxiomLearner;
+import org.dllearner.algorithms.properties.DataPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.DataPropertyDomainAxiomLearner;
 import org.dllearner.algorithms.properties.DataPropertyRangeAxiomLearner;
 import org.dllearner.algorithms.properties.DisjointDataPropertyAxiomLearner;
@@ -52,6 +52,7 @@ import org.dllearner.algorithms.properties.FunctionalDataPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.FunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.InverseFunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.IrreflexiveObjectPropertyAxiomLearner;
+import org.dllearner.algorithms.properties.ObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner2;
 import org.dllearner.algorithms.properties.ObjectPropertyRangeAxiomLearner;
 import org.dllearner.algorithms.properties.ReflexiveObjectPropertyAxiomLearner;
@@ -121,9 +122,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 public class EnrichmentManager {
 	
 	public interface EnrichmentProgressListener extends EventListener {
-		public void onEnrichmentStarted(AxiomType<OWLAxiom> arg);
-		public void onEnrichmentFinished(AxiomType<OWLAxiom> arg);
-		public void onEnrichmentFailed(AxiomType<OWLAxiom> arg);
+		public void onEnrichmentStarted(AxiomType<?extends OWLAxiom> arg);
+		public void onEnrichmentFinished(AxiomType<?extends OWLAxiom> arg);
+		public void onEnrichmentFailed(AxiomType<?extends OWLAxiom> arg);
 	}
 
 	private final List<EnrichmentProgressListener> enrichmentProgressListeners = new LinkedList<EnrichmentProgressListener>();
@@ -140,28 +141,26 @@ public class EnrichmentManager {
 		}
 	}
 
-	private void fireEnrichmentStarted(AxiomType<OWLAxiom> arg) {
+	private void fireEnrichmentStarted(AxiomType<?extends OWLAxiom> arg) {
 		synchronized (enrichmentProgressListeners) {
 			for (EnrichmentProgressListener listener : enrichmentProgressListeners)
 				listener.onEnrichmentStarted(arg);
 		}
 	}
 
-	private void fireEnrichmentFinished(AxiomType<OWLAxiom> arg) {
+	private void fireEnrichmentFinished(AxiomType<?extends OWLAxiom> arg) {
 		synchronized (enrichmentProgressListeners) {
 			for (EnrichmentProgressListener listener : enrichmentProgressListeners)
 				listener.onEnrichmentFinished(arg);
 		}
 	}
 	
-	private void fireEnrichmentFailed(AxiomType<OWLAxiom> arg) {
+	private void fireEnrichmentFailed(AxiomType<?extends OWLAxiom> arg) {
 		synchronized (enrichmentProgressListeners) {
 			for (EnrichmentProgressListener listener : enrichmentProgressListeners)
 				listener.onEnrichmentFailed(arg);
 		}
 	}
-
-
 	
 	enum QueryMode {
 		ITERATIVE,
@@ -176,7 +175,6 @@ public class EnrichmentManager {
 	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private KeywordColorMap colorMap = new KeywordColorMap();
-	private Renderer renderer = ORESession.getRenderer();
 	
 	private DecimalFormat df = new DecimalFormat("##0.0");
 	
@@ -192,7 +190,7 @@ public class EnrichmentManager {
 	
 	private List<AxiomType> axiomTypes;
 	
-	private List<EvaluatedAxiom> learnedAxioms;
+	private List<EvaluatedAxiom<OWLAxiom>> learnedAxioms;
 	
 	private OWLEntity currentEntity;
 	private LearningAlgorithm currentAlgorithm;
@@ -272,7 +270,6 @@ public class EnrichmentManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	public SparqlEndpoint getEndpoint() {
@@ -331,8 +328,8 @@ public class EnrichmentManager {
 		this.axiomTypes = axiomTypes;
 	}
 	
-	public List<EvaluatedAxiom> getCurrentlyEvaluatedAxioms(){
-		return new ArrayList<EvaluatedAxiom>(learnedAxioms);
+	public List<EvaluatedAxiom<OWLAxiom>> getCurrentlyEvaluatedAxioms(){
+		return new ArrayList<EvaluatedAxiom<OWLAxiom>>(learnedAxioms);
 	}
 	
 	public Collection<AxiomType<OWLAxiom>> getAxiomTypes(ResourceType type){
@@ -359,8 +356,6 @@ public class EnrichmentManager {
 		return types;
 	}
 	
-	
-	
 	public ResourceType getResourceType(String resourceURI) throws OREException{
 		SPARQLTasks st = new SPARQLTasks(endpoint);
 		currentEntity = st.guessResourceType(resourceURI, true);
@@ -379,11 +374,11 @@ public class EnrichmentManager {
 		}
 	}
 	
-	public List<EvaluatedAxiom> getEvaluatedAxioms2(String resourceURI, ResourceType resourceType,
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms2(String resourceURI, ResourceType resourceType,
 			AxiomType<OWLAxiom> axiomType, int maxExecutionTimeInSeconds, double threshold, boolean useInference)
 			throws OREException {
 		fireEnrichmentStarted(axiomType);
-		List<EvaluatedAxiom> learnedAxioms = new ArrayList<EvaluatedAxiom>();
+		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
 
 		try {
 			// common helper objects
@@ -417,10 +412,10 @@ public class EnrichmentManager {
 		return learnedAxioms;
 	}
 	
-	public List<EvaluatedAxiom> getEvaluatedAxioms2(String resourceURI, AxiomType<OWLAxiom> axiomType)
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms2(String resourceURI, AxiomType<?extends OWLAxiom> axiomType)
 			throws OREException {
 		fireEnrichmentStarted(axiomType);
-		List<EvaluatedAxiom> learnedAxioms = new ArrayList<EvaluatedAxiom>();
+		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
 
 		try {
 			// common helper objects
@@ -453,7 +448,6 @@ public class EnrichmentManager {
 		}
 		return learnedAxioms;
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	private void runClassLearningAlgorithms(SparqlEndpointKS ks, OWLClass nc) throws ComponentInitException {
@@ -480,9 +474,9 @@ public class EnrichmentManager {
 		}		
 	}	
 	
-	private List<EvaluatedAxiom> applyLearningAlgorithm(Class<? extends LearningAlgorithm> algorithmClass, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
+	private List<EvaluatedAxiom<OWLAxiom>> applyLearningAlgorithm(Class<? extends LearningAlgorithm> algorithmClass, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
 		if(axiomTypes != null && !axiomTypes.contains(axiomType2Class.inverse().get(algorithmClass))){
-			return Collections.<EvaluatedAxiom>emptyList();
+			return Collections.<EvaluatedAxiom<OWLAxiom>>emptyList();
 		}
 		
 		AxiomLearningAlgorithm learner = null;
@@ -493,12 +487,13 @@ public class EnrichmentManager {
 			e.printStackTrace();
 		}
 		if(classAlgorithms.contains(algorithmClass)) {
-			ConfigHelper.configure(learner, "classToDescribe", entity);
-		} else {
-			ConfigHelper.configure(learner, "propertyToDescribe", entity);
+			
+		} else if(objectPropertyAlgorithms.contains(algorithmClass)){
+			((ObjectPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLObjectProperty());
+		} else if(dataPropertyAlgorithms.contains(algorithmClass)){
+			((DataPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLDataProperty());
 		}
-		ConfigHelper.configure(learner, "maxExecutionTimeInSeconds",
-				maxExecutionTimeInSeconds);
+		ConfigHelper.configure(learner, "maxExecutionTimeInSeconds", maxExecutionTimeInSeconds);
 //		if(reasoner != null){
 			((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
 //		}
@@ -518,32 +513,34 @@ public class EnrichmentManager {
 		}
 		long runtime = System.currentTimeMillis() - startTime;
 		System.out.println("done in " + runtime + " ms");
-		List<EvaluatedAxiom> learnedAxioms = learner
-				.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
+		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = learner.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
 		System.out.println(prettyPrint(learnedAxioms));
 		this.learnedAxioms.addAll(learnedAxioms);
 		return learnedAxioms;
 	}
 	
-	private List<EvaluatedAxiom> applyLearningAlgorithm2(AxiomType axiomType, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
+	private List<EvaluatedAxiom<OWLAxiom>> applyLearningAlgorithm2(AxiomType axiomType, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
 		if(axiomType == AxiomType.EQUIVALENT_CLASSES){
 			return applyCELOE(ks, (OWLClass)entity, true);
 		} else {
 			Class<? extends LearningAlgorithm> algorithmClass = axiomType2Class.get(axiomType);
-			AxiomLearningAlgorithm learner = null;
+			AbstractAxiomLearningAlgorithm learner = null;
 			try {
-				learner = (AxiomLearningAlgorithm)algorithmClass.getConstructor(
+				learner = (AbstractAxiomLearningAlgorithm)algorithmClass.getConstructor(
 						SparqlEndpointKS.class).newInstance(ks);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			if(classAlgorithms.contains(algorithmClass)) {
-				ConfigHelper.configure(learner, "classToDescribe", entity);
-			} else {
-				ConfigHelper.configure(learner, "propertyToDescribe", entity);
+				if(axiomType.equals(AxiomType.DISJOINT_CLASSES)){
+					((DisjointClassesLearner)learner).setClassToDescribe(entity.asOWLClass());
+				}
+			} else if(objectPropertyAlgorithms.contains(algorithmClass)){
+				((ObjectPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLObjectProperty());
+			} else if(dataPropertyAlgorithms.contains(algorithmClass)){
+				((DataPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLDataProperty());
 			}
-			ConfigHelper.configure(learner, "maxExecutionTimeInSeconds",
-					maxExecutionTimeInSeconds);
+			learner.setMaxExecutionTimeInSeconds(maxExecutionTimeInSeconds);
 //			if(reasoner != null){
 				((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
 //			}
@@ -563,7 +560,7 @@ public class EnrichmentManager {
 			}
 			long runtime = System.currentTimeMillis() - startTime;
 			System.out.println("done in " + runtime + " ms");
-			List<EvaluatedAxiom> learnedAxioms = learner
+			List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = learner
 					.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
 			System.out.println(prettyPrint(learnedAxioms));
 			learningAlgorithmInstances.put(axiomType, (AbstractAxiomLearningAlgorithm)learner);
@@ -571,7 +568,7 @@ public class EnrichmentManager {
 		}
 	}
 	
-	private List<EvaluatedAxiom> applyCELOE(SparqlEndpointKS ks, OWLClass nc, boolean equivalence) throws ComponentInitException {
+	private List<EvaluatedAxiom<OWLAxiom>> applyCELOE(SparqlEndpointKS ks, OWLClass nc, boolean equivalence) throws ComponentInitException {
 		// get instances of class as positive examples
 		System.out.print("finding positives ... ");
 		long startTime = System.currentTimeMillis();
@@ -639,7 +636,7 @@ public class EnrichmentManager {
 
         // convert the result to axioms (to make it compatible with the other algorithms)
         List<? extends EvaluatedDescription> learnedDescriptions = la.getCurrentlyBestEvaluatedDescriptions(threshold);
-        List<EvaluatedAxiom> learnedAxioms = new LinkedList<EvaluatedAxiom>();
+        List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new LinkedList<EvaluatedAxiom<OWLAxiom>>();
         for(EvaluatedDescription learnedDescription : learnedDescriptions) {
         	OWLAxiom axiom;
         	if(equivalence) {
@@ -648,7 +645,7 @@ public class EnrichmentManager {
         		axiom = dataFactory.getOWLSubClassOfAxiom(nc, learnedDescription.getDescription());
         	}
         	Score score = lp.computeScore(learnedDescription.getDescription());
-        	learnedAxioms.add(new EvaluatedAxiom(axiom, new AxiomScore(score.getAccuracy()))); 
+        	learnedAxioms.add(new EvaluatedAxiom<OWLAxiom>(axiom, new AxiomScore(score.getAccuracy()))); 
         }
         System.out.println(prettyPrint(learnedAxioms));	
         	
@@ -784,12 +781,12 @@ public class EnrichmentManager {
 		return entity;
 	}
 	
-	private String prettyPrint(List<EvaluatedAxiom> learnedAxioms) {
+	private String prettyPrint(List<EvaluatedAxiom<OWLAxiom>> learnedAxioms) {
 		String str = "suggested axioms and their score in percent:\n";
 		if(learnedAxioms.isEmpty()) {
 			return "  no axiom suggested\n";
 		} else {
-			for (EvaluatedAxiom learnedAxiom : learnedAxioms) {
+			for (EvaluatedAxiom<OWLAxiom> learnedAxiom : learnedAxioms) {
 				str += " " + prettyPrint(learnedAxiom) + "\n";
 			}		
 		}
@@ -841,5 +838,19 @@ public class EnrichmentManager {
 			e.printStackTrace();
 		}
 		return renderedString;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		EnrichmentManager man = new EnrichmentManager(
+				SparqlEndpoint.getEndpointDBpedia(), 
+				CacheUtilsH2.createCacheFrontend("cache/enrichment", true, 100000));
+		man.setMaxExecutionTimeInSeconds(10);
+		man.setThreshold(0.1);
+		List<EvaluatedAxiom<OWLAxiom>> axioms = man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_DOMAIN);
+		System.out.println(axioms);
+		axioms = man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.ASYMMETRIC_OBJECT_PROPERTY);
+		System.out.println(axioms);
+		man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_RANGE);
+		System.out.println(axioms);
 	}
 }

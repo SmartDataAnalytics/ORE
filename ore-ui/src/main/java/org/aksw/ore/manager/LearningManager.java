@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.aksw.ore.cache.LearningResultsCache;
 import org.aksw.ore.model.LearningSetting;
@@ -13,27 +14,19 @@ import org.apache.log4j.Logger;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedDescription;
-import org.dllearner.core.owl.Description;
-import org.dllearner.core.owl.Individual;
-import org.dllearner.core.owl.Intersection;
-import org.dllearner.core.owl.NamedClass;
-import org.dllearner.core.owl.Union;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.dllearner.reasoning.PelletReasoner;
+import org.dllearner.reasoning.FastInstanceChecker;
 import org.dllearner.refinementoperators.RhoDRDown;
-import org.dllearner.utilities.owl.OWLAPIConverter;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLNaryBooleanClassExpression;
+import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
+import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.google.common.collect.Sets;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 public class LearningManager {
 	
@@ -48,7 +41,7 @@ public class LearningManager {
 
 	private ClassLearningProblem lp;
 	private CELOE la;
-	private PelletReasoner reasoner;
+	private FastInstanceChecker reasoner;
 
 	private LearningSetting learningSetting;
 
@@ -60,8 +53,10 @@ public class LearningManager {
 	public List<EvaluatedDescriptionClass> result;
 
 	public LearningResultsCache learningCache = new LearningResultsCache();
+	
+	private OWLDataFactory df = new OWLDataFactoryImpl(false, false);
 
-	public LearningManager(PelletReasoner reasoner) {
+	public LearningManager(FastInstanceChecker reasoner) {
 		this.reasoner = reasoner;
 	}
 
@@ -73,7 +68,7 @@ public class LearningManager {
 		return learningType;
 	}
 	
-	public PelletReasoner getReasoner(){
+	public FastInstanceChecker getReasoner(){
 		return reasoner;
 	}
 	
@@ -92,8 +87,8 @@ public class LearningManager {
 			logger.info("Initializing internal reasoner...");
 			long startTime = System.currentTimeMillis();
 			prepared = true;
-			reasoner.realise();
-			reasoner.dematerialise();
+//			reasoner.realise();
+//			reasoner.dematerialise();
 			logger.info("...done in " + (System.currentTimeMillis()-startTime) + "ms.");
 		}
 		initLearningProblem();
@@ -101,11 +96,11 @@ public class LearningManager {
 		preparing = false;
 	}
 	
-	public List<NamedClass> getClasses(){
-		reasoner.realise();
-		reasoner.dematerialise();
-		List<NamedClass> classes = new ArrayList<NamedClass>();
-		for(NamedClass nc : reasoner.getAtomicConceptsList()){
+	public List<OWLClass> getClasses(){
+//		reasoner.realise();
+//		reasoner.dematerialise();
+		List<OWLClass> classes = new ArrayList<OWLClass>();
+		for(OWLClass nc : reasoner.getAtomicConceptsList()){
 			if(reasoner.getIndividuals(nc).size() >= 2){
 				classes.add(nc);
 			}
@@ -117,14 +112,11 @@ public class LearningManager {
 	 * Returns all classes that are direct subclasses of owl:Thing.
 	 * @return
 	 */
-	public SortedSet<NamedClass> getTopLevelClasses(){
-		SortedSet<NamedClass> classes = Sets.newTreeSet();
-		com.clarkparsia.pellet.owlapiv3.PelletReasoner pelletReasoner = reasoner.getReasoner();
-		Set<OWLClass> directSubClasses = pelletReasoner.getSubClasses(reasoner.getOWLDataFactory().getOWLThing(), true).getFlattened();
-		for (OWLClass cls : directSubClasses) {
-			if(!cls.isBuiltIn() && !cls.getIRI().isReservedVocabulary()){
-				classes.add(new NamedClass(cls.toStringID()));
-			}
+	public SortedSet<OWLClass> getTopLevelClasses(){
+		SortedSet<OWLClassExpression> subClasses = reasoner.getSubClasses(df.getOWLThing());
+		SortedSet<OWLClass> classes = new TreeSet<OWLClass>();
+		for (OWLClassExpression subClass : subClasses) {
+			classes.add(subClass.asOWLClass());
 		}
 		return classes;
 	}
@@ -133,14 +125,11 @@ public class LearningManager {
 	 * Returns all direct subclasses.
 	 * @return
 	 */
-	public SortedSet<NamedClass> getDirectSubClasses(NamedClass nc){
-		SortedSet<NamedClass> classes = Sets.newTreeSet();
-		com.clarkparsia.pellet.owlapiv3.PelletReasoner pelletReasoner = reasoner.getReasoner();
-		Set<OWLClass> directSubClasses = pelletReasoner.getSubClasses(OWLAPIConverter.getOWLAPIDescription(nc), true).getFlattened();
-		for (OWLClass cls : directSubClasses) {
-			if(!cls.isBuiltIn() && !cls.getIRI().isReservedVocabulary()){
-				classes.add(new NamedClass(cls.toStringID()));
-			}
+	public SortedSet<OWLClass> getDirectSubClasses(OWLClass cls){
+		SortedSet<OWLClassExpression> subClasses = reasoner.getSubClasses(cls);
+		SortedSet<OWLClass> classes = new TreeSet<OWLClass>();
+		for (OWLClassExpression subClass : subClasses) {
+			classes.add(subClass.asOWLClass());
 		}
 		return classes;
 	}
@@ -251,19 +240,19 @@ public class LearningManager {
 		return null;
 	}
 	
-	public void setClass2Describe(NamedClass nc) {
+	public void setClass2Describe(OWLClass nc) {
 		learningSetting.setClassToDescribe(nc);
 	}
 
-	public NamedClass getClass2Describe() {
+	public OWLClass getClass2Describe() {
 		return learningSetting.getClassToDescribe();
 	}
 	
-	public Set<Individual> getFalsePositives(int index){
+	public Set<OWLIndividual> getFalsePositives(int index){
 		return result.get(index).getAdditionalInstances();
 	}
 	
-	public Set<Individual> getFalseNegatives(int index){
+	public Set<OWLIndividual> getFalseNegatives(int index){
 		return result.get(index).getNotCoveredInstances();
 	}
 	
@@ -272,21 +261,19 @@ public class LearningManager {
 	 * @param ind
 	 * @param desc
 	 */
-	public Set<Description> getNegCriticalDescriptions(Individual ind, Description desc){
+	public Set<OWLClassExpression> getNegCriticalDescriptions(OWLIndividual ind, OWLClassExpression desc){
 		
-		Set<Description> criticals = new HashSet<Description>();
-		List<Description> children = desc.getChildren();
+		Set<OWLClassExpression> criticals = new HashSet<OWLClassExpression>();
 		
 		if(reasoner.hasType(desc, ind)){
 			
-			if(children.size() >= 2){
-				
-				if(desc instanceof Intersection){
-					for(Description d: children){
+			if(desc instanceof OWLNaryBooleanClassExpression){
+				if(desc instanceof OWLObjectIntersectionOf){
+					for(OWLClassExpression d: ((OWLObjectIntersectionOf) desc).getOperands()){
 						criticals.addAll(getNegCriticalDescriptions(ind, d));
 					}
-				} else if(desc instanceof Union){
-					for(Description d: children){
+				} else if(desc instanceof OWLObjectUnionOf){
+					for(OWLClassExpression d: ((OWLObjectUnionOf) desc).getOperands()){
 						if(reasoner.hasType(d, ind)){
 							criticals.addAll(getNegCriticalDescriptions(ind, d));
 						}
@@ -298,23 +285,6 @@ public class LearningManager {
 		}
 		
 		return criticals;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		String ontologyURL = "file:/tmp/dl-learner-sample-with-classes-pco.rdf";
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLDataFactory dataFactory = man.getOWLDataFactory();
-		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
-		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
-		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
-		PelletReasoner pelletReasoner = new PelletReasoner((com.clarkparsia.pellet.owlapiv3.PelletReasoner)reasoner);
-		pelletReasoner.init();
-		LearningManager learningManager = new LearningManager(pelletReasoner);
-		SortedSet<NamedClass> topLevelClasses = learningManager.getTopLevelClasses();
-		System.out.println(topLevelClasses);
-		SortedSet<NamedClass> directSubClasses = learningManager.getDirectSubClasses(new NamedClass("http://purl.org/goodrelations/v1#Offering"));
-		System.out.println(directSubClasses);
 	}
 	
 }
