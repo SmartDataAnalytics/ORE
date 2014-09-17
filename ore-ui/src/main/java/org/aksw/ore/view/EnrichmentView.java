@@ -16,13 +16,14 @@ import org.aksw.ore.component.EvaluatedAxiomsTable;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
-import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.dllearner.core.EvaluatedAxiom;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -231,8 +232,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				try {
-					ResourceType resourceType = ORESession.getEnrichmentManager().getResourceType((String)resourceURIField.getValue());
-					onResourceTypeChanged(resourceType);
+					EntityType<? extends OWLEntity> entityType = ORESession.getEnrichmentManager().getEntityType((String)resourceURIField.getValue());
+					onResourceTypeChanged(entityType);
 				} catch (OREException e) {
 					e.printStackTrace();
 				}
@@ -322,12 +323,12 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		double threshold = (Double) thresholdSlider.getValue()/100;
 		man.setThreshold(threshold);
 		
-		ResourceType resourceType = getSelectedResourceType();
+		EntityType<? extends OWLEntity> resourceType = getSelectedResourceType();
 		man.setResourceType(resourceType);
 		
-		if(resourceType == ResourceType.UNKNOWN){
+		if(resourceType == null){
 			try {
-				resourceType = man.getResourceType(resourceURI);
+				resourceType = man.getEntityType(resourceURI);
 				Label label = new Label("Entity <b>" + resourceURI + "</b> is processed as " + resourceType.toString() + ".", ContentMode.HTML);
 				label.addStyleName("entity-autodetect-info-label");
 				pendingAxiomTypes.retainAll(man.getAxiomTypes(resourceType));
@@ -426,17 +427,17 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		return split;
 	}
 	
-	private ResourceType getSelectedResourceType(){
+	private EntityType<? extends OWLEntity> getSelectedResourceType(){
 		return resourceTypeField.getResourceType();
 	}
 	
-	private void onResourceTypeChanged(ResourceType resourceType){
-		if(resourceType == ResourceType.UNKNOWN){
+	private void onResourceTypeChanged(EntityType<? extends OWLEntity> entityType){
+		if(entityType == null){
 //			axiomTypesField.updateVisibleAxiomTypes(Collections.EMPTY_SET);
 			axiomTypesField.setVisible(false);
 		} else {
 			axiomTypesField.setVisible(true);
-			axiomTypesTable.show(resourceType);
+			axiomTypesTable.show(entityType);
 		}
 	}
 	
@@ -450,7 +451,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	public void reset(){
 		axiomsPanel.removeAllComponents();
 		resourceURIField.setValue("");
-		onResourceTypeChanged(ResourceType.UNKNOWN);
+		onResourceTypeChanged(null);
 		startButton.setEnabled(false);
 		try {
 			thresholdSlider.setValue(70d);
@@ -516,7 +517,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			autoDetectBox.addValueChangeListener(new ValueChangeListener() {
 				@Override
 				public void valueChange(ValueChangeEvent event) {
-					onResourceTypeChanged(ResourceType.UNKNOWN);
+					onResourceTypeChanged(null);
 					if((Boolean) event.getProperty().getValue()){
 						resourceTypeGroup.setEnabled(false);
 					} else {
@@ -528,10 +529,12 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			
 			resourceTypeGroup = new OptionGroup();
 			resourceTypeGroup.setImmediate(true);
-			resourceTypeGroup.addItem(ResourceType.CLASS);
-			resourceTypeGroup.addItem(ResourceType.OBJECT_PROPERTY);
-			resourceTypeGroup.addItem(ResourceType.DATA_PROPERTY);
-			resourceTypeGroup.setValue(ResourceType.CLASS);
+			
+			resourceTypeGroup.addItem(EntityType.CLASS);
+			resourceTypeGroup.addItem(EntityType.OBJECT_PROPERTY);
+			resourceTypeGroup.addItem(EntityType.DATA_PROPERTY);
+			
+			resourceTypeGroup.setValue(EntityType.CLASS);
 			resourceTypeGroup.addValueChangeListener(new ValueChangeListener() {
 				@Override
 				public void valueChange(
@@ -542,16 +545,16 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			addComponent(resourceTypeGroup);
 		}
 		
-		public ResourceType getResourceType(){
+		public EntityType<? extends OWLEntity> getResourceType(){
 			if(autoDetectBox.getValue()){
-				return ResourceType.UNKNOWN;
+				return null;
 			} else {
-				return (ResourceType) resourceTypeGroup.getValue();
+				return (EntityType<? extends OWLEntity>) resourceTypeGroup.getValue();
 			}
 		}
 		
-		public void setResourceType(ResourceType resourceType){
-			if(resourceType.equals(ResourceType.UNKNOWN)){
+		public void setResourceType(EntityType<? extends OWLEntity> resourceType){
+			if(resourceType == null){
 				resourceTypeGroup.setEnabled(false);
 				autoDetectBox.setValue(true);
 			} else {

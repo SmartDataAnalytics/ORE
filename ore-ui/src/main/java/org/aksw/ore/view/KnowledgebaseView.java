@@ -82,6 +82,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	public KnowledgebaseView() {
 		addStyleName("dashboard-view");
+		addStyleName("knowledgebase-view");
 		setSizeFull();
 		setSpacing(true);
 		setMargin(true);
@@ -126,35 +127,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		changesPanel.setComponentAlignment(applyChangesButton, Alignment.MIDDLE_RIGHT);
 		
 		return changesPanel;
-	}
-	
-	private Component createMenu(){
-		MenuBar menu = new MenuBar();
-		MenuItem item = menu.addItem("OWL Ontology", null);
-		item.addItem("From file", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				
-			}
-		});
-		item.addItem("From URI", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				
-			}
-		});
-		
-		menu.addItem("SPARQL Endpoint", new Command() {
-			
-			@Override
-			public void menuSelected(MenuItem selectedItem) {
-				SPARQLEndpointDialog dialog = new SPARQLEndpointDialog();
-				getUI().addWindow(dialog);
-			}
-		});
-		return menu;
 	}
 	
 	private Component createButtons(){

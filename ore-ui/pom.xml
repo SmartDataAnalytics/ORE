@@ -166,6 +166,18 @@
 					<artifactId>lucene-queryparser</artifactId>
 					<groupId>org.apache.lucene</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>owlapi-api</artifactId>
+					<groupId>net.sourceforge.owlapi</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>owlapi-impl</artifactId>
+					<groupId>net.sourceforge.owlapi</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>owlapi-apibinding</artifactId>
+					<groupId>net.sourceforge.owlapi</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

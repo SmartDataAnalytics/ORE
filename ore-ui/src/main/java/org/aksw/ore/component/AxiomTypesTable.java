@@ -33,12 +33,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
-import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.util.OWL2Doc;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
 
 import com.google.common.collect.Lists;
 import com.vaadin.data.Property;
@@ -135,22 +135,18 @@ public class AxiomTypesTable extends Table{
 	
 	}
 	
-	public void show(ResourceType resourceType){
+	public void show(EntityType<? extends OWLEntity> resourceType){
 		container.removeAllItems();
 		container.addItem(allAxioms());
 		
-		switch(resourceType){
-		case CLASS:container.addAll(CLASS_AXIOM_TYPES);
-			break;
-		case DATA_PROPERTY:container.addAll(DATA_PROPERTY_AXIOM_TYPES);
-			break;
-		case OBJECT_PROPERTY:container.addAll(OBJECT_PROPERTY_AXIOM_TYPES);
-			break;
-		case UNKNOWN:
-			break;
-		default:
-			break;
+		if(resourceType == EntityType.CLASS){
+			container.addAll(CLASS_AXIOM_TYPES);
+		} else if(resourceType == EntityType.OBJECT_PROPERTY){
+			container.addAll(OBJECT_PROPERTY_AXIOM_TYPES);
+		} else if(resourceType == EntityType.DATA_PROPERTY){
+			container.addAll(DATA_PROPERTY_AXIOM_TYPES);
 		}
+		
 //		container.sort(new String[]{"name"}, new boolean[]{true});
 	}
 	

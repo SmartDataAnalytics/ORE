@@ -33,7 +33,6 @@ import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.exception.OREException;
-import org.aksw.ore.model.ResourceType;
 import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
 import org.apache.jena.riot.checker.CheckerLiterals;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -75,7 +74,6 @@ import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGenerator;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGeneratorImpl;
-import org.dllearner.kb.sparql.SPARQLTasks;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.learningproblems.AxiomScore;
 import org.dllearner.learningproblems.ClassLearningProblem;
@@ -88,6 +86,7 @@ import org.dllearner.utilities.examples.AutomaticNegativeExampleFinderSPARQL2;
 import org.dllearner.utilities.owl.OWLEntityTypeAdder;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -180,7 +179,7 @@ public class EnrichmentManager {
 	
 	private SparqlEndpoint endpoint;
 	private SPARQLReasoner reasoner;
-	private ResourceType resourceType;
+	private EntityType<? extends OWLEntity> resourceType;
 	
 	private int maxExecutionTimeInSeconds = 10;
 	private double threshold = 0.75;
@@ -280,11 +279,11 @@ public class EnrichmentManager {
 		this.endpoint = endpoint;
 	}
 
-	public ResourceType getResourceType() {
+	public EntityType<? extends OWLEntity> getResourceType() {
 		return resourceType;
 	}
 
-	public void setResourceType(ResourceType resourceType) {
+	public void setResourceType(EntityType<? extends OWLEntity> resourceType) {
 		this.resourceType = resourceType;
 	}
 
@@ -332,15 +331,15 @@ public class EnrichmentManager {
 		return new ArrayList<EvaluatedAxiom<OWLAxiom>>(learnedAxioms);
 	}
 	
-	public Collection<AxiomType<OWLAxiom>> getAxiomTypes(ResourceType type){
+	public Collection<AxiomType<OWLAxiom>> getAxiomTypes(EntityType<? extends OWLEntity> type){
 		List<AxiomType<OWLAxiom>> types = new ArrayList<AxiomType<OWLAxiom>>();
 		
 		List<Class<? extends LearningAlgorithm>> algorithms;
-		if(type == ResourceType.CLASS){
+		if(type == EntityType.CLASS){
 			algorithms = classAlgorithms;
-		} else if(type == ResourceType.OBJECT_PROPERTY){
+		} else if(type == EntityType.OBJECT_PROPERTY){
 			algorithms = objectPropertyAlgorithms;
-		} else if(type == ResourceType.DATA_PROPERTY){
+		} else if(type == EntityType.DATA_PROPERTY){
 			algorithms = dataPropertyAlgorithms;
 		} else {
 			algorithms = new ArrayList<Class<? extends LearningAlgorithm>>();
@@ -356,44 +355,29 @@ public class EnrichmentManager {
 		return types;
 	}
 	
-	public ResourceType getResourceType(String resourceURI) throws OREException{
-		SPARQLTasks st = new SPARQLTasks(endpoint);
-		currentEntity = st.guessResourceType(resourceURI, true);
-		if(currentEntity != null){
-			ResourceType resourceType = null;
-			if(currentEntity.isOWLObjectProperty()) {
-				resourceType = ResourceType.OBJECT_PROPERTY;
-			} else if(currentEntity.isOWLDataProperty()) {
-				resourceType = ResourceType.DATA_PROPERTY;
-			} else if(currentEntity.isOWLClass()) {
-				resourceType = ResourceType.CLASS;	
-			} 
-			return resourceType;
+	public EntityType<? extends OWLEntity> getEntityType(String resourceURI) throws OREException{
+		EntityType<? extends OWLEntity> entityType = reasoner.getOWLEntityType(resourceURI);
+		if(entityType != null){
+			return entityType;
 		} else {
 			throw new OREException("Could not detect type of resource");
 		}
 	}
 	
-	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms2(String resourceURI, ResourceType resourceType,
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms2(String resourceURI, EntityType<? extends OWLEntity> entityType,
 			AxiomType<OWLAxiom> axiomType, int maxExecutionTimeInSeconds, double threshold, boolean useInference)
 			throws OREException {
 		fireEnrichmentStarted(axiomType);
 		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
 
 		try {
-			// common helper objects
-			SPARQLTasks st = new SPARQLTasks(endpoint);
-
-			OWLEntity currentEntity = getEntity(resourceURI, resourceType);
-			if (currentEntity == null) {
-				currentEntity = st.guessResourceType(resourceURI, true);
-			}
+			OWLEntity currentEntity = getEntity(resourceURI, entityType);
 
 			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
 			ks.init();
 
 			// check if endpoint supports SPARQL 1.1
-			boolean supportsSPARQL_1_1 = st.supportsSPARQL_1_1();
+			boolean supportsSPARQL_1_1 = reasoner.supportsSPARQL1_1();
 			ks.setSupportsSPARQL_1_1(supportsSPARQL_1_1);
 
 			if (useInference && !reasoner.isPrepared()) {
@@ -418,19 +402,15 @@ public class EnrichmentManager {
 		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
 
 		try {
-			// common helper objects
-			SPARQLTasks st = new SPARQLTasks(endpoint);
+			resourceType = getEntityType(resourceURI);
 
 			OWLEntity currentEntity = getEntity(resourceURI, resourceType);
-			if (currentEntity == null) {
-				currentEntity = st.guessResourceType(resourceURI, true);
-			}
 
 			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
 			ks.init();
 
 			// check if endpoint supports SPARQL 1.1
-			boolean supportsSPARQL_1_1 = st.supportsSPARQL_1_1();
+			boolean supportsSPARQL_1_1 = reasoner.supportsSPARQL1_1();
 			ks.setSupportsSPARQL_1_1(supportsSPARQL_1_1);
 
 			if (useInference && !reasoner.isPrepared()) {
@@ -512,9 +492,9 @@ public class EnrichmentManager {
 			}
 		}
 		long runtime = System.currentTimeMillis() - startTime;
-		System.out.println("done in " + runtime + " ms");
+		
 		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = learner.getCurrentlyBestEvaluatedAxioms(maxNrOfReturnedAxioms, threshold);
-		System.out.println(prettyPrint(learnedAxioms));
+		
 		this.learnedAxioms.addAll(learnedAxioms);
 		return learnedAxioms;
 	}
@@ -769,13 +749,13 @@ public class EnrichmentManager {
 	}
 	
 
-	private OWLEntity getEntity(String resourceURI, ResourceType resourceType){
+	private OWLEntity getEntity(String resourceURI, EntityType<? extends OWLEntity> resourceType){
 		OWLEntity entity = null;
-		if(resourceType == ResourceType.CLASS){
+		if(resourceType == EntityType.CLASS){
 			entity = new OWLClassImpl(IRI.create(resourceURI));
-		} else if(resourceType == ResourceType.OBJECT_PROPERTY){
+		} else if(resourceType == EntityType.OBJECT_PROPERTY){
 			entity = new OWLObjectPropertyImpl(IRI.create(resourceURI));
-		} else if(resourceType == ResourceType.DATA_PROPERTY){
+		} else if(resourceType == EntityType.DATA_PROPERTY){
 			entity = new OWLDataPropertyImpl(IRI.create(resourceURI));
 		}
 		return entity;
@@ -842,7 +822,7 @@ public class EnrichmentManager {
 	
 	public static void main(String[] args) throws Exception {
 		EnrichmentManager man = new EnrichmentManager(
-				SparqlEndpoint.getEndpointDBpedia(), 
+				SparqlEndpoint.getEndpointDBpediaLiveAKSW(), 
 				CacheUtilsH2.createCacheFrontend("cache/enrichment", true, 100000));
 		man.setMaxExecutionTimeInSeconds(10);
 		man.setThreshold(0.1);
