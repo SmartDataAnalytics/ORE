@@ -822,15 +822,21 @@ public class EnrichmentManager {
 	
 	public static void main(String[] args) throws Exception {
 		EnrichmentManager man = new EnrichmentManager(
-				SparqlEndpoint.getEndpointDBpediaLiveAKSW(), 
+				SparqlEndpoint.getEndpointDBpedia(), 
 				CacheUtilsH2.createCacheFrontend("cache/enrichment", true, 100000));
 		man.setMaxExecutionTimeInSeconds(10);
 		man.setThreshold(0.1);
+		
 		List<EvaluatedAxiom<OWLAxiom>> axioms = man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_DOMAIN);
 		System.out.println(axioms);
+		
 		axioms = man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.ASYMMETRIC_OBJECT_PROPERTY);
 		System.out.println(axioms);
+		
 		man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_RANGE);
+		System.out.println(axioms);
+		
+		man.getEvaluatedAxioms2("http://dbpedia.org/ontology/league", AxiomType.SUB_OBJECT_PROPERTY);
 		System.out.println(axioms);
 	}
 }
