@@ -347,7 +347,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				@Override
 				public void run() {
 					try {
-						final List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms2(resourceURI, axiomType);
+						final List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms(resourceURI, axiomType);
 						UI.getCurrent().access(new Runnable() {
 							
 							@Override
