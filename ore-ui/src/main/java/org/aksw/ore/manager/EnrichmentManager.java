@@ -40,6 +40,7 @@ import org.dllearner.algorithms.DisjointClassesLearner;
 import org.dllearner.algorithms.SimpleSubclassLearner;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.algorithms.properties.AsymmetricObjectPropertyAxiomLearner;
+import org.dllearner.algorithms.properties.AxiomAlgorithms;
 import org.dllearner.algorithms.properties.DataPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.DataPropertyDomainAxiomLearner;
 import org.dllearner.algorithms.properties.DataPropertyRangeAxiomLearner;
@@ -52,7 +53,7 @@ import org.dllearner.algorithms.properties.FunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.InverseFunctionalObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.IrreflexiveObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyAxiomLearner;
-import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner2;
+import org.dllearner.algorithms.properties.ObjectPropertyDomainAxiomLearner;
 import org.dllearner.algorithms.properties.ObjectPropertyRangeAxiomLearner;
 import org.dllearner.algorithms.properties.ReflexiveObjectPropertyAxiomLearner;
 import org.dllearner.algorithms.properties.SubDataPropertyOfAxiomLearner;
@@ -170,8 +171,6 @@ public class EnrichmentManager {
 	private List<Class<? extends LearningAlgorithm>> dataPropertyAlgorithms;
 	private List<Class<? extends LearningAlgorithm>> classAlgorithms;
 	
-	private HashBiMap<AxiomType, Class<? extends LearningAlgorithm>> axiomType2Class;
-	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private KeywordColorMap colorMap = new KeywordColorMap();
 	
@@ -213,7 +212,7 @@ public class EnrichmentManager {
 		objectPropertyAlgorithms.add(SubObjectPropertyOfAxiomLearner.class);
 		objectPropertyAlgorithms.add(FunctionalObjectPropertyAxiomLearner.class);
 		objectPropertyAlgorithms.add(InverseFunctionalObjectPropertyAxiomLearner.class);
-		objectPropertyAlgorithms.add(ObjectPropertyDomainAxiomLearner2.class);
+		objectPropertyAlgorithms.add(ObjectPropertyDomainAxiomLearner.class);
 		objectPropertyAlgorithms.add(ObjectPropertyRangeAxiomLearner.class);
 		objectPropertyAlgorithms.add(SymmetricObjectPropertyAxiomLearner.class);
 		objectPropertyAlgorithms.add(AsymmetricObjectPropertyAxiomLearner.class);
@@ -233,29 +232,6 @@ public class EnrichmentManager {
 		classAlgorithms.add(DisjointClassesLearner.class);
 		classAlgorithms.add(SimpleSubclassLearner.class);
 		classAlgorithms.add(CELOE.class);
-		
-		axiomType2Class = HashBiMap.create();
-		axiomType2Class.put(AxiomType.SUBCLASS_OF, SimpleSubclassLearner.class);
-		axiomType2Class.put(AxiomType.EQUIVALENT_CLASSES, CELOE.class);
-		axiomType2Class.put(AxiomType.DISJOINT_CLASSES, DisjointClassesLearner.class);
-		axiomType2Class.put(AxiomType.SUB_OBJECT_PROPERTY, SubObjectPropertyOfAxiomLearner.class);
-		axiomType2Class.put(AxiomType.EQUIVALENT_OBJECT_PROPERTIES, EquivalentObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.DISJOINT_OBJECT_PROPERTIES, DisjointObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.OBJECT_PROPERTY_DOMAIN, ObjectPropertyDomainAxiomLearner2.class);
-		axiomType2Class.put(AxiomType.OBJECT_PROPERTY_RANGE, ObjectPropertyRangeAxiomLearner.class);
-		axiomType2Class.put(AxiomType.FUNCTIONAL_OBJECT_PROPERTY, FunctionalObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.INVERSE_FUNCTIONAL_OBJECT_PROPERTY, InverseFunctionalObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.REFLEXIVE_OBJECT_PROPERTY, ReflexiveObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.IRREFLEXIVE_OBJECT_PROPERTY, IrreflexiveObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.SYMMETRIC_OBJECT_PROPERTY, SymmetricObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.ASYMMETRIC_OBJECT_PROPERTY, AsymmetricObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.TRANSITIVE_OBJECT_PROPERTY, TransitiveObjectPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.SUB_DATA_PROPERTY, SubDataPropertyOfAxiomLearner.class);
-		axiomType2Class.put(AxiomType.EQUIVALENT_DATA_PROPERTIES, EquivalentDataPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.DISJOINT_DATA_PROPERTIES, DisjointDataPropertyAxiomLearner.class);
-		axiomType2Class.put(AxiomType.DATA_PROPERTY_DOMAIN, DataPropertyDomainAxiomLearner.class);
-		axiomType2Class.put(AxiomType.DATA_PROPERTY_RANGE, DataPropertyRangeAxiomLearner.class);
-		axiomType2Class.put(AxiomType.FUNCTIONAL_DATA_PROPERTY, FunctionalDataPropertyAxiomLearner.class);
 		
 		loadProperties();
 	}
@@ -331,28 +307,8 @@ public class EnrichmentManager {
 		return new ArrayList<EvaluatedAxiom<OWLAxiom>>(learnedAxioms);
 	}
 	
-	public Collection<AxiomType<OWLAxiom>> getAxiomTypes(EntityType<? extends OWLEntity> type){
-		List<AxiomType<OWLAxiom>> types = new ArrayList<AxiomType<OWLAxiom>>();
-		
-		List<Class<? extends LearningAlgorithm>> algorithms;
-		if(type == EntityType.CLASS){
-			algorithms = classAlgorithms;
-		} else if(type == EntityType.OBJECT_PROPERTY){
-			algorithms = objectPropertyAlgorithms;
-		} else if(type == EntityType.DATA_PROPERTY){
-			algorithms = dataPropertyAlgorithms;
-		} else {
-			algorithms = new ArrayList<Class<? extends LearningAlgorithm>>();
-			algorithms.addAll(classAlgorithms);
-			algorithms.addAll(objectPropertyAlgorithms);
-			algorithms.addAll(dataPropertyAlgorithms);
-		}
-		
-		for(Class<? extends LearningAlgorithm> alg : algorithms){
-			types.add(axiomType2Class.inverse().get(alg));
-		}
-		
-		return types;
+	public Collection<AxiomType<? extends OWLAxiom>> getAxiomTypes(EntityType<? extends OWLEntity> entityType){
+		return AxiomAlgorithms.getAxiomTypes(entityType);
 	}
 	
 	public EntityType<? extends OWLEntity> getEntityType(String resourceURI) throws OREException{
@@ -455,25 +411,15 @@ public class EnrichmentManager {
 	}	
 	
 	private List<EvaluatedAxiom<OWLAxiom>> applyLearningAlgorithm(Class<? extends LearningAlgorithm> algorithmClass, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
-		if(axiomTypes != null && !axiomTypes.contains(axiomType2Class.inverse().get(algorithmClass))){
-			return Collections.<EvaluatedAxiom<OWLAxiom>>emptyList();
-		}
-		
-		AxiomLearningAlgorithm learner = null;
+		AbstractAxiomLearningAlgorithm learner = null;
 		try {
-			learner = (AxiomLearningAlgorithm)algorithmClass.getConstructor(
+			learner = (AbstractAxiomLearningAlgorithm)algorithmClass.getConstructor(
 					SparqlEndpointKS.class).newInstance(ks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if(classAlgorithms.contains(algorithmClass)) {
-			
-		} else if(objectPropertyAlgorithms.contains(algorithmClass)){
-			((ObjectPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLObjectProperty());
-		} else if(dataPropertyAlgorithms.contains(algorithmClass)){
-			((DataPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLDataProperty());
-		}
-		ConfigHelper.configure(learner, "maxExecutionTimeInSeconds", maxExecutionTimeInSeconds);
+		learner.setEntityToDescribe(entity);
+		learner.setMaxExecutionTimeInSeconds(maxExecutionTimeInSeconds);
 //		if(reasoner != null){
 			((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
 //		}
@@ -503,7 +449,7 @@ public class EnrichmentManager {
 		if(axiomType == AxiomType.EQUIVALENT_CLASSES){
 			return applyCELOE(ks, (OWLClass)entity, true);
 		} else {
-			Class<? extends LearningAlgorithm> algorithmClass = axiomType2Class.get(axiomType);
+			Class<? extends LearningAlgorithm> algorithmClass = AxiomAlgorithms.getAlgorithmClass(axiomType);
 			AbstractAxiomLearningAlgorithm learner = null;
 			try {
 				learner = (AbstractAxiomLearningAlgorithm)algorithmClass.getConstructor(
@@ -511,15 +457,7 @@ public class EnrichmentManager {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if(classAlgorithms.contains(algorithmClass)) {
-				if(axiomType.equals(AxiomType.DISJOINT_CLASSES)){
-					((DisjointClassesLearner)learner).setClassToDescribe(entity.asOWLClass());
-				}
-			} else if(objectPropertyAlgorithms.contains(algorithmClass)){
-				((ObjectPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLObjectProperty());
-			} else if(dataPropertyAlgorithms.contains(algorithmClass)){
-				((DataPropertyAxiomLearner)learner).setPropertyToDescribe(entity.asOWLDataProperty());
-			}
+			learner.setEntityToDescribe(entity);
 			learner.setMaxExecutionTimeInSeconds(maxExecutionTimeInSeconds);
 //			if(reasoner != null){
 				((AbstractAxiomLearningAlgorithm)learner).setReasoner(reasoner);
