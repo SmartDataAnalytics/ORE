@@ -10,13 +10,18 @@ import org.aksw.ore.rendering.Syntax;
 import com.vaadin.data.Item;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * @author Lorenz Buehmann
@@ -24,49 +29,71 @@ import com.vaadin.ui.Window;
  */
 public class SettingsDialog extends Window{
 	
+	private boolean dirty = false;
+	private OptionGroup entityRenderingOptions;
+	private OptionGroup axiomRenderingOptions;
+	
 	public SettingsDialog() {
 		super("Settings");
 		setModal(true);
 		setCloseShortcut(KeyCode.ESCAPE, null);
-		setClosable(false);
 		
-		FormLayout form = new FormLayout();
-		setContent(form);
+		VerticalLayout main = new VerticalLayout();
+		main.setSizeUndefined();
+		main.setMargin(true);
+		main.setSpacing(true);
 		
-		//entity rendering options
-		final OptionGroup entityRenderingOptions = new OptionGroup();
-		entityRenderingOptions.setItemCaptionMode(ItemCaptionMode.ID);
-		for (EntityRenderingStyle style : EntityRenderingStyle.values()) {
-			Item item = entityRenderingOptions.addItem(style);
-			
-		}
-		entityRenderingOptions.setValue(EntityRenderingStyle.SHORT_FORM);
-		Panel panel = new Panel("Entity rendering");
-		panel.setSizeUndefined(); 
-		form.addComponent(panel);
-		panel.setContent(entityRenderingOptions);
+		setContent(main);
 		
-		//axiom rendering options
-		final OptionGroup axiomRenderingOptions = new OptionGroup();
-		for (Syntax syntax : Syntax.values()) {
-			Item item = axiomRenderingOptions.addItem(syntax);
-		}
-		axiomRenderingOptions.setValue(Syntax.MANCHESTER);
-
-		panel = new Panel("Axiom rendering");
-		panel.setSizeUndefined();
-		form.addComponent(panel);
-		panel.setContent(axiomRenderingOptions);
+		TabSheet tabs = new TabSheet();
+		tabs.setSizeUndefined();
+		main.addComponent(tabs);
+		main.setExpandRatio(tabs, 1f);
+		
+		tabs.addTab(createRenderingTab(), "Rendering");
+		
 		
 		//apply changes button
 		Button applyButton = new Button("Apply", new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				ORESession.getRenderer().setRenderingStyle((Syntax) axiomRenderingOptions.getValue(), (EntityRenderingStyle) entityRenderingOptions.getValue());
+				close();
 			}
 		});
 		applyButton.setDescription("Apply changes.");
-		form.addComponent(applyButton);
+		applyButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		main.addComponent(applyButton);
+		main.setComponentAlignment(applyButton, Alignment.BOTTOM_RIGHT);
+	}
+	
+	private Component createRenderingTab(){
+		FormLayout form = new FormLayout();
+		form.setSizeUndefined();
+		
+		entityRenderingOptions = new OptionGroup();
+		entityRenderingOptions.setItemCaptionMode(ItemCaptionMode.ID);
+		for (EntityRenderingStyle style : EntityRenderingStyle.values()) {
+			Item item = entityRenderingOptions.addItem(style);
+			
+		}
+		entityRenderingOptions.setValue(EntityRenderingStyle.SHORT_FORM);
+		Panel panel = new Panel("Entity rendering", entityRenderingOptions);
+		panel.setSizeUndefined();
+		panel.setContent(entityRenderingOptions);
+		form.addComponent(panel);
+		
+		axiomRenderingOptions = new OptionGroup();
+		for (Syntax syntax : Syntax.values()) {
+			Item item = axiomRenderingOptions.addItem(syntax);
+		}
+		axiomRenderingOptions.setValue(Syntax.MANCHESTER);
+
+		panel = new Panel("Axiom rendering", axiomRenderingOptions);
+		panel.setSizeUndefined();
+		form.addComponent(panel);
+		
+		return form;
 	}
 
 }

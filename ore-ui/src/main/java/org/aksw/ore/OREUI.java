@@ -309,6 +309,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
                     @Override
                     public void menuSelected(MenuItem selectedItem) {
                         SettingsDialog settingsDialog = new SettingsDialog();
+                        settingsDialog.center();
                         addWindow(settingsDialog);
                     }
                 });

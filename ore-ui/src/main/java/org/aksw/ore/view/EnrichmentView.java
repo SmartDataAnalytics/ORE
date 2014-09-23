@@ -79,7 +79,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private List<AxiomType<OWLAxiom>> pendingAxiomTypes;
 	
-	private Set<EvaluatedAxiomsTable> tables;
+	private Set<EvaluatedAxiomsTable> tables = new HashSet<EvaluatedAxiomsTable>();
 	private Button addToKbButton;
 	private Button dumpSPARULButton;
 
@@ -138,10 +138,10 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		buttons.addComponent(addToKbButton);
 		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
 		
-		dumpSPARULButton = new Button("Dump as SPARUL");
+		dumpSPARULButton = new Button("Dump as SPARQL 1.1 Update");
 		dumpSPARULButton.setHeight(null);
 		dumpSPARULButton.setImmediate(true);
-		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL Update statements.");
+		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL 1.1 Update statements.");
 		dumpSPARULButton.addClickListener(new Button.ClickListener() {
 			
 			@Override

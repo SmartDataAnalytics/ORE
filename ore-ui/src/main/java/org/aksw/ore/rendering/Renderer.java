@@ -47,10 +47,7 @@ public class Renderer {
 	//the short form providers for each entity rendering style
 	Map<EntityRenderingStyle, ShortFormProvider> shortFormProviders = new HashMap<EntityRenderingStyle, ShortFormProvider>();
 	
-	
 	IRIShortFormProvider sfp = new SimpleIRIShortFormProvider();
-	
-	
 	
 	private LoadingCache<OWLObject, String> manchesterCache = CacheBuilder.newBuilder()
 		       .maximumSize(1000)
@@ -155,9 +152,9 @@ public class Renderer {
 				return manchesterCache.get(owlObject);//renderManchesterSyntax(owlObject);
 			}
 		} catch (ExecutionException e) {
-			e.printStackTrace();
+			logger.error("Rendering of " + owlObject + " failed.", e);
+			return owlObject.toString();
 		}
-		return owlObject.toString();
 	}
 	
 	public String renderHTML(OWLObject owlObject) {

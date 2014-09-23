@@ -37,9 +37,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		setWidth("100%");
 		setPageLength(0);
 		setHeight(null);
-		setColumnWidth("Selected", 30);
 		setColumnExpandRatio("Axiom", 1.0f);
-//		setColumnWidth("Frequency", 40);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);
@@ -97,7 +95,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 								indention += "&nbsp;";
 							}
 						}
-						return new Label(indention + renderer.render(ax), ContentMode.HTML);
+						return new Label(indention + renderer.renderHTML(ax), ContentMode.HTML);
 		        	}
 				}
 				return null;
@@ -164,7 +162,8 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 	@Override
 	public String getColumnHeader(Object propertyId) {
 		if(propertyId.equals("Frequency")){
-			return ("<a title='The number of explanations in which the axiom occurs.'>" + propertyId + "</a>").replace("'","\"");
+//			return ("<a title='The number of explanations in which the axiom occurs.'>" + propertyId + "</a>").replace("'","\"");
+			return ("<span title='The number of explanations in which the axiom occurs.'>" + propertyId + "</span>").replace("'","\"");
 		}
 		return super.getColumnHeader(propertyId);
 	}

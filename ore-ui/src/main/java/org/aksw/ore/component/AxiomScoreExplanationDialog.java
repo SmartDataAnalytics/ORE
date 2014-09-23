@@ -97,7 +97,7 @@ public class AxiomScoreExplanationDialog extends Window{
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {
-		                	return new Label(element.toString());
+		                	return new Label(ORESession.getRenderer().render(element));
 		                }
 		            }
 
@@ -141,7 +141,7 @@ public class AxiomScoreExplanationDialog extends Window{
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {
-		                	return new Label(element.toString());
+		                	return new Label(ORESession.getRenderer().render(element));
 		                }
 		            }
 
