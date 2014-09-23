@@ -9,13 +9,16 @@ import org.aksw.ore.rendering.Syntax;
 
 import com.vaadin.data.Item;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -52,6 +55,7 @@ public class SettingsDialog extends Window{
 		
 		tabs.addTab(createRenderingTab(), "Rendering");
 		
+		main.addComponent(new Label("<hr/>", ContentMode.HTML));
 		
 		//apply changes button
 		Button applyButton = new Button("Apply", new ClickListener() {
@@ -78,9 +82,10 @@ public class SettingsDialog extends Window{
 			
 		}
 		entityRenderingOptions.setValue(EntityRenderingStyle.SHORT_FORM);
-		Panel panel = new Panel("Entity rendering", entityRenderingOptions);
+		CssLayout panel = new CssLayout(entityRenderingOptions);
+		panel.setCaption("Entity Rendering");
+//		Panel panel = new Panel("Entity rendering", entityRenderingOptions);
 		panel.setSizeUndefined();
-		panel.setContent(entityRenderingOptions);
 		form.addComponent(panel);
 		
 		axiomRenderingOptions = new OptionGroup();
@@ -89,7 +94,9 @@ public class SettingsDialog extends Window{
 		}
 		axiomRenderingOptions.setValue(Syntax.MANCHESTER);
 
-		panel = new Panel("Axiom rendering", axiomRenderingOptions);
+		panel = new CssLayout(axiomRenderingOptions);
+		panel.setCaption("Axiom Rendering");
+//		panel = new Panel("Axiom rendering", axiomRenderingOptions);
 		panel.setSizeUndefined();
 		form.addComponent(panel);
 		
