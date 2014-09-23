@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.mole.ore.rendering.KeywordColorMap;
@@ -144,14 +145,19 @@ public class Renderer {
 	}
 	
 	public String render(OWLObject owlObject) {
-		switch (axiomRenderingStyle) {
-		case MANCHESTER:
-			return renderManchesterSyntax(owlObject);
-		case DL:
-			return renderDLSyntax(owlObject);
-		default:
-			return renderManchesterSyntax(owlObject);
+		try {
+			switch (axiomRenderingStyle) {
+			case MANCHESTER:
+				return manchesterCache.get(owlObject);//renderManchesterSyntax(owlObject);
+			case DL:
+				return dlCache.get(owlObject);//renderDLSyntax(owlObject);
+			default:
+				return manchesterCache.get(owlObject);//renderManchesterSyntax(owlObject);
+			}
+		} catch (ExecutionException e) {
+			e.printStackTrace();
 		}
+		return owlObject.toString();
 	}
 	
 	public String renderHTML(OWLObject owlObject) {

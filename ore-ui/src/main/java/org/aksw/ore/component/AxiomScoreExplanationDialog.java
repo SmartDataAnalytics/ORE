@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
-import org.aksw.ore.util.ScoreExplanationPattern;
+import org.aksw.ore.util.AxiomScoreExplanationGenerator;
 import org.dllearner.core.EvaluatedAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -35,12 +35,11 @@ public class AxiomScoreExplanationDialog extends Window{
 	private DecimalFormat df = new DecimalFormat("0.00%");
 	Renderer renderer = ORESession.getRenderer();
 	
-	public AxiomScoreExplanationDialog(AxiomType axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
+	public AxiomScoreExplanationDialog(AxiomType<OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
 		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");
 		setCloseShortcut(KeyCode.ESCAPE, null);
-		setClosable(false);
 		
 		VerticalLayout content = new VerticalLayout();
 		content.setSizeFull();
@@ -49,14 +48,14 @@ public class AxiomScoreExplanationDialog extends Window{
 		setContent(content);
 		
 		//show the total score of the axiom
-		String renderedAxiom = ORESession.getRenderer().render(axiom.getAxiom());
+		String renderedAxiom = ORESession.getRenderer().renderHTML(axiom.getAxiom());
 		Label label = new Label("<div><h3>Axiom: " + renderedAxiom + "</h3></div>"
 				+ "<div><h3>Score:" + df.format(axiom.getScore().getAccuracy()) + "</h3></div>", ContentMode.HTML);
 		content.addComponent(label);
 		content.setExpandRatio(label, 0f);
 		
 		//show the explanation text
-		label = new Label(ScoreExplanationPattern.getAccuracyDescription(axiomType, axiom), ContentMode.HTML);
+		label = new Label(AxiomScoreExplanationGenerator.getAccuracyDescription(axiom), ContentMode.HTML);
 		content.addComponent(label);
 		content.setExpandRatio(label, 0f);
 		
@@ -94,7 +93,7 @@ public class AxiomScoreExplanationDialog extends Window{
 							} catch (UnsupportedEncodingException e) {
 								e.printStackTrace();
 							}
-		                	Link link = new Link(decodedURI, new ExternalResource(ind.toStringID()));
+		                	Link link = new Link(ORESession.getRenderer().render(ind), new ExternalResource(ind.toStringID()));
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {
@@ -138,7 +137,7 @@ public class AxiomScoreExplanationDialog extends Window{
 							} catch (UnsupportedEncodingException e) {
 								e.printStackTrace();
 							}
-		                	Link link = new Link(decodedURI, new ExternalResource(ind.toStringID()));
+		                	Link link = new Link(ORESession.getRenderer().render(ind), new ExternalResource(ind.toStringID()));
 		                	link.setTargetName("_blank");
 			                return link;
 		                } else {

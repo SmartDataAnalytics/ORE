@@ -34,6 +34,7 @@ import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
+import org.aksw.ore.util.AxiomScoreExplanationGenerator;
 import org.apache.jena.riot.checker.CheckerLiterals;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.dllearner.algorithms.celoe.CELOE;
@@ -614,6 +615,13 @@ public class EnrichmentManager {
 		
 		List<EvaluatedAxiom<OWLAxiom>> axioms = man.getEvaluatedAxioms("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_DOMAIN);
 		System.out.println(axioms);
+		
+		AxiomScoreExplanationGenerator.init();
+		for (EvaluatedAxiom<OWLAxiom> ax : axioms) {
+			String accuracyDescription = AxiomScoreExplanationGenerator.getAccuracyDescription(ax);
+			System.out.println(accuracyDescription);
+		}
+		
 		
 		axioms = man.getEvaluatedAxioms("http://dbpedia.org/ontology/league", AxiomType.ASYMMETRIC_OBJECT_PROPERTY);
 		System.out.println(axioms);

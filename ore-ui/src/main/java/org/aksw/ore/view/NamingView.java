@@ -35,6 +35,7 @@ import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -44,8 +45,10 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
@@ -53,6 +56,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -94,22 +98,26 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 	
 	private void initUI(){
 		setSizeFull();
-		setMargin(true);
+//		setMargin(true);
 		addStyleName("dashboard-view");
 		addStyleName("naming-view");
 		
-		layout = new GridLayout(6, 1);
+//		layout = new GridLayout(6, 1);
+		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSizeFull();
 		addComponent(layout);
-		setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
+//		setComponentAlignment(layout, Alignment.MIDDLE_CENTER);
 
-		layout.addComponent(createNamingPatternView(), 0, 0);
-		layout.addComponent(createPatternInstancesView(), 2, 0);
-		layout.addComponent(createInstructionsView(), 4, 0);
+//		layout.addComponent(createNamingPatternView(), 0, 0);
+//		layout.addComponent(createPatternInstancesView(), 2, 0);
+//		layout.addComponent(createInstructionsView(), 4, 0);
+		
+		Component namingPatternView = createNamingPatternView();
+		layout.addComponent(namingPatternView);
 		
 		detectButton = new Button("Detect");
-		detectButton.addStyleName("icon-detect");
-		detectButton.setWidth(null);
+		detectButton.setIcon(FontAwesome.SEARCH);
+		detectButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 		detectButton.setEnabled(false);
 		detectButton.addClickListener(new Button.ClickListener() {
 			
@@ -118,11 +126,16 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 				onDetectNamingPattern();
 			}
 		});
-		layout.addComponent(detectButton, 1, 0);
+//		layout.addComponent(detectButton, 1, 0);
+		layout.addComponent(detectButton);
 		layout.setComponentAlignment(detectButton, Alignment.MIDDLE_CENTER);
 		
+		Component patternInstancesView = createPatternInstancesView();
+		layout.addComponent(patternInstancesView);
+		
 		instructButton = new Button("Instruct");
-		instructButton.addStyleName("icon-detect");
+		instructButton.setIcon(FontAwesome.SHARE_ALT);
+		instructButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 		instructButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -130,11 +143,16 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 				onGenerateInstructions();
 			}
 		});
-		layout.addComponent(instructButton, 3, 0);
+//		layout.addComponent(instructButton, 3, 0);
+		layout.addComponent(instructButton);
 		layout.setComponentAlignment(instructButton, Alignment.MIDDLE_CENTER);
 		
+		Component instructionsView = createInstructionsView();
+		layout.addComponent(instructionsView);
+		
 		transformButton = new Button("Transform");
-		transformButton.addStyleName("icon-transform");
+		transformButton.setIcon(FontAwesome.GEARS);
+		transformButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 		transformButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -142,13 +160,18 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 				onTransform();
 			}
 		});
-		layout.addComponent(transformButton, 5, 0);
+//		layout.addComponent(transformButton, 5, 0);
+		layout.addComponent(transformButton);
 		layout.setComponentAlignment(transformButton, Alignment.MIDDLE_CENTER);
 		
-		layout.setColumnExpandRatio(0, 0.3f);
-		layout.setColumnExpandRatio(2, 0.3f);
-		layout.setColumnExpandRatio(4, 0.3f);
-		layout.setRowExpandRatio(0, 1f);
+		layout.setExpandRatio(namingPatternView, 1f);
+		layout.setExpandRatio(patternInstancesView, 1f);
+		layout.setExpandRatio(instructionsView, 1f);
+		
+//		layout.setColumnExpandRatio(0, 0.3f);
+//		layout.setColumnExpandRatio(2, 0.3f);
+//		layout.setColumnExpandRatio(4, 0.3f);
+//		layout.setRowExpandRatio(0, 1f);
 		layout.setSpacing(true);
 		
 //		instructionsTable.setEnabled(false);
@@ -437,7 +460,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 		    }
 		});
 		instructionsTable.setVisibleColumns(new Object[] {"selected", "instruction"});
-		instructionsTable.setColumnWidth("selected", 30);
+		instructionsTable.setColumnExpandRatio("instruction", 1f);
 		
 		return new WhitePanel(instructionsTable);
 	}

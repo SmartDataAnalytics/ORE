@@ -5,7 +5,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.aksw.ore.util.PatOMatPatternLibrary;
-import org.aksw.ore.util.ScoreExplanationPattern;
+import org.aksw.ore.util.AxiomScoreExplanationGenerator;
 
 @WebListener
 public class OREContextListener implements ServletContextListener{
@@ -18,7 +18,7 @@ public class OREContextListener implements ServletContextListener{
 	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		PatOMatPatternLibrary.init();
-		ScoreExplanationPattern.init();
+		AxiomScoreExplanationGenerator.init();
 		OREConfiguration.loadSettings(servletContextEvent.getServletContext());
 	}
 	

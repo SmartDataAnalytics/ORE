@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
-import org.aksw.ore.util.ScoreExplanationPattern;
+import org.aksw.ore.util.AxiomScoreExplanationGenerator;
 import org.dllearner.core.EvaluatedAxiom;
 import org.dllearner.learningproblems.AxiomScore;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -125,7 +125,6 @@ public class EvaluatedAxiomsTable extends Table{
 //				cell.setSpacing(true);
 				
 				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom<OWLAxiom>) itemId).getScore().getAccuracy()));
-				accuracyLabel.setDescription(getAccuracyDescription((EvaluatedAxiom<OWLAxiom>)itemId));
 				cell.addComponent(accuracyLabel);
 				cell.setExpandRatio(accuracyLabel, 1f);
 				cell.setComponentAlignment(accuracyLabel, Alignment.MIDDLE_RIGHT);
@@ -177,7 +176,7 @@ public class EvaluatedAxiomsTable extends Table{
 		setColumnHeader("Selected", "");
 		
 		Item item;
-		for(EvaluatedAxiom ax : axioms){
+		for(EvaluatedAxiom<OWLAxiom> ax : axioms){
 			item = container.addItem(ax);
 			item.getItemProperty("Accuracy").setValue(ax.getScore().getAccuracy());
 			item.getItemProperty("Axiom").setValue(ax.getAxiom());
@@ -186,9 +185,10 @@ public class EvaluatedAxiomsTable extends Table{
 		setItemDescriptionGenerator(new ItemDescriptionGenerator() {                             
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
 			    if(propertyId == null){
-			        return "Row description "+ itemId;
+			        return "";//"Row description "+ itemId;
 			    } else if(propertyId.equals("Accuracy")) {
-			        return getAccuracyDescription((EvaluatedAxiom)itemId);
+			    	EvaluatedAxiom<OWLAxiom> evAxiom = (EvaluatedAxiom<OWLAxiom>)itemId;
+			        return AxiomScoreExplanationGenerator.getAccuracyDescription(evAxiom, ORESession.getRenderer());
 			    } 
 //			    else if(propertyId.equals("Axiom")){
 //			    	Axiom axiom = ((EvaluatedAxiom) itemId).getAxiom();
@@ -198,82 +198,6 @@ public class EvaluatedAxiomsTable extends Table{
 			}
 		});
 	};
-	
-	private String getAccuracyDescription(EvaluatedAxiom evAxiom){
-		AxiomScore score = (AxiomScore) evAxiom.getScore();
-		String explanationPattern = ScoreExplanationPattern.getExplanationPattern(axiomType);
-		if(explanationPattern == null || explanationPattern.isEmpty()){
-			explanationPattern = ScoreExplanationPattern.getGenericPattern();
-		}
-		explanationPattern = explanationPattern.replace("$total", "<b>" + String.valueOf(score.getTotalNrOfExamples()) + "</b>");
-		explanationPattern = explanationPattern.replace("$pos", "<b>" + String.valueOf(score.getNrOfPositiveExamples()) + "</b>");
-		OWLAxiom axiom = evAxiom.getAxiom();
-		String prop1 = null;
-		String prop2 = null;
-		String cls1 = null;
-		String cls2 = null;
-		String datatype = null;
-		if (axiom instanceof OWLObjectPropertyCharacteristicAxiom) {
-			prop1 = ((OWLObjectPropertyCharacteristicAxiom)axiom).getProperty().asOWLObjectProperty().toStringID();
-		} else if (axiom instanceof OWLSubObjectPropertyOfAxiom) {
-			prop1 = ((OWLSubObjectPropertyOfAxiom)axiom).getSubProperty().toString();
-			prop2 = ((OWLSubObjectPropertyOfAxiom)axiom).getSuperProperty().toString();
-		} else if (axiom instanceof OWLDisjointObjectPropertiesAxiom) {
-			Set<OWLObjectPropertyExpression> properties = ((OWLDisjointObjectPropertiesAxiom) axiom).getProperties();
-			Iterator<OWLObjectPropertyExpression> iter = properties.iterator();
-			prop1 = iter.next().toString();
-			prop2 = iter.next().toString();
-		} else if (axiom instanceof OWLNaryPropertyAxiom) {
-			Collection<OWLPropertyExpression> properties = ((OWLNaryPropertyAxiom)axiom).getProperties();
-			Iterator<OWLPropertyExpression> iter = properties.iterator();
-			prop1 = iter.next().toString();
-			prop2 = iter.next().toString();
-		} else if (axiom instanceof OWLObjectPropertyDomainAxiom) {
-			prop1 = ((OWLObjectPropertyDomainAxiom)axiom).getProperty().toString();
-			cls1 = ((OWLObjectPropertyDomainAxiom)axiom).getDomain().toString();
-		} else if (axiom instanceof OWLObjectPropertyRangeAxiom) {
-			prop1 = ((OWLObjectPropertyRangeAxiom)axiom).getProperty().toString();
-			cls1 = ((OWLObjectPropertyRangeAxiom)axiom).getRange().toString();
-		} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
-			prop1 = ((OWLSubDataPropertyOfAxiom)axiom).getSubProperty().toString();
-			prop2 = ((OWLSubDataPropertyOfAxiom)axiom).getSuperProperty().toString();
-		} else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
-			prop1 = ((OWLFunctionalDataPropertyAxiom)axiom).getProperty().asOWLDataProperty().toStringID();
-		} else if (axiom instanceof OWLDataPropertyDomainAxiom) {
-			prop1 = ((OWLDataPropertyDomainAxiom)axiom).getProperty().toString();
-			cls1 = ((OWLDataPropertyDomainAxiom)axiom).getDomain().toString();
-		} else if (axiom instanceof OWLDataPropertyRangeAxiom) {
-			prop1 = ((OWLDataPropertyRangeAxiom)axiom).getProperty().toString();
-			datatype = ((OWLDataPropertyRangeAxiom)axiom).getRange().toString();
-		} else if (axiom instanceof OWLSubClassOfAxiom) {
-			cls1 = ((OWLSubClassOfAxiom)axiom).getSubClass().toString();
-			cls2 = ((OWLSubClassOfAxiom)axiom).getSuperClass().toString();
-		} else if (axiom instanceof OWLDisjointClassesAxiom) {
-			Collection<OWLClassExpression> classes = ((OWLDisjointClassesAxiom)axiom).getClassExpressions();
-			Iterator<OWLClassExpression> iter = classes.iterator();
-			cls1 = iter.next().toString();
-			cls2 = iter.next().toString();
-		}
-		if(prop1 != null){
-			explanationPattern = explanationPattern.replace("$prop1", "<b>" + prop1 + "</b>");
-		}
-		if(prop2 != null){
-			explanationPattern = explanationPattern.replace("$prop2", "<b>" + prop2 + "</b>");
-		}
-		if(cls1 != null){
-			explanationPattern = explanationPattern.replace("$cls1", "<b>" + cls1 + "</b>");
-		}
-		if(cls2 != null){
-			explanationPattern = explanationPattern.replace("$cls2", "<b>" + cls2 + "</b>");
-		}
-		if(datatype != null){
-			explanationPattern = explanationPattern.replace("$datatype", "<b>" + datatype + "</b>");
-		}
-		explanationPattern = explanationPattern.replaceAll("(\\s)([x,y,z])([\\s|,|.])", "$1<i>$2</i>$3");
-		
-		
-		return explanationPattern;
-	}
 	
 	@Override
 	protected String formatPropertyValue(Object rowId, Object colId,

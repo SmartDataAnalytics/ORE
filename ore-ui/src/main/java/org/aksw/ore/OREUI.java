@@ -57,7 +57,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @Theme("ore")
 @Title("ORE")
-@Push(value=PushMode.AUTOMATIC,transport=Transport.LONG_POLLING)
+@Push(value=PushMode.AUTOMATIC,transport=Transport.WEBSOCKET)
 @VaadinServletConfiguration(productionMode = false, ui = OREUI.class, widgetset="org.aksw.ore.AppWidgetSet")
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener
