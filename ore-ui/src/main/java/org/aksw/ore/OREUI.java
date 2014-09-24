@@ -117,6 +117,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     
     @Override
     protected void init(VaadinRequest request) {
+    	System.out.println("INIT UI");
     	UI.getCurrent().setLocale(Locale.ENGLISH);
     	getPage().setTitle("ORE");
     	root.addStyleName("root");

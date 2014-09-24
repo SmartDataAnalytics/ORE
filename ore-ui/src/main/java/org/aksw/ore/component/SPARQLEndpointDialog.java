@@ -12,6 +12,8 @@ import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 
+import com.vaadin.data.Validator;
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.event.Action;
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
@@ -51,7 +53,6 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		setModal(true);
 		setWidth("400px");
 		setHeight(null);
-		setClosable(false);
 		setCloseShortcut(KeyCode.ESCAPE);
 		
 		initUI();
@@ -64,6 +65,8 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		
 		endpointURLField.setValue(endpointURL);
 		defaultGraphURIField.setValue(defaultGraphURI);
+		
+//		okButton.click();
 	}
 	
 	private void initUI(){
@@ -73,7 +76,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		main.setSpacing(true);
 		main.setMargin(true);
 		setContent(main);
-		FormLayout form = new FormLayout();
+		final FormLayout form = new FormLayout();
 		main.addComponent(form);
 		form.setWidth("100%");
 //		form.setWidth("80%");
@@ -95,26 +98,41 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		
 		//named graphs in a list
 		final TextField namedGraphURIField = new TextField();
-		namedGraphURIField.setDescription("Enter a named graph URI and click 'Add' or press 'Return' key to add it to the list below.");
+		namedGraphURIField.setDescription("Enter a named graph IRI and click 'Add' or press 'Return' key to add it to the list below.");
 		namedGraphURIField.setWidth("100%");
 		namedGraphURIField.setInputPrompt("Enter named graph IRI");
+		namedGraphURIField.addValidator(new Validator() {
+			UrlValidator urlValidator = new UrlValidator();
+			
+			@Override
+			public void validate(Object value) throws InvalidValueException {
+				if(value != null && !((String) value).isEmpty()){
+					if(!urlValidator.isValid((String) value)){
+						throw new InvalidValueException("Invalid IRI");
+					};
+				}
+			}
+		});
+		
 		namedGraphList = new ListSelect();
 		namedGraphList.setWidth("100%");
 		namedGraphList.setNullSelectionAllowed(false);
 		namedGraphList.setMultiSelect(true);
+		
 		final Button addButton = new Button("Add");
 		addButton.setDescription("Add the named graph to the list.");
 		addButton.addClickListener(new ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
+				namedGraphURIField.validate();
 				if(namedGraphURIField.getValue() != null){
 					//TODO check for valid URI
 					UrlValidator urlValidator = new UrlValidator();
 					if(urlValidator.isValid(namedGraphURIField.getValue())){
 						namedGraphList.addItem(namedGraphURIField.getValue());
 						namedGraphURIField.setValue("");
-					}
+					} 
 				}
 			}
 		});
@@ -155,7 +173,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		okButton.addClickListener(new ClickListener() {
 			
 			@Override
-			public void buttonClick(ClickEvent event) {System.out.println("button click");
+			public void buttonClick(ClickEvent event) {
 				try {
 					List<String> defaultGraphURIs = new ArrayList<String>();
 					if(defaultGraphURIField.getValue() != null){
@@ -189,8 +207,6 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 			}
 		});
 		buttons.addComponent(cancelButton);
-		okButton.setWidth("70px");
-		cancelButton.setWidth("70px");
 		buttons.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
 		buttons.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
 		

@@ -30,7 +30,6 @@ import com.hp.hpl.jena.query.ResultSet;
 
 public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
-	
 	private static final Logger logger = Logger.getLogger(KnowledgebaseManager.class.getName());
 	
 	public interface KnowledgebaseLoadingListener{
@@ -46,13 +45,9 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
 	private Set<OWLOntologyChange> changes;
 	
-	private List<KnowledgebaseLoadingListener> listeners;
+	private List<KnowledgebaseLoadingListener> listeners = new ArrayList<KnowledgebaseLoadingListener>();
 	
-	public KnowledgebaseManager() {
-		listeners = new ArrayList<KnowledgebaseLoadingListener>();
-	}
-	
-	public void setKnowledgebase(Knowledgebase knowledgebase) {
+	public void setKnowledgebase(Knowledgebase knowledgebase) {System.out.println("set KB");
 		logger.debug("Set knowledgebase to " + knowledgebase);
 		this.knowledgebase = knowledgebase;
 		changes = Sets.newLinkedHashSet();
@@ -179,7 +174,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		}
 	}
 	
-	public void addListener(KnowledgebaseLoadingListener l){//System.out.println("Add listener " + l);
+	public void addListener(KnowledgebaseLoadingListener l){System.out.println("Add listener " + l);
 		synchronized(listeners){
 			listeners.add(l);
 		}

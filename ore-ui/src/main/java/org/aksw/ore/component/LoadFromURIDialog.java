@@ -1,6 +1,9 @@
 package org.aksw.ore.component;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -19,6 +22,7 @@ import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -37,25 +41,30 @@ public class LoadFromURIDialog extends Window{
 		
 		uriField.setValue(ontologyURI);
 		setResizeLazy(false);
+		
+		okButton.setEnabled(true);
+//		okButton.click();
 	}
 	
 	public LoadFromURIDialog() {
 		this("");
+		
+		okButton.setEnabled(false);
 	}
 	
 	private void initUI(){
 		setCaption("Load ontology from URI");
 		setModal(true);
-		setWidth("300px");
+		setWidth("400px");
 		addStyleName("no-vertical-drag-hints");
 		addStyleName("no-horizontal-drag-hints");
-		setClosable(true);
 		setCloseShortcut(KeyCode.ESCAPE, null);
 		
 		VerticalLayout main = new VerticalLayout();
 		main.setSizeFull();
-		main.setHeight(null);
+		main.setHeightUndefined();
 		main.setSpacing(true);
+		main.setMargin(true);
 		setContent(main);
 		
 		FormLayout l = new FormLayout();
@@ -70,12 +79,14 @@ public class LoadFromURIDialog extends Window{
 		uriField.setWidth("100%");
 		uriField.setHeight(null);
 		uriField.setImmediate(true);
+		uriField.setRequired(true);
+//		uriField.setRequiredError("The URI must not be empty.");
 		uriField.setTextChangeEventMode(TextChangeEventMode.EAGER);
 		uriField.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				okButton.focus();
-				onLoadOntology();
+				okButton.focus();System.out.println("Value changed");
+//				onLoadOntology();
 			}
 		});
 		uriField.addTextChangeListener(new TextChangeListener() {
@@ -93,6 +104,8 @@ public class LoadFromURIDialog extends Window{
 				onLoadOntology();
 			}
 		});
+		okButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		okButton.setImmediate(true);
 		Button cancelButton = new Button("Cancel", new Button.ClickListener() {
 
 			@Override
@@ -106,8 +119,7 @@ public class LoadFromURIDialog extends Window{
 		buttonLayout.setSpacing(true);
 		buttonLayout.addComponent(okButton);
 		buttonLayout.addComponent(cancelButton);
-		okButton.setWidth("70px");
-		cancelButton.setWidth("70px");
+	
 		buttonLayout.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
 		buttonLayout.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
 		main.addComponent(buttonLayout);
@@ -119,20 +131,20 @@ public class LoadFromURIDialog extends Window{
 	public void onLoadOntology(){
 		try {
 			String uri = (String)uriField.getValue();
-			URI.create(uri);
+			new URL(uri);
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			man.addOntologyLoaderListener(ORESession.getKnowledgebaseManager());
 			OWLOntology ontology = man.loadOntology(IRI.create(uri));
 			ORESession.getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
 			close();
-		} catch (IllegalArgumentException e){
-			Notification.show("Error loading ontology", "Invalid URI.", Notification.Type.ERROR_MESSAGE);
+		} catch (MalformedURLException e) {
+			Notification.show("An error occured while loading the ontology", "Invalid URI.\nReason:" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 			uriField.focus();
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
-			Notification.show("Error loading ontology", "Could not load the ontology from the given URI.", Notification.Type.ERROR_MESSAGE);
+			Notification.show("An error occured while loading the ontology", "Could not load the ontology from the given URI.\nReason: " + e.getMessage(), Notification.Type.ERROR_MESSAGE);
 			uriField.focus();
-		}
+		} 
 	}
 
 }

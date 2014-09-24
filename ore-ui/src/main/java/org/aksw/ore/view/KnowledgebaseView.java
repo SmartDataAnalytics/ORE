@@ -153,6 +153,36 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 //		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
 		
 		//OWL Ontology
+		ThemeResource icon = new ThemeResource("img/owl-ontology-128.png");
+		MenuBar split = new MenuBar();
+        MenuBar.MenuItem dropdown = split.addItem("OWL Ontology", null);
+        dropdown.setIcon(icon);
+        dropdown.addItem("From File", new Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				onLoadOntologyFromFile();
+			}
+		});
+        dropdown.addItem("From URI", new Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				onLoadOntologyFromURI();
+			}
+		});
+        dropdown.addItem("Ontology Repository", new Command() {
+			
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				onLoadOntologyFromRepository();
+			}
+		});
+        split.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        buttons.addComponent(split);
+		buttons.setComponentAlignment(split, Alignment.MIDDLE_RIGHT);
+		
+		/*
 		Button ontologyButton = new PopupButton("OWL Ontology");
 		ontologyButton.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
 //		ontologyButton.addStyleName("ontology-button");
@@ -160,17 +190,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		ontologyButton.setIcon(icon);
 		buttons.addComponent(ontologyButton);
 		buttons.setComponentAlignment(ontologyButton, Alignment.MIDDLE_RIGHT);
-		
-//		MenuBar split = new MenuBar();
-//        MenuBar.MenuItem dropdown = split.addItem("OWL Ontology", null);
-//        dropdown.setIcon(icon);
-//        dropdown.addItem("Another Action", null);
-//        dropdown.addItem("Secondary Action", null);
-//        dropdown.addItem("Last Action", null);
-//        split.addStyleName(ValoTheme.BUTTON_ICON_ALIGN_TOP);
-//        buttons.addComponent(split);
-//		buttons.setComponentAlignment(split, Alignment.MIDDLE_RIGHT);
-		
 		VerticalLayout popupLayout = new VerticalLayout();
 		popupLayout.setSpacing(true);
 		((PopupButton)ontologyButton).setContent(popupLayout);
@@ -199,6 +218,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 				onLoadOntologyFromRepository();
 			}
 		}));
+		*/
 		
 		//SPARQL endpoint
 		Button endpointButton = new Button("SPARQL Endpoint", new ClickListener() {
@@ -432,7 +452,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		if(kb.isConsistent()){
 			htmlTable += "<tr class=\"even\"><td>Coherent</td><td>" + kb.isCoherent() + "</td></tr>";
 			if(!kb.isCoherent()){
-				htmlTable += "<tr class=\"odd\"><td>#Unsatisfiable Classes</td><td>" + kb.getReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom().size() + "</td></tr>";
+				htmlTable += "<tr class=\"odd\"><td>#Unsatisfiable Classes</td><td>" + kb.getReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom().size() + FontAwesome.EXCLAMATION_TRIANGLE.getHtml() + "</td></tr>";
 			}
 					
 		}
