@@ -3,7 +3,6 @@ package org.aksw.ore.component;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -11,24 +10,8 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.rendering.Renderer;
 import org.aksw.ore.util.AxiomScoreExplanationGenerator;
 import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.learningproblems.AxiomScore;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLDisjointObjectPropertiesAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLNaryPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyCharacteristicAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLPropertyExpression;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
-import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 
 import com.google.common.collect.Sets;
 import com.vaadin.data.Item;
@@ -48,35 +31,38 @@ import com.vaadin.ui.themes.ValoTheme;
 
 public class EvaluatedAxiomsTable extends Table{
 	
-	private DecimalFormat df = new DecimalFormat("0.00%");
+	enum Columns{
+		SELECTED, ACCURACY, AXIOM
+	}
+	
+	private static final DecimalFormat df = new DecimalFormat("0.00%");
 	
 	private Set<Object> selectedObjects = new HashSet<Object>();
 	
-	private AxiomType axiomType;
+	private AxiomType<? extends OWLAxiom> axiomType;
 	private Collection<EvaluatedAxiom<OWLAxiom>> axioms;
 	
 	private Renderer renderer = ORESession.getRenderer();
 	
-	public EvaluatedAxiomsTable(final AxiomType axiomType, Collection<EvaluatedAxiom<OWLAxiom>> axioms) {
+	public EvaluatedAxiomsTable(final AxiomType<? extends OWLAxiom> axiomType, Collection<EvaluatedAxiom<OWLAxiom>> axioms) {
 		this.axiomType = axiomType;
 		this.axioms = axioms;
 		
 		addStyleName("enrichment-axioms-table");
 		addStyleName(ValoTheme.TABLE_BORDERLESS);
-		setSizeFull();
+		setWidth("100%");
+		setHeightUndefined();
 		setPageLength(0);
-		setHeight(null);
-//		setColumnWidth("Selected", 30);
-//		setColumnWidth("Accuracy", 100);
-		setColumnExpandRatio("Axiom", 1.0f);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);
+        setColumnCollapsingAllowed(false);
+        setColumnReorderingAllowed(false);
 		
 		IndexedContainer container = new IndexedContainer();
-		container.addContainerProperty("Selected", CheckBox.class, null);
-		container.addContainerProperty("Accuracy", Double.class, null);
-		container.addContainerProperty("Axiom", OWLAxiom.class, null);
+		container.addContainerProperty(Columns.SELECTED, CheckBox.class, null);
+		container.addContainerProperty(Columns.ACCURACY, Double.class, null);
+		container.addContainerProperty(Columns.AXIOM, OWLAxiom.class, null);
 		setContainerDataSource(container);
 		
 		Set<String> renderedAxioms = Sets.newHashSetWithExpectedSize(axioms.size());
@@ -88,11 +74,11 @@ public class EvaluatedAxiomsTable extends Table{
 			}
 		}
 		
-		addGeneratedColumn("Selected", new ColumnGenerator() {
+		addGeneratedColumn(Columns.SELECTED, new ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
-				if ("Selected".equals(columnId)) {
+				if (columnId == Columns.SELECTED) {
 					CheckBox cb = new CheckBox();
 					cb.addValueChangeListener(new ValueChangeListener() {
 						
@@ -114,7 +100,7 @@ public class EvaluatedAxiomsTable extends Table{
 			}
 		});
 		
-		addGeneratedColumn("Accuracy", new ColumnGenerator() {
+		addGeneratedColumn(Columns.ACCURACY, new ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
@@ -125,6 +111,7 @@ public class EvaluatedAxiomsTable extends Table{
 //				cell.setSpacing(true);
 				
 				Label accuracyLabel = new Label(df.format(((EvaluatedAxiom<OWLAxiom>) itemId).getScore().getAccuracy()));
+				accuracyLabel.setWidthUndefined();
 				cell.addComponent(accuracyLabel);
 				cell.setExpandRatio(accuracyLabel, 1f);
 				cell.setComponentAlignment(accuracyLabel, Alignment.MIDDLE_RIGHT);
@@ -150,11 +137,11 @@ public class EvaluatedAxiomsTable extends Table{
 			}
 		});
 		
-		addGeneratedColumn("Axiom", new ColumnGenerator() {
+		addGeneratedColumn(Columns.AXIOM, new ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				if ("Axiom".equals(columnId)) {
+				if (columnId == Columns.AXIOM) {
 					if(itemId instanceof EvaluatedAxiom){
 						OWLAxiom axiom = ((EvaluatedAxiom) itemId).getAxiom();
 						String s = renderer.renderHTML(axiom);
@@ -173,20 +160,24 @@ public class EvaluatedAxiomsTable extends Table{
 			}
 		});
 		
-		setColumnHeader("Selected", "");
+		setColumnHeader(Columns.SELECTED, "");
+		setColumnHeader(Columns.ACCURACY, "Accuracy");
+		setColumnHeader(Columns.AXIOM, "Axiom");
+		
+		setColumnExpandRatio(Columns.AXIOM, 1f);
 		
 		Item item;
 		for(EvaluatedAxiom<OWLAxiom> ax : axioms){
 			item = container.addItem(ax);
-			item.getItemProperty("Accuracy").setValue(ax.getScore().getAccuracy());
-			item.getItemProperty("Axiom").setValue(ax.getAxiom());
+			item.getItemProperty(Columns.ACCURACY).setValue(ax.getScore().getAccuracy());
+			item.getItemProperty(Columns.AXIOM).setValue(ax.getAxiom());
 		}
 		
 		setItemDescriptionGenerator(new ItemDescriptionGenerator() {                             
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
 			    if(propertyId == null){
 			        return "";//"Row description "+ itemId;
-			    } else if(propertyId.equals("Accuracy")) {
+			    } else if(propertyId.equals(Columns.ACCURACY)) {
 			    	EvaluatedAxiom<OWLAxiom> evAxiom = (EvaluatedAxiom<OWLAxiom>)itemId;
 			        return AxiomScoreExplanationGenerator.getAccuracyDescription(evAxiom, ORESession.getRenderer());
 			    } 

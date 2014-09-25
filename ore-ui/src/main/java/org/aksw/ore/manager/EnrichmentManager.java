@@ -39,9 +39,11 @@ import org.apache.jena.riot.checker.CheckerLiterals;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.algorithms.properties.AxiomAlgorithms;
+import org.dllearner.algorithms.properties.MultiPropertyAxiomLearner;
 import org.dllearner.core.AbstractAxiomLearningAlgorithm;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.AnnComponentManager;
+import org.dllearner.core.AxiomLearningProgressMonitor;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedAxiom;
 import org.dllearner.core.EvaluatedDescription;
@@ -167,6 +169,7 @@ public class EnrichmentManager {
 	private int maxNrOfNegativeExamples = 20;
 	
 	OWLDataFactory dataFactory = new OWLDataFactoryImpl();
+	private MultiPropertyAxiomLearner la;
 	
 	public EnrichmentManager(SparqlEndpoint endpoint, CacheFrontend cache) {
 		this.endpoint = endpoint;
@@ -174,6 +177,8 @@ public class EnrichmentManager {
 		reasoner = new SPARQLReasoner(new SparqlEndpointKS(endpoint), cache);
 		
 		loadProperties();
+		
+		la = new MultiPropertyAxiomLearner(new SparqlEndpointKS(endpoint));
 	}
 	
 	private void loadProperties(){
@@ -185,6 +190,10 @@ public class EnrichmentManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void addProgressMonitor(AxiomLearningProgressMonitor monitor){
+		la.setProgressMonitor(monitor);
 	}
 
 	public SparqlEndpoint getEndpoint() {
@@ -260,7 +269,30 @@ public class EnrichmentManager {
 		}
 	}
 	
-	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms(String resourceURI, AxiomType<?extends OWLAxiom> axiomType)
+	public OWLEntity getEntity(String entityURI) throws OREException{
+		EntityType<? extends OWLEntity> entityType = reasoner.getOWLEntityType(entityURI);
+		if(entityType != null){
+			return dataFactory.getOWLEntity(entityType, IRI.create(entityURI));
+		} else {
+			throw new OREException("Could not detect type of resource");
+		}
+	}
+	
+	public void generateEvaluatedAxioms(OWLEntity entity, Set<AxiomType<? extends OWLAxiom>> axiomTypes){
+		la.setEntityToDescribe(entity);
+		la.setAxiomTypes(axiomTypes);
+		la.start();
+	}
+	
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms(OWLEntity entity, AxiomType<? extends OWLAxiom> axiomType){
+		return la.getCurrentlyBestEvaluatedAxioms(axiomType, threshold);
+	}
+	
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms(OWLEntity entity, AxiomType<? extends OWLAxiom> axiomType, double accuracyThreshold){
+		return la.getCurrentlyBestEvaluatedAxioms(axiomType, accuracyThreshold);
+	}
+	
+	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms(String resourceURI, AxiomType<? extends OWLAxiom> axiomType)
 			throws OREException {
 		fireEnrichmentStarted(axiomType);
 		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
@@ -293,7 +325,7 @@ public class EnrichmentManager {
 		return learnedAxioms;
 	}
 	
-	private List<EvaluatedAxiom<OWLAxiom>> applyLearningAlgorithm(AxiomType axiomType, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
+	private List<EvaluatedAxiom<OWLAxiom>> applyLearningAlgorithm(AxiomType<? extends OWLAxiom> axiomType, SparqlEndpointKS ks, OWLEntity entity) throws ComponentInitException {
 		if(axiomType == AxiomType.EQUIVALENT_CLASSES){
 			return applyCELOE(ks, (OWLClass)entity, true);
 		} else {
@@ -522,13 +554,13 @@ public class EnrichmentManager {
 		return model;
 	}
 	
-	public Set<OWLObject> getPositives(AxiomType<OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
+	public Set<OWLObject> getPositives(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
 		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
 		Set<OWLObject> positiveExamples = la.getPositiveExamples(axiom);
 		return positiveExamples;
 	}
 
-	public Set<OWLObject> getNegatives(AxiomType<OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
+	public Set<OWLObject> getNegatives(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
 		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
 		Set<OWLObject> negativeExamples = la.getNegativeExamples(axiom);
 		return negativeExamples;

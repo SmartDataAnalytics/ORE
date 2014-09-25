@@ -1,9 +1,10 @@
 package org.aksw.ore.view;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -338,29 +339,53 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		}
 		
 		EnrichmentProgressDialog progressDialog = new EnrichmentProgressDialog(pendingAxiomTypes);
+		man.addProgressMonitor(progressDialog);
 		getUI().addWindow(progressDialog);
 		
-		for(final AxiomType<OWLAxiom> axiomType : pendingAxiomTypes){
-			
+		try {
+			final OWLEntity entity = man.getEntity(resourceURI);
 			new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
-					try {
-						final List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms(resourceURI, axiomType);
+					man.generateEvaluatedAxioms(entity, new HashSet<AxiomType<? extends OWLAxiom>>(pendingAxiomTypes));
+					for (final AxiomType<OWLAxiom> axiomType : pendingAxiomTypes) {
+						final List<EvaluatedAxiom<OWLAxiom>> evaluatedAxioms = man.getEvaluatedAxioms(entity, axiomType);
+						
 						UI.getCurrent().access(new Runnable() {
-							
 							@Override
 							public void run() {
-								showTable(axiomType, learnedAxioms);
+								showTable(axiomType, evaluatedAxioms);
 							}
 						});
-					} catch (OREException e) {
-						e.printStackTrace();
 					}
 				}
 			}).start();
+		} catch (OREException e) {
+			e.printStackTrace();
 		}
+		
+//		for(final AxiomType<OWLAxiom> axiomType : pendingAxiomTypes){
+//			
+//			new Thread(new Runnable() {
+//				
+//				@Override
+//				public void run() {
+//					try {
+//						final List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = ORESession.getEnrichmentManager().getEvaluatedAxioms(resourceURI, axiomType);
+//						UI.getCurrent().access(new Runnable() {
+//							
+//							@Override
+//							public void run() {
+//								showTable(axiomType, learnedAxioms);
+//							}
+//						});
+//					} catch (OREException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}).start();
+//		}
 	}
 	
 	private void onDumpSPARUL(){
@@ -398,11 +423,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		}
 	}
 	
-	public void showTable(AxiomType<OWLAxiom> axiomType, List<EvaluatedAxiom<OWLAxiom>> axioms){
+	public void showTable(AxiomType<? extends OWLAxiom> axiomType, List<EvaluatedAxiom<OWLAxiom>> axioms){
 		if(!axioms.isEmpty()){
 			try {
 				EvaluatedAxiomsTable table = new EvaluatedAxiomsTable(axiomType, axioms);
-				table.setWidth("100%");
+//				table.setWidth("100%");
 				String axiomName = axiomType.getName();
 				if(axiomType.equals(AxiomType.IRREFLEXIVE_OBJECT_PROPERTY)){
 					axiomName = "Irreflexive Object Property";
@@ -461,9 +486,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	}
 	
 	private class AxiomTypesField extends VerticalLayout{
-		
-		private Set<AxiomType<OWLAxiom>> selectedAxiomsTypes = new HashSet<AxiomType<OWLAxiom>>();
-		private Collection<AxiomType<OWLAxiom>> visibleAxiomTypes;
 		
 		public AxiomTypesField() {
 			setCaption("Axiom types");

@@ -35,7 +35,7 @@ public class AxiomScoreExplanationDialog extends Window{
 	private DecimalFormat df = new DecimalFormat("0.00%");
 	Renderer renderer = ORESession.getRenderer();
 	
-	public AxiomScoreExplanationDialog(AxiomType<OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
+	public AxiomScoreExplanationDialog(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
 		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");

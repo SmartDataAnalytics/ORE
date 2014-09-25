@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.EnrichmentManager.EnrichmentProgressListener;
+import org.dllearner.core.AxiomLearningProgressMonitor;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
@@ -31,7 +32,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * @author Lorenz Buehmann
  *
  */
-public class EnrichmentProgressDialog extends Window implements EnrichmentProgressListener{
+public class EnrichmentProgressDialog extends Window implements EnrichmentProgressListener, AxiomLearningProgressMonitor{
 	
 	private volatile boolean cancelled = false;
 	private Label message;
@@ -166,5 +167,68 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	 */
 	@Override
 	public void onEnrichmentFailed(AxiomType<? extends OWLAxiom> axiomType) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dllearner.core.AxiomLearningProgressMonitor#learningStarted(org.semanticweb.owlapi.model.AxiomType)
+	 */
+	@Override
+	public void learningStarted(AxiomType<? extends OWLAxiom> axiomType) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dllearner.core.AxiomLearningProgressMonitor#learningStopped(org.semanticweb.owlapi.model.AxiomType)
+	 */
+	@Override
+	public void learningStopped(final AxiomType<? extends OWLAxiom> axiomType) {
+		finishedAxiomTypes.add(axiomType);
+		
+		UI.getCurrent().access(new Runnable() {
+			
+			@Override
+			public void run() {
+				Label label = axiomType2Label.get(axiomType);
+				label.removeStyleName(ValoTheme.LABEL_SPINNER);
+				label.setIcon(FontAwesome.SMILE_O);
+				if(finishedAxiomTypes.size() == pendingAxiomTypes.size()){
+					close();
+				}
+			}
+		});
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dllearner.core.AxiomLearningProgressMonitor#learningProgressChanged(org.semanticweb.owlapi.model.AxiomType, int, int)
+	 */
+	@Override
+	public void learningProgressChanged(AxiomType<? extends OWLAxiom> axiomType, int value, int max) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dllearner.core.AxiomLearningProgressMonitor#learningTaskBusy(org.semanticweb.owlapi.model.AxiomType)
+	 */
+	@Override
+	public void learningTaskBusy(AxiomType<? extends OWLAxiom> axiomType) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.dllearner.core.AxiomLearningProgressMonitor#learningFailed(org.semanticweb.owlapi.model.AxiomType)
+	 */
+	@Override
+	public void learningFailed(final AxiomType<? extends OWLAxiom> axiomType) {
+		finishedAxiomTypes.add(axiomType);
+		
+		UI.getCurrent().access(new Runnable() {
+			
+			@Override
+			public void run() {
+				Label label = axiomType2Label.get(axiomType);
+				label.removeStyleName(ValoTheme.LABEL_SPINNER);
+				label.setIcon(FontAwesome.FROWN_O);
+				if(finishedAxiomTypes.size() == pendingAxiomTypes.size()){
+					close();
+				}
+			}
+		});
 	}
 }
