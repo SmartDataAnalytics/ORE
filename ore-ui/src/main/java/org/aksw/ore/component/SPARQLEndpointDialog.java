@@ -109,7 +109,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 				if(value != null && !((String) value).isEmpty()){
 					if(!urlValidator.isValid((String) value)){
 						throw new InvalidValueException("Invalid IRI");
-					};
+					}
 				}
 			}
 		});

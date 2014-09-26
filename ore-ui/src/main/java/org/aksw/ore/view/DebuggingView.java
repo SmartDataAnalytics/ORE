@@ -92,11 +92,12 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	
 	private Map<OWLAxiom, OWLAxiomBean> axiom2Bean = new HashMap<OWLAxiom, OWLAxiomBean>();
 
-	private Set<Table> tables;
+	private Set<Table> tables = new HashSet<>();
 
 	
 	public DebuggingView() {
 		addStyleName("dashboard-view");
+        addStyleName("debugging-view");
 		setSizeFull();
 		
 		createUnsatisfiableClassesTable();

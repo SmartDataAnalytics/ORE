@@ -14,6 +14,7 @@ import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -45,7 +46,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
 	private Set<OWLOntologyChange> changes;
 	
-	private List<KnowledgebaseLoadingListener> listeners = new ArrayList<KnowledgebaseLoadingListener>();
+	private final List<KnowledgebaseLoadingListener> listeners = new ArrayList<KnowledgebaseLoadingListener>();
 	
 	public void setKnowledgebase(Knowledgebase knowledgebase) {System.out.println("set KB");
 		logger.debug("Set knowledgebase to " + knowledgebase);
@@ -226,18 +227,16 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 
 	@Override
 	public void startedLoadingOntology(LoadingStartedEvent event) {
-		if(!event.isImported()){
-			
-		} else {
-			message("Loading import " + event.getDocumentIRI() + "...");
+		if(event.isImported()){
+            message("Loading import " + event.getDocumentIRI() + "...");
 		}
-		
 	}
 
 	@Override
 	public void finishedLoadingOntology(LoadingFinishedEvent event) {
 		if(!event.isImported()){
 			message("...loaded ontology");
+
 		} else {
 			message("...loaded import");
 		}

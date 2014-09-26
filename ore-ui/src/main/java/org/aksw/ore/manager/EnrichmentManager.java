@@ -144,7 +144,7 @@ public class EnrichmentManager {
 	}
 	
 	private UnsortedManchesterSyntaxRendererImpl manchesterSyntaxRenderer = new UnsortedManchesterSyntaxRendererImpl();// ManchesterOWLSyntaxOWLObjectRendererImpl();
-	private KeywordColorMap colorMap = new KeywordColorMap();
+	private static final KeywordColorMap colorMap = new KeywordColorMap();
 	
 	private DecimalFormat df = new DecimalFormat("##0.0");
 	
@@ -623,9 +623,9 @@ public class EnrichmentManager {
 				color = c;
 			}
 			if(isReserved){
-				bf.append("<b><font color=" + color + ">" + token + " </font></b>");
+				bf.append("<b><font color=").append(color).append(">").append(token).append(" </font></b>");
 			} else {
-				bf.append(" " + token + " ");
+				bf.append(" ").append(token).append(" ");
 			}
 		}
 		bf.append("</html>");

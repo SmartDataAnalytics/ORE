@@ -35,7 +35,7 @@ public class LearningManager {
 	
 	public enum LearningType {
 		EQUIVALENT, SUPER
-	};
+	}
 
 	private LearningType learningType = LearningType.EQUIVALENT;
 

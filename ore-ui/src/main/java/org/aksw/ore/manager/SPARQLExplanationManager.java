@@ -61,6 +61,7 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	private ExplanationFormatter2 formatter;
 	
 	private ExplanationType currentExplanationType;
+    boolean useModularization = true;
 	
 	private Collection<ExplanationManagerListener> listeners = new HashSet<ExplanationManagerListener>();
 
@@ -90,7 +91,6 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	}
 	
 	private ExplanationGeneratorFactory<OWLAxiom> createExplanationGeneratorFactory(ExplanationType type){
-		boolean useModularization = true;
 		EntailmentCheckerFactory<OWLAxiom> checkerFactory = new SatisfiabilityEntailmentCheckerFactory(reasonerFactory, useModularization);
 		Configuration<OWLAxiom> configuration = new Configuration<OWLAxiom>(checkerFactory);
 		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<OWLAxiom>(configuration);

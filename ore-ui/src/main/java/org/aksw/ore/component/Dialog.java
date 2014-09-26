@@ -55,7 +55,7 @@ public class Dialog extends Window {
 		l.addComponent(innerComponent);
 		addCloseListener(new Window.CloseListener() {
 			public void windowClose(Window.CloseEvent e) {
-				if (Dialog.this.closed == true) {
+				if (Dialog.this.closed) {
 					return;
 				}
 				Dialog.this.doAction(e, 0);
@@ -118,6 +118,7 @@ public class Dialog extends Window {
 		try {
 			return getAction(action).button;
 		} catch (Exception x) {
+            x.printStackTrace();
 		}
 		return null;
 	}

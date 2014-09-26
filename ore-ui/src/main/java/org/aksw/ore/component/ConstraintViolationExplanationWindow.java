@@ -32,7 +32,7 @@ public class ConstraintViolationExplanationWindow extends Window{
 	    setCaption(constraint.toString());
 	    setContent(l);
 	    center();
-	    setCloseShortcut(KeyCode.ESCAPE, null);
+	    setCloseShortcut(KeyCode.ESCAPE);
 	    setResizable(false);
 	    setClosable(false);
 

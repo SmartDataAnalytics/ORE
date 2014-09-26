@@ -372,8 +372,6 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 			e.printStackTrace();
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
-		} catch (OWLParserException e) {
-			throw e;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

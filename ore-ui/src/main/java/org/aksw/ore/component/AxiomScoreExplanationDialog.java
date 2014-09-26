@@ -31,15 +31,16 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 public class AxiomScoreExplanationDialog extends Window{
-	
-	private DecimalFormat df = new DecimalFormat("0.00%");
+
+	private static final DecimalFormat df = new DecimalFormat("0.00%");
+
 	Renderer renderer = ORESession.getRenderer();
 	
 	public AxiomScoreExplanationDialog(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom) {
 		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");
-		setCloseShortcut(KeyCode.ESCAPE, null);
+		setCloseShortcut(KeyCode.ESCAPE);
 		
 		VerticalLayout content = new VerticalLayout();
 		content.setSizeFull();

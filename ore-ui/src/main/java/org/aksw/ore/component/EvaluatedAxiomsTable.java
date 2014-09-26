@@ -188,7 +188,7 @@ public class EvaluatedAxiomsTable extends Table{
 			    return null;
 			}
 		});
-	};
+	}
 	
 	@Override
 	protected String formatPropertyValue(Object rowId, Object colId,

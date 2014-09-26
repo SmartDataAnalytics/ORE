@@ -362,8 +362,6 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	private void onExport(){
 		if(ORESession.getKnowledgebaseManager().getKnowledgebase() instanceof SPARQLEndpointKnowledgebase){
 			onDumpSPARUL();
-		} else {
-			
 		}
 	}
 	

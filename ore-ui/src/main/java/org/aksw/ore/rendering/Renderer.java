@@ -38,6 +38,8 @@ import com.google.common.cache.LoadingCache;
 public class Renderer {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Renderer.class);
+
+    private static final KeywordColorMap colorMap = new KeywordColorMap();
 	
 	private List<RenderingListener> renderingListeners = new ArrayList<RenderingListener>();
 	
@@ -73,9 +75,7 @@ public class Renderer {
 	private OWLObjectRenderer manchesterSyntaxRenderer = new ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private OWLObjectRenderer manchesterSyntaxRendererLongForm = new ManchesterOWLSyntaxOWLObjectRendererImpl();
 	private OWLObjectRenderer manchesterSyntaxRendererPrefixed = new UnsortedManchesterSyntaxRendererImpl();
-	private OWLObjectRenderer dlSyntaxRenderer = new DLSyntaxObjectRenderer(); 
-	
-	private KeywordColorMap colorMap = new KeywordColorMap();
+	private OWLObjectRenderer dlSyntaxRenderer = new DLSyntaxObjectRenderer();
 	
 	public Renderer() {
 		shortFormProviders.put(EntityRenderingStyle.SHORT_FORM, new SimpleShortFormProvider());
@@ -197,11 +197,11 @@ public class Renderer {
 			
 			if(isReserved){
 				color = "#000000";
-				bf.append("<b><font color=" + color + ">" + token + " </font></b>");
+				bf.append("<b><font color=").append(color).append(">").append(token).append(" </font></b>");
 			} else if(token.equals("(not")){//if token equals (not as workaround
-				bf.append("(<b><font color=" + color + ">not</font></b>");
+				bf.append("(<b><font color=").append(color).append(">not</font></b>");
 			} else {
-				bf.append(" " + token + " ");
+				bf.append(" ").append(token).append(" ");
 			}
 		}
 		bf.append("</html>");

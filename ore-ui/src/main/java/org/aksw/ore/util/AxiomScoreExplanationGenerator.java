@@ -48,10 +48,9 @@ public class AxiomScoreExplanationGenerator {
 	
 	public static void init(){
 		axiomType2Pattern = new HashMap<AxiomType<OWLAxiom>, String>();
-		
-		DataInputStream in = null;
-		try {
-			in = new DataInputStream(PatOMatPatternLibrary.class.getClassLoader().getResourceAsStream(patternFile));
+
+		try (DataInputStream in = new DataInputStream(PatOMatPatternLibrary.class.getClassLoader().getResourceAsStream(patternFile))){
+
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -74,12 +73,6 @@ public class AxiomScoreExplanationGenerator {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	

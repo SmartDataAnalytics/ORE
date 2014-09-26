@@ -75,6 +75,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	private ExplanationFormatter2 formatter;
 	
 	private ExplanationType currentExplanationType;
+    boolean useModularization = true;
 	
 	private Collection<ExplanationManagerListener> listeners = new HashSet<ExplanationManagerListener>();
 
@@ -105,7 +106,6 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	}
 	
 	private ExplanationGeneratorFactory<OWLAxiom> createExplanationGeneratorFactory(ExplanationType type){
-		boolean useModularization = true;
 		EntailmentCheckerFactory<OWLAxiom> checkerFactory = new SatisfiabilityEntailmentCheckerFactory(reasonerFactory, useModularization);
 		Configuration<OWLAxiom> configuration = new Configuration<OWLAxiom>(checkerFactory);
 		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<OWLAxiom>(configuration);
@@ -173,6 +173,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 			ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = getExplanationGeneratorFactory();
 			try {
 				explanations = explanationGeneratorFactory.createExplanationGenerator(ontology, this).getExplanations(entailment, limit);
+
 			} catch (ExplanationException e) {
 				if(e instanceof ExplanationGeneratorInterruptedException){
 					explanations = currentlyFoundExplanations;
@@ -180,10 +181,10 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 					e.printStackTrace();
 				}
 			}
-			cache.addExplanations(entailment, explanations);
-			if(explanations.size() < limit){
-				cache.setAllExplanationsFound(entailment);
-			}
+            cache.addExplanations(entailment, explanations);
+            if(explanations.size() < limit){
+                cache.setAllExplanationsFound(entailment);
+            }
 		}
 		logger.info("Got " + explanations.size() + " explanations in " + (System.currentTimeMillis()-startTime) + "ms.");
 		fireAllExplanationsFound(explanations);
@@ -391,7 +392,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	@Override
 	public boolean isCancelled() {
 		for (ExplanationProgressMonitor<OWLAxiom> mon : explanationProgressMonitors) {
-			if(mon.isCancelled() == true){
+			if(mon.isCancelled()){
 				return true;
 			}
 		}

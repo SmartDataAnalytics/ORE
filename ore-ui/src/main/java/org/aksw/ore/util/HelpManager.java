@@ -32,7 +32,7 @@ public class HelpManager {
         Scanner scanner = new Scanner(this.getClass().getClassLoader().getResourceAsStream("help-naming-view.txt"), "UTF-8");
         try {
           while (scanner.hasNextLine()){
-            text.append(scanner.nextLine() + " ");
+            text.append(scanner.nextLine()).append(" ");
           }
         }
         finally{

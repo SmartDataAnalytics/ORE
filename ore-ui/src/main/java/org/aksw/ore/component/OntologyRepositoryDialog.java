@@ -1,6 +1,7 @@
 package org.aksw.ore.component;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.aksw.mole.ore.repository.OntologyRepository;
 import org.aksw.mole.ore.repository.OntologyRepositoryEntry;
@@ -116,9 +117,7 @@ public class OntologyRepositoryDialog extends Window {
 
                     @Override
                     public boolean appliesToProperty(Object propertyId) {
-                        if (propertyId.equals("Name"))
-                            return true;
-                        return false;
+                        return propertyId.equals("Name");
                     }
                 });
             }
@@ -189,13 +188,13 @@ public class OntologyRepositoryDialog extends Window {
 	
 	private void onLoadOntology(String uri){
 		try {
-			URI.create(uri);
+			new URI(uri);
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			man.addOntologyLoaderListener(ORESession.getKnowledgebaseManager());
 			OWLOntology ontology = man.loadOntology(IRI.create(uri));
 			ORESession.getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
 			close();
-		} catch (IllegalArgumentException e){
+		} catch (URISyntaxException e){
 			Notification.show("Error loading ontology", "Invalid URI.", Notification.Type.ERROR_MESSAGE);
 			table.focus();
 		} catch (OWLOntologyCreationException e) {
