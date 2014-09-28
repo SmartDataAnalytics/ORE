@@ -90,11 +90,18 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		addComponent(createButtons());
 		
 		Component kbInfoPanel = createKnowledgeBaseInfo();
-		addComponent(kbInfoPanel);
+//		addComponent(kbInfoPanel);
 		
-		addComponent(createChangesPanel());
+		Component changesPanel = createChangesPanel();
+//		addComponent(changesPanel);
 		
-		setExpandRatio(kbInfoPanel, 1f);
+		HorizontalLayout bottom = new HorizontalLayout();
+		bottom.setSizeFull();
+		bottom.addComponent(kbInfoPanel);
+		bottom.addComponent(changesPanel);
+		addComponent(bottom);
+		
+		setExpandRatio(bottom, 1f);
 		
 		ORESession.getKnowledgebaseManager().addListener(this);
 		ORESession.getKnowledgebaseManager().addListener(table);
@@ -106,6 +113,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private Component createChangesPanel(){
 		changesPanel = new VerticalLayout();
+		changesPanel.setImmediate(true);
 		changesPanel.setSizeFull();
 		Label label = new Label("<h3>Changes:</h3>", ContentMode.HTML);
 		changesPanel.addComponent(label);
@@ -316,7 +324,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 				onSaveOntology();
 			} else {
 				visualizeSPARQLEndpoint((SPARQLEndpointKnowledgebase) knowledgebase);
-				applyChangesButton.setDescription("Export changes as SPARQL Update statements.");
+				applyChangesButton.setDescription("Export changes as SPARQL 1.1 Update statements.");
 			}
 		}
 		changesPanel.setVisible(false);
@@ -375,7 +383,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 				VerticalLayout content = new VerticalLayout();
 				String sparulString = translator.translate(changes);
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
-				final Window window = new Window("SPARQL Update statements", content);
+				final Window window = new Window("SPARQL 1.1 Update statements", content);
 				window.setWidth("1000px");
 				window.setHeight("400px");
 				window.center();

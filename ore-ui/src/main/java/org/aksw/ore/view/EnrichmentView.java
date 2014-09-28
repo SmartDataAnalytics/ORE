@@ -209,9 +209,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private Component createConfigForm(){
 		VerticalLayout form = new VerticalLayout();
-		form.setWidth("100%");
-		form.setHeightUndefined();
-//		form.setSizeFull();
+		form.setSizeFull();
 		form.setSpacing(true);
 		form.addStyleName("enrichment-options");
 		form.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
@@ -263,7 +261,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private Component createAdvancedOptionsPanel(){
 		VerticalLayout panel = new VerticalLayout();
-//		panel.setSizeFull();
+		panel.setSizeFull();
 		panel.setHeightUndefined();
 		
 		useInferenceBox = new CheckBox();
@@ -297,7 +295,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		panel.addComponent(thresholdSlider);
 		
 		CollapsibleBox collapsibleBox = new CollapsibleBox("Advanced", panel);
-		collapsibleBox.setSizeFull();
 		
 		return collapsibleBox;
 	}
@@ -491,7 +488,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			setCaption("Axiom types");
 			setDescription("Choose the types of axioms for which suggestions will be generated.");
 			setSizeFull();
-			setHeightUndefined();
+//			setHeightUndefined();
 			
 			//(de)select all checkbox
 			CheckBox allCheckBox = new CheckBox("All");
@@ -513,6 +510,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				}
 			});
 			addComponent(axiomTypesTable);
+			setExpandRatio(axiomTypesTable, 1f);
 			
 		}
 		

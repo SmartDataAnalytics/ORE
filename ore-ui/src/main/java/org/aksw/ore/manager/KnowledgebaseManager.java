@@ -48,7 +48,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
 	private final List<KnowledgebaseLoadingListener> listeners = new ArrayList<KnowledgebaseLoadingListener>();
 	
-	public void setKnowledgebase(Knowledgebase knowledgebase) {System.out.println("set KB");
+	public void setKnowledgebase(Knowledgebase knowledgebase) {
 		logger.debug("Set knowledgebase to " + knowledgebase);
 		this.knowledgebase = knowledgebase;
 		changes = Sets.newLinkedHashSet();

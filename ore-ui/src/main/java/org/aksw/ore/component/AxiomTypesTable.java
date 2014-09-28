@@ -86,7 +86,7 @@ public class AxiomTypesTable extends Table{
 	public AxiomTypesTable(final Property.ValueChangeListener listener) {
 		addStyleName("axiomtypes-table");
 		setSizeFull();
-		setHeightUndefined();
+//		setHeightUndefined();
 		setImmediate(true);
 		setPageLength(0);
 		setColumnHeaderMode(ColumnHeaderMode.HIDDEN);

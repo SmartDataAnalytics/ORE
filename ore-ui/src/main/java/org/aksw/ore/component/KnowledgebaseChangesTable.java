@@ -14,13 +14,14 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class KnowledgebaseChangesTable extends Table implements KnowledgebaseLoadingListener{
@@ -53,7 +54,7 @@ public class KnowledgebaseChangesTable extends Table implements KnowledgebaseLoa
 				if (AXIOM.equals(columnId)) {
 					if(itemId instanceof AddAxiom || itemId instanceof RemoveAxiom){
 						OWLAxiom axiom = ((OWLOntologyChange) itemId).getAxiom();
-						return new Label(renderer.render(axiom), ContentMode.HTML);
+						return new Label(renderer.renderHTML(axiom), ContentMode.HTML);
 		        	} else {
 						return new Label(itemId.toString());
 		        	}
@@ -69,8 +70,10 @@ public class KnowledgebaseChangesTable extends Table implements KnowledgebaseLoa
 				
 				final OWLOntologyChange change = (OWLOntologyChange) itemId;
 				Button button = new Button();
-				button.setStyleName(BaseTheme.BUTTON_LINK);
-				button.addStyleName("cancel");
+				button.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+				button.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+				button.setIcon(FontAwesome.TRASH_O);
+//				button.addStyleName("cancel");
 				button.setDescription("Click to remove the ontology change.");
 
 				button.addClickListener(new ClickListener() {
