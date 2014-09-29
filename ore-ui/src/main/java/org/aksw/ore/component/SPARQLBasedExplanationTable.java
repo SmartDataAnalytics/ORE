@@ -22,6 +22,10 @@ import com.vaadin.ui.Table;
 @SuppressWarnings("serial")
 public class SPARQLBasedExplanationTable extends Table implements RepairManagerListener{
 	
+	enum Columns{
+		SELECTED, FREQUENCY, AXIOM
+	}
+	
 	private Explanation<OWLAxiom> explanation;
 	private Set<Object> selectedObjects = new HashSet<Object>();
 	private FormattedExplanation formattedExplanation;
@@ -37,22 +41,21 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		setWidth("100%");
 		setPageLength(0);
 		setHeight(null);
-		setColumnExpandRatio("Axiom", 1.0f);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);
 		
 		IndexedContainer container = new IndexedContainer();
-		container.addContainerProperty("Selected", CheckBox.class, null);
-		container.addContainerProperty("Axiom", String.class, null);
-		container.addContainerProperty("Frequency", Integer.class, null);
+		container.addContainerProperty(Columns.SELECTED, CheckBox.class, null);
+		container.addContainerProperty(Columns.AXIOM, OWLAxiom.class, null);
+		container.addContainerProperty(Columns.FREQUENCY, Integer.class, null);
 		setContainerDataSource(container);
 		
-		addGeneratedColumn("Selected", new ColumnGenerator() {
+		addGeneratedColumn(Columns.SELECTED, new ColumnGenerator() {
 			
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
-				if ("Selected".equals(columnId)) {
+				if (Columns.SELECTED.equals(columnId)) {
 					CheckBox cb = new CheckBox();
 					cb.setValue(selectedObjects.contains(itemId));
 					cb.setImmediate(true);
@@ -70,23 +73,23 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 							
 						}
 					});
-					SPARQLBasedExplanationTable.this.getItem(itemId).getItemProperty("Selected").setValue(cb);
+					SPARQLBasedExplanationTable.this.getItem(itemId).getItemProperty(Columns.SELECTED).setValue(cb);
 					return cb;
 				}
 				return null;
 			}
 		});
 		//column alignment, numbers always right aligned
-		setColumnAlignment("Frequency", Align.RIGHT);
+		setColumnAlignment(Columns.FREQUENCY, Align.RIGHT);
 		
 		//render axiom column colored
-		addGeneratedColumn("Axiom", new ColumnGenerator() {
+		addGeneratedColumn(Columns.AXIOM, new ColumnGenerator() {
 			
 			private Renderer renderer = ORESession.getRenderer();
 			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
-				if ("Axiom".equals(columnId)) {
+				if (Columns.AXIOM.equals(columnId)) {
 					if(itemId instanceof OWLAxiom){
 						OWLAxiom ax = ((OWLAxiom) itemId);
 						String indention = "";
@@ -102,7 +105,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 			}
 		});
 		
-		setColumnHeader("Selected", "");
+		setColumnHeader(Columns.SELECTED, "");
 		
 		Collection<OWLAxiom> axioms;
 		if(formatted){
@@ -114,8 +117,8 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		Item item;
 		for(OWLAxiom axiom : axioms){
 			item = container.addItem(axiom);
-			item.getItemProperty("Axiom").setValue(axiom.toString());
-			item.getItemProperty("Frequency").setValue(ORESession.getSPARQLExplanationManager().getAxiomFrequency(axiom));
+			item.getItemProperty(Columns.AXIOM).setValue(axiom.toString());
+			item.getItemProperty(Columns.FREQUENCY).setValue(ORESession.getSPARQLExplanationManager().getAxiomFrequency(axiom));
 		}
 		
 		setValue(selectedObjects);
@@ -124,12 +127,14 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 			
 			@Override
 			public String generateDescription(Component source, Object itemId, Object propertyId) {
-				if(propertyId != null && propertyId.equals("Frequency")){
-					return "The axiom occurs in " + getItem(itemId).getItemProperty("Frequency").getValue() + " explanations.";
+				if(propertyId != null && propertyId.equals(Columns.FREQUENCY)){
+					return "The axiom occurs in " + getItem(itemId).getItemProperty(Columns.FREQUENCY).getValue() + " explanations.";
 				}
 				return null;
 			}
 		});
+		
+		setColumnExpandRatio(Columns.AXIOM, 1.0f);
 	}
 	
 	public void selectAxiom(OWLAxiom axiom){
@@ -142,7 +147,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		selectedObjects.addAll(explanation.getAxioms());
 		selectedObjects.retainAll(axioms);
 		for(OWLAxiom ax : explanation.getAxioms()){
-			((CheckBox)getItem(ax).getItemProperty("Selected").getValue()).setValue(axioms.contains(ax));
+			((CheckBox)getItem(ax).getItemProperty(Columns.SELECTED).getValue()).setValue(axioms.contains(ax));
 		}
 //		setValue(axioms);
 	}
@@ -161,7 +166,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 	 */
 	@Override
 	public String getColumnHeader(Object propertyId) {
-		if(propertyId.equals("Frequency")){
+		if(propertyId.equals(Columns.FREQUENCY)){
 //			return ("<a title='The number of explanations in which the axiom occurs.'>" + propertyId + "</a>").replace("'","\"");
 			return ("<span title='The number of explanations in which the axiom occurs.'>" + propertyId + "</span>").replace("'","\"");
 		}

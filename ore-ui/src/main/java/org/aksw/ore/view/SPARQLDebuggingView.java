@@ -34,6 +34,7 @@ import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -82,6 +83,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 //	private SPARQLBasedInconsistencyFinder incFinder;
 	SPARQLBasedTrivialInconsistencyFinder incFinder;
 	Set<Explanation<OWLAxiom>> explanations;
+	private Set<Explanation<OWLAxiom>> currentExplanations;
 	
 	public SPARQLDebuggingView() {
 		addStyleName("dashboard-view");
@@ -128,6 +130,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		VerticalLayout l = new VerticalLayout();
 		l.setSizeFull();
 		l.setSpacing(true);
+		l.setMargin(new MarginInfo(false, false, true, false));
 		l.setCaption("Options");
 		
 		Component configForm = createConfigForm();
@@ -265,23 +268,24 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	}
 	
 	private Component createRepairPlanPanel(){
-		VerticalLayout wrapper = new VerticalLayout();
-		wrapper.setCaption("Repair Plan");
-		wrapper.setSizeFull();
+		VerticalLayout repairPlanPanel = new VerticalLayout();
+		repairPlanPanel.setCaption("Repair Plan");
+		repairPlanPanel.setSizeFull();
 		
 		repairPlanTable = new RepairPlanTable();
-		wrapper.addComponent(repairPlanTable);
-		wrapper.setExpandRatio(repairPlanTable, 1.0f);
+		repairPlanPanel.addComponent(repairPlanTable);
+		repairPlanPanel.setExpandRatio(repairPlanTable, 1.0f);
 		
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setWidth(null);
-		wrapper.addComponent(buttons);
-		wrapper.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
+		buttons.setSpacing(true);
+		repairPlanPanel.addComponent(buttons);
+		repairPlanPanel.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
 		
 		Button addToKbButton = new Button("Apply");
 		addToKbButton.setHeight(null);
 		addToKbButton.setImmediate(true);
-		addToKbButton.setDescription("Apply the changes virtually.(visible in 'Knowledge Base' view)");
+		addToKbButton.setDescription("(Virtually) apply the changes (visible in 'Knowledge Base' view)");
 		addToKbButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -292,7 +296,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		buttons.addComponent(addToKbButton);
 		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
 		
-		Button dumpSPARULButton = new Button("Dump as SPARUL");
+		Button dumpSPARULButton = new Button("Export");
 		dumpSPARULButton.setHeight(null);
 		dumpSPARULButton.setImmediate(true);
 		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL Update statements.");
@@ -306,8 +310,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		buttons.addComponent(dumpSPARULButton);
 		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
 		
-		return new WhitePanel(wrapper);
-		
+		return new WhitePanel(repairPlanPanel);
 	}
 	
 	private void onApplyRepairPlan(){
@@ -373,9 +376,8 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 						
 						@Override
 						public void run() {
-								showExplanations();
+							showExplanations();
 						}
-
 					});
 				} else {
 					if(incFinder.isCompleted()){
@@ -398,31 +400,42 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	
 
 	private void showExplanations() {
-		clearExplanations();
-		int i = 1;
-		for (Explanation<OWLAxiom> explanation : ORESession.getSPARQLExplanationManager().getExplanations()) {
-			final SPARQLBasedExplanationTable t = new SPARQLBasedExplanationTable(explanation, selectedAxioms);
-			ORESession.getRepairManager().addListener(t);
-//			t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());
-			explanationsPanel.addComponent(t);
-			t.addValueChangeListener(new Property.ValueChangeListener() {
+		
+		Set<Explanation<OWLAxiom>> newExplanations = ORESession.getSPARQLExplanationManager().getExplanations();
+		Set<Explanation<OWLAxiom>> shownExplanations = new HashSet<Explanation<OWLAxiom>>();
+		// we only have to repaint if the set of explanations has changed
+		if(currentExplanations != null || newExplanations.size() != shownExplanations.size()){
+			clearExplanations();
+			
+			currentExplanations = newExplanations;
+			int i = 1;
+			for (Explanation<OWLAxiom> explanation : newExplanations) {
+				final SPARQLBasedExplanationTable t = new SPARQLBasedExplanationTable(explanation, selectedAxioms);
+				ORESession.getRepairManager().addListener(t);
+//				t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());
+				explanationsPanel.addComponent(t);
+				t.addValueChangeListener(new Property.ValueChangeListener() {
 
-				{
-					table2Listener.put(t, this);
-				}
+					{
+						table2Listener.put(t, this);
+					}
 
-				@Override
-				public void valueChange(ValueChangeEvent event) {
-					selectedAxioms.removeAll(t.getExplanation().getAxioms());
-					selectedAxioms.addAll((Collection<? extends OWLAxiom>) event.getProperty().getValue());
-					onAxiomSelectionChanged();
+					@Override
+					public void valueChange(ValueChangeEvent event) {
+						selectedAxioms.removeAll(t.getExplanation().getAxioms());
+						selectedAxioms.addAll((Collection<? extends OWLAxiom>) event.getProperty().getValue());
+						onAxiomSelectionChanged();
+					}
+				});
+				tables.add(t);
+				shownExplanations.add(explanation);
+				if(i++ == ORESession.getSPARQLExplanationManager().getExplanationLimit()){
+					break;
 				}
-			});
-			tables.add(t);
-			if(i++ == ORESession.getSPARQLExplanationManager().getExplanationLimit()){
-				break;
 			}
+			currentExplanations = shownExplanations;
 		}
+		
 	}
 	
 	public void onStopSearchingInconsistency() {
@@ -662,7 +675,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 			}
 		} else if(event.getProperty() == limitSpinner){
 			ORESession.getSPARQLExplanationManager().setExplanationLimit((Integer)event.getProperty().getValue());
-			
 		}
 	}
 

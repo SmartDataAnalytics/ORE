@@ -34,11 +34,13 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -54,6 +56,7 @@ import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @Theme("ore")
 @Title("ORE")
@@ -284,6 +287,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
         l.addComponent(new VerticalLayout() {
             {
                 setSizeUndefined();
+                setWidth("100%");
                 addStyleName("user");
                 Image profilePic = new Image(
                         null,
@@ -317,7 +321,23 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
                 settingsMenu.addItem("Preferences", cmd);
                 settingsMenu.addSeparator();
                 settingsMenu.addItem("My Account", cmd);
-                addComponent(settings);
+//                addComponent(settings);
+                
+                Button settingsButton = new NativeButton();
+                settingsButton.setIcon(FontAwesome.GEAR);
+                settingsButton.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+                settingsButton.setDescription("Settings");
+                settingsButton.addClickListener(new ClickListener() {
+					
+					@Override
+					public void buttonClick(ClickEvent event) {
+						SettingsDialog settingsDialog = new SettingsDialog();
+                        settingsDialog.center();
+                        addWindow(settingsDialog);
+					}
+				});
+                addComponent(settingsButton);
+                setComponentAlignment(settingsButton, Alignment.MIDDLE_CENTER);
 
                 Button exit = new NativeButton("Exit");
                 exit.addStyleName("icon-cancel");

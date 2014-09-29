@@ -109,6 +109,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		rightSide.setExpandRatio(panel, 1f);
 		
 		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.setSpacing(true);
 		buttons.setWidth(null);
 		rightSide.addComponent(buttons);
 		rightSide.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
@@ -116,7 +117,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		addToKbButton = new Button("Add");
 		addToKbButton.setHeight(null);
 		addToKbButton.setImmediate(true);
-		addToKbButton.setDescription("Add the selected axioms temporarily to the knowledge base.(visible in 'Knowledge Base' view)");
+		addToKbButton.setDescription("(Virtually) add the selected axioms to the knowledge base.(visible in 'Knowledge Base' view)");
 		addToKbButton.addClickListener(new Button.ClickListener() {
 			
 			@Override
@@ -139,7 +140,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		buttons.addComponent(addToKbButton);
 		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
 		
-		dumpSPARULButton = new Button("Dump as SPARQL 1.1 Update");
+		dumpSPARULButton = new Button("Export");
 		dumpSPARULButton.setHeight(null);
 		dumpSPARULButton.setImmediate(true);
 		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL 1.1 Update statements.");
@@ -250,8 +251,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		// axiom types
 		axiomTypesField = new AxiomTypesField();
 		axiomTypesField.setSizeFull();
+		axiomTypesField.setHeightUndefined();
 		form.addComponent(axiomTypesField);
-		form.setExpandRatio(axiomTypesField, 1f);
+//		form.setExpandRatio(axiomTypesField, 1f);
+		
+		Label l = new Label("<br/>", ContentMode.HTML);
+		form.addComponent(l);
+		form.setExpandRatio(l, 1f);
 		
 		form.setComponentAlignment(resourceURIField, Alignment.TOP_CENTER);
 		form.setComponentAlignment(advancedOptionsPanel, Alignment.TOP_CENTER);

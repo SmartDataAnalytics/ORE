@@ -47,14 +47,12 @@ public class KnowledgebaseChangesTable extends Table implements KnowledgebaseLoa
 		
 		addGeneratedColumn(AXIOM, new ColumnGenerator() {
 			
-			private Renderer renderer = ORESession.getRenderer();
-			
 			@Override
 			public Object generateCell(Table source, Object itemId, Object columnId) {
 				if (AXIOM.equals(columnId)) {
 					if(itemId instanceof AddAxiom || itemId instanceof RemoveAxiom){
 						OWLAxiom axiom = ((OWLOntologyChange) itemId).getAxiom();
-						return new Label(renderer.renderHTML(axiom), ContentMode.HTML);
+						return new Label(ORESession.getRenderer().renderHTML(axiom), ContentMode.HTML);
 		        	} else {
 						return new Label(itemId.toString());
 		        	}

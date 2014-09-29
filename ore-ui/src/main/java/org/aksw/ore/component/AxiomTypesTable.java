@@ -137,7 +137,7 @@ public class AxiomTypesTable extends Table{
 	
 	public void show(EntityType<? extends OWLEntity> resourceType){
 		container.removeAllItems();
-		container.addItem(allAxioms());
+//		container.addItem(allAxioms());
 		
 		if(resourceType == EntityType.CLASS){
 			container.addAll(CLASS_AXIOM_TYPES);
