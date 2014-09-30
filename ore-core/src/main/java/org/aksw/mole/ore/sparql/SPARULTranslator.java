@@ -4,45 +4,33 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.jena.riot.Lang;
 import org.coode.owlapi.rdf.model.AbstractTranslator;
 import org.coode.owlapi.rdf.model.RDFLiteralNode;
 import org.coode.owlapi.rdf.model.RDFNode;
 import org.coode.owlapi.rdf.model.RDFResourceNode;
-import org.coode.owlapi.rdf.model.RDFTriple;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.change.RemoveAxiomData;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.hp.hpl.jena.JenaRuntime;
-import com.hp.hpl.jena.n3.N3JenaWriter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.util.ModelUtils;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateRequest;
 
 public class SPARULTranslator extends AbstractTranslator<RDFNode, RDFResourceNode, RDFResourceNode, RDFLiteralNode> {
 
@@ -108,16 +96,16 @@ public class SPARULTranslator extends AbstractTranslator<RDFNode, RDFResourceNod
 			m.read(new ByteArrayInputStream(triplesString.toString().getBytes()), null, "TURTLE");
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			m.write(baos, "TTL", null);
-			return type == RemoveAxiom.class ? "DELETE DATA" : "INSERT DATA" + "{\n" + new String(baos.toByteArray()) + "}";
+			return (type == RemoveAxiom.class ? "DELETE DATA" : "INSERT DATA") + "{\n" + new String(baos.toByteArray()) + "}";
 		} else {
-			return type == RemoveAxiom.class ? "DELETE DATA" : "INSERT DATA" + "{\n" + triplesString.toString() + "}";
+			return (type == RemoveAxiom.class ? "DELETE DATA" : "INSERT DATA") + "{\n" + triplesString.toString() + "}";
 		}
 	}
 
 	@Override
 	protected void addTriple(RDFResourceNode subject, RDFResourceNode pred,
 			RDFNode object) {
-		triplesString.append(subject).append(" ").append(pred).append(" ").append(object).append(".\n");
+		triplesString.append(subject).append(" ").append(pred).append(" ").append(object).append(" .\n");
 	}
 
 	@Override
@@ -138,9 +126,9 @@ public class SPARULTranslator extends AbstractTranslator<RDFNode, RDFResourceNod
 	@Override
 	protected RDFLiteralNode getLiteralNode(OWLLiteral literal) {
 		if(literal.getDatatype() != null){
-			return new RDFLiteralNode(literal.toString(), literal.getDatatype().getIRI());
+			return new RDFLiteralNode(literal.getLiteral(), literal.getDatatype().getIRI());
 		} else {
-			return new RDFLiteralNode(literal.toString(), literal.getLang());
+			return new RDFLiteralNode(literal.getLiteral(), literal.getLang());
 		}
 		
 	}
@@ -152,13 +140,20 @@ public class SPARULTranslator extends AbstractTranslator<RDFNode, RDFResourceNod
 		OWLOntology ontology = man.createOntology();
 		DefaultPrefixManager pm = new DefaultPrefixManager("http://ex.org/");
 		OWLObjectProperty op = df.getOWLObjectProperty("p", pm);
+		OWLDataProperty dp = df.getOWLDataProperty("t", pm);
 		OWLClass clsA = df.getOWLClass("A", pm);
 		OWLClass clsB = df.getOWLClass("B", pm);
+		OWLIndividual indA = df.getOWLNamedIndividual("a", pm);
+		OWLIndividual indB = df.getOWLNamedIndividual("b", pm);
+		OWLLiteral lit = df.getOWLLiteral("1934-12-10", OWL2Datatype.XSD_DATE_TIME);
 		
 		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		
-		changes.addAll(man.addAxiom(ontology, df.getOWLObjectPropertyDomainAxiom(op, clsA)));
-		changes.addAll(man.addAxiom(ontology, df.getOWLObjectPropertyDomainAxiom(op, clsB)));
+//		changes.addAll(man.addAxiom(ontology, df.getOWLObjectPropertyDomainAxiom(op, clsA)));
+//		changes.addAll(man.addAxiom(ontology, df.getOWLObjectPropertyDomainAxiom(op, clsB)));
+//		changes.addAll(man.addAxiom(ontology, df.getOWLFunctionalObjectPropertyAxiom(op)));
+//		changes.addAll(man.addAxiom(ontology, df.getOWLObjectPropertyAssertionAxiom(op, indA, indB)));
+		changes.add(new RemoveAxiom(ontology, df.getOWLDataPropertyAssertionAxiom(dp, indA, lit)));
 		
 		System.out.println(new SPARULTranslator(man, ontology, false).translate(changes, true));
 		

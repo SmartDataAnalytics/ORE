@@ -12,6 +12,7 @@ import org.semanticweb.owlapi.model.RemoveAxiom;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -19,6 +20,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class RepairPlanTable extends Table implements RepairManagerListener{
@@ -34,7 +36,7 @@ public class RepairPlanTable extends Table implements RepairManagerListener{
 		setSizeFull();
 //		setCaption("Repair Plan");
 		addStyleName("repair-plan-table");
-		addStyleName("borderless");
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
 		
 		container = new IndexedContainer();
 		container.addContainerProperty(ACTION, String.class, null);
@@ -52,7 +54,7 @@ public class RepairPlanTable extends Table implements RepairManagerListener{
 				if (AXIOM.equals(columnId)) {
 					if(itemId instanceof OWLOntologyChange){
 						OWLAxiom axiom = ((OWLOntologyChange) itemId).getAxiom();
-						return new Label(renderer.render(axiom), ContentMode.HTML);
+						return new Label(renderer.renderHTML(axiom), ContentMode.HTML);
 		        	}
 				}
 				return null;
@@ -66,8 +68,9 @@ public class RepairPlanTable extends Table implements RepairManagerListener{
 				
 				final OWLOntologyChange change = (OWLOntologyChange) itemId;
 				Button button = new Button();
-				button.setStyleName(BaseTheme.BUTTON_LINK);
-				button.addStyleName("cancel");
+				button.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+				button.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
+				button.setIcon(FontAwesome.TRASH_O);
 				button.setDescription("Click to remove the ontology change from the repair plan.");
 
 				button.addClickListener(new ClickListener() {
@@ -101,7 +104,7 @@ public class RepairPlanTable extends Table implements RepairManagerListener{
 			}
 		});
 		
-		setColumnWidth(ACTION, 25);
+//		setColumnWidth(ACTION, 25);
 		setColumnExpandRatio(AXIOM, 1.0f);
 		
 		setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
