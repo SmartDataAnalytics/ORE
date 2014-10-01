@@ -555,17 +555,12 @@ public class EnrichmentManager {
 	}
 	
 	public Set<OWLObject> getPositives(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
-		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
-		Set<OWLObject> positiveExamples = la.getPositiveExamples(axiom);
-		return positiveExamples;
+		return la.getPositives(axiomType, axiom);
 	}
 
 	public Set<OWLObject> getNegatives(AxiomType<? extends OWLAxiom> axiomType, EvaluatedAxiom<OWLAxiom> axiom){
-		AbstractAxiomLearningAlgorithm la = learningAlgorithmInstances.get(axiomType);
-		Set<OWLObject> negativeExamples = la.getNegativeExamples(axiom);
-		return negativeExamples;
+		return la.getNegatives(axiomType, axiom);
 	}
-	
 
 	private OWLEntity getEntity(String resourceURI, EntityType<? extends OWLEntity> resourceType){
 		OWLEntity entity = null;

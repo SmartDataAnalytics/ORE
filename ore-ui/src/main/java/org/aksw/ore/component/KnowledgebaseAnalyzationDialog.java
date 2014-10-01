@@ -67,7 +67,4 @@ public class KnowledgebaseAnalyzationDialog extends ProgressDialog implements Kn
 	@Override
 	public void knowledgebaseModified(Set<OWLOntologyChange> changes) {
 	}
-
-	
-
 }

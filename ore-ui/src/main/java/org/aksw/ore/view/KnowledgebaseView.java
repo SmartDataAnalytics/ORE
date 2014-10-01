@@ -421,13 +421,14 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		}
 		if(stats != null){
 			if(stats.getOwlClassCnt() != -1){
-				htmlTable += "<tr class=\"even\"><td>#Classes</td><td>" + stats.getOwlClassCnt() + "</td></tr>";
+				htmlTable += "<tr class=\"even\"><td title=\"Classes can be understood as sets of individuals.\">Classes</td><td>" + stats.getOwlClassCnt() + "</td></tr>";
 			}
 			if(stats.getOwlObjectPropertyCnt() != -1){
-				htmlTable += "<tr class=\"odd\"><td>#ObjectProperties</td><td>" + stats.getOwlObjectPropertyCnt() + "</td></tr>";
+				htmlTable += "<tr class=\"odd\"><td title=\"Object properties connect pairs of individuals.\">Object Properties</td><td>" + stats.getOwlObjectPropertyCnt() + "</td></tr>";
 			}
 			if(stats.getOwlDataPropertyCnt() != -1){
-				htmlTable += "<tr class=\"even\"><td>#DataProperties</td><td>" + stats.getOwlDataPropertyCnt() + "</td></tr>";
+				htmlTable += "<tr class=\"even\"><td title=\"Data properties connect individuals with literals. "
+						+ "In some knowledge representation systems, functional data properties are called attributes.\">Data Properties</td><td>" + stats.getOwlDataPropertyCnt() + "</td></tr>";
 			}
 		
 		}

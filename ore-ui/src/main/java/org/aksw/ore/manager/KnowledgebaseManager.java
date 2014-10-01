@@ -14,7 +14,6 @@ import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -113,18 +112,21 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		
 		//pre load entities
 		//get OWL classes
+		message("Loading classes...");
 		String query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
 		QueryExecution qe = qef.createQueryExecution(query);
 		ResultSet rs = qe.execSelect();
 		Set<String> classes = asSet(rs, "s");
 		
 		//get OWL object properties
+		message("Loading object properties...");
 		query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#ObjectProperty>.}";
 		qe = qef.createQueryExecution(query);
 		rs = qe.execSelect();
 		Set<String> objectProperties = asSet(rs, "s");
 		
 		//get OWL data properties
+		message("Loading data properties...");
 		query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
 		qe = qef.createQueryExecution(query);
 		rs = qe.execSelect();
@@ -175,13 +177,13 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		}
 	}
 	
-	public void addListener(KnowledgebaseLoadingListener l){System.out.println("Add listener " + l);
+	public void addListener(KnowledgebaseLoadingListener l){
 		synchronized(listeners){
 			listeners.add(l);
 		}
 	}
 	
-	public void removeListener(KnowledgebaseLoadingListener l){//System.out.println("Remove listener " + l);
+	public void removeListener(KnowledgebaseLoadingListener l){
 		synchronized(listeners){
 			listeners.remove(l);
 		}

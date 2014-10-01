@@ -251,7 +251,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		// axiom types
 		axiomTypesField = new AxiomTypesField();
 		axiomTypesField.setSizeFull();
-		axiomTypesField.setHeightUndefined();
+//		axiomTypesField.setHeightUndefined();
 		form.addComponent(axiomTypesField);
 //		form.setExpandRatio(axiomTypesField, 1f);
 		
