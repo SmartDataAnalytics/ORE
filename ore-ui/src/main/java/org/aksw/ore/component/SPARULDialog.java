@@ -38,6 +38,7 @@ public class SPARULDialog extends Window{
 			String sparulString = translator.translate(changes, true);
 			
 			VerticalLayout content = new VerticalLayout();
+			content.setSizeUndefined();
 			setContent(content);
 			
 			content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));

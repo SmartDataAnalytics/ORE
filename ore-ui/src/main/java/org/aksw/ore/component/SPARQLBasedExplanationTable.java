@@ -106,6 +106,8 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		});
 		
 		setColumnHeader(Columns.SELECTED, "");
+		setColumnHeader(Columns.AXIOM, "Axiom");
+		setColumnHeader(Columns.FREQUENCY, "Frequency");
 		
 		Collection<OWLAxiom> axioms;
 		if(formatted){
@@ -117,7 +119,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		Item item;
 		for(OWLAxiom axiom : axioms){
 			item = container.addItem(axiom);
-			item.getItemProperty(Columns.AXIOM).setValue(axiom.toString());
+//			item.getItemProperty(Columns.AXIOM).setValue(axiom);
 			item.getItemProperty(Columns.FREQUENCY).setValue(ORESession.getSPARQLExplanationManager().getAxiomFrequency(axiom));
 		}
 		

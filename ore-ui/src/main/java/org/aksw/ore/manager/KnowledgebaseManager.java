@@ -228,6 +228,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	@Override
 	public void startedLoadingOntology(LoadingStartedEvent event) {
 		if(event.isImported()){
+			logger.info("Loading import from " + event.getDocumentIRI());
             message("Loading import " + event.getDocumentIRI() + "...");
 		}
 	}
@@ -236,9 +237,10 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	public void finishedLoadingOntology(LoadingFinishedEvent event) {
 		if(!event.isImported()){
 			message("...loaded ontology");
-
+			logger.info("Loaded ontology");
 		} else {
 			message("...loaded import");
+			logger.info("Loaded import " + event.getDocumentIRI());
 		}
 	}
 	

@@ -85,7 +85,7 @@ public class LoadFromURIDialog extends Window{
 		uriField.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				okButton.focus();System.out.println("Value changed");
+				okButton.focus();
 //				onLoadOntology();
 			}
 		});
@@ -134,7 +134,9 @@ public class LoadFromURIDialog extends Window{
 			new URL(uri);
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			man.addOntologyLoaderListener(ORESession.getKnowledgebaseManager());
+			System.out.println("Loading ontology ...");
 			OWLOntology ontology = man.loadOntology(IRI.create(uri));
+			System.out.println("... done.");
 			ORESession.getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
 			close();
 		} catch (MalformedURLException e) {
