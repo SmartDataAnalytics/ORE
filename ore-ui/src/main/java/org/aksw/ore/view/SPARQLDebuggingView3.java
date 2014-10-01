@@ -85,7 +85,6 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 	Set<Explanation<OWLAxiom>> explanations;
 	
 	public SPARQLDebuggingView3() {
-		addStyleName("dashboard-view");
 		addStyleName("sparql-debugging-view");
 		initUI();
 	}
@@ -114,10 +113,12 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 	private void initUI(){
 		setSizeFull();
 		
-		Component rightSide = createRightSide();
-		addComponent(rightSide);
+		Component content = createContentPanel();
+		content.addStyleName("content");
+		addComponent(content);
 		
-		final Component options = createLeftSide();
+		final Component options = createOptionsPanel();
+		options.addStyleName("options");
 		addComponent(options);
 		options.setVisible(false);
 		options.setWidth("100px");
@@ -133,11 +134,9 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 			}
 		});
 		addComponent(optionsButton);
-		
-//		reset();
 	}
 	
-	private Component createLeftSide(){
+	private Component createOptionsPanel(){
 		VerticalLayout l = new VerticalLayout();
 		l.addStyleName("debugging-options-panel");
 		l.setSizeFull();
@@ -214,7 +213,7 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 		return form;
 	}
 	
-	private Component createRightSide(){
+	private Component createContentPanel(){
 		VerticalSplitPanel rightSide = new VerticalSplitPanel();
 		rightSide.setSizeFull();
 		rightSide.setSplitPosition(75);

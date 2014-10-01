@@ -438,9 +438,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				axiomName = splitCamelCase(axiomName);
 				table.setCaption(axiomName + " Axioms");
 				tables.add(table);
-				WhitePanel c = new WhitePanel(table);
-				c.setHeight(null);
-				axiomsPanel.addComponent(c);
+//				WhitePanel c = new WhitePanel(table);
+//				c.setHeight(null);
+				axiomsPanel.addComponent(table);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
