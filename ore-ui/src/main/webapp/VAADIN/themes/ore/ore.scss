@@ -1232,7 +1232,12 @@ div.footnote {
 	    padding-right: 20px;
 	    width: 60%;
 	}
+	
+	.dashboard-view .debugging-view .explanation-table {
+			overflow:hidden;
+	}
 
+/* Menu bar as button with icon above caption*/
 .v-menubar-icon-align-top {
       @include valo-menubar-icon-align-top-style;
     }

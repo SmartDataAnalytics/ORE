@@ -30,6 +30,7 @@ public class ExplanationsPanel extends VerticalLayout {
 	private boolean aggregatedView = false;
 	
 	public ExplanationsPanel() {
+		addStyleName("explanations-panel");
 		setImmediate(true);
 		setSpacing(true);
 		setSizeFull();

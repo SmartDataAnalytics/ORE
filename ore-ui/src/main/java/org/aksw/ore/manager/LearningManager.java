@@ -14,10 +14,13 @@ import org.apache.log4j.Logger;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.core.EvaluatedDescription;
+import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.reasoning.FastInstanceChecker;
 import org.dllearner.refinementoperators.RhoDRDown;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -25,7 +28,15 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLNaryBooleanClassExpression;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+
+import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 public class LearningManager {
@@ -285,6 +296,32 @@ public class LearningManager {
 		}
 		
 		return criticals;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		String ontologyURL = "http://130.88.198.11/2008/iswc-modtut/materials/koala.owl";
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLDataFactory dataFactory = man.getOWLDataFactory();
+		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
+		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
+		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
+		FastInstanceChecker rc = new FastInstanceChecker(new OWLAPIOntology(ontology));
+		rc.init();
+		LearningManager lm = new LearningManager(rc);
+		LearningSetting setting = new LearningSetting(new OWLClassImpl(IRI.create("http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Degree")),
+				10,
+				10,
+				0.1,
+				0.1,
+				false,
+				true,
+				true,
+				true,
+				true,
+				3);
+		lm.setLearningSetting(setting);
+		lm.prepareLearning();
+		lm.startLearning();
 	}
 	
 }

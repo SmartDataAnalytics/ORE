@@ -15,8 +15,8 @@ public class WhitePanel extends CssLayout{
 
 	
 	public WhitePanel(Component content) {
-//        addStyleName("layout-panel");
-        addStyleName(ValoTheme.LAYOUT_CARD);
+        addStyleName("layout-panel");
+//        addStyleName(ValoTheme.LAYOUT_CARD);
         setSizeFull();
         addComponent(content);
 	}

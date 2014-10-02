@@ -27,6 +27,7 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
@@ -145,6 +146,7 @@ public class OntologyRepositoryDialog extends Window {
 			}
 		});
 		okButton.setEnabled(false);
+		okButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		cancelButton = new Button("Cancel");
 		cancelButton.addClickListener(new Button.ClickListener() {
 
@@ -159,8 +161,6 @@ public class OntologyRepositoryDialog extends Window {
 		buttons.setSpacing(true);
 		buttons.addComponent(okButton);
 		buttons.addComponent(cancelButton);
-		okButton.setWidth("70px");
-		cancelButton.setWidth("70px");
 		buttons.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
 		buttons.setComponentAlignment(cancelButton, Alignment.MIDDLE_LEFT);
 		

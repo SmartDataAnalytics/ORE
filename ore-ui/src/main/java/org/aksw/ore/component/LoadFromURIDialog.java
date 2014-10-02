@@ -11,7 +11,10 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderListener.LoadingFinishedEvent;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderListener.LoadingStartedEvent;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -25,8 +28,10 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -130,23 +135,70 @@ public class LoadFromURIDialog extends Window{
 	
 	public void onLoadOntology(){
 		try {
-			String uri = (String)uriField.getValue();
+			final String uri = (String)uriField.getValue();
 			new URL(uri);
-			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+			final Window w = new Window("Loading ontology...");
+			w.setWidth("600px");
+			w.setHeight("200px");
+			w.center();
+			w.setClosable(false);
+			w.setModal(true);
+			final Label l = new Label();
+			w.setContent(l);
+			UI.getCurrent().addWindow(w);
+			final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			man.addOntologyLoaderListener(ORESession.getKnowledgebaseManager());
-			System.out.println("Loading ontology ...");
-			OWLOntology ontology = man.loadOntology(IRI.create(uri));
-			System.out.println("... done.");
-			ORESession.getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
-			close();
+			man.addOntologyLoaderListener(new OWLOntologyLoaderListener() {
+				@Override
+				public void startedLoadingOntology(final LoadingStartedEvent event) {
+					UI.getCurrent().access(new Runnable() {
+						@Override
+						public void run() {
+							if(event.isImported()){
+								l.setValue("Loading imported ontology " + event.getOntologyID() + " from " + event.getDocumentIRI() + " ...");
+							}
+						}
+					});
+				}
+				
+				@Override
+				public void finishedLoadingOntology(LoadingFinishedEvent event) {
+				}
+			});
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						OWLOntology ontology = man.loadOntology(IRI.create(uri));
+						System.out.println(ontology.getIndividualsInSignature());
+						ORESession.getKnowledgebaseManager().setKnowledgebase(new OWLOntologyKnowledgebase(ontology));
+						UI.getCurrent().access(new Runnable() {
+							@Override
+							public void run() {
+								close();
+							}
+						});
+					}  catch (OWLOntologyCreationException e) {
+						e.printStackTrace();
+						Notification.show("An error occured while loading the ontology", "Could not load the ontology from the given URI.\nReason: " + e.getMessage(), Notification.Type.ERROR_MESSAGE);
+						uriField.focus();
+					} finally {
+						UI.getCurrent().access(new Runnable() {
+							@Override
+							public void run() {
+								w.close();
+							}
+						});
+					}
+					
+				}
+			}).start();
+			
 		} catch (MalformedURLException e) {
 			Notification.show("An error occured while loading the ontology", "Invalid URI.\nReason:" + e.getLocalizedMessage(), Notification.Type.ERROR_MESSAGE);
 			uriField.focus();
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-			Notification.show("An error occured while loading the ontology", "Could not load the ontology from the given URI.\nReason: " + e.getMessage(), Notification.Type.ERROR_MESSAGE);
-			uriField.focus();
-		} 
+		}
 	}
 
 }

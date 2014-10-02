@@ -372,6 +372,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	private void showExplanation(final Explanation<OWLAxiom> explanation) {
 		try {
 			final ExplanationTable t = new ExplanationTable(explanation, selectedAxioms);
+			t.addStyleName("explanation-table");
 			if(explanation.getEntailment() != null){
 				OWLClass cls = ((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().asOWLClass();
 				t.setCaption(ORESession.getRenderer().render(cls));

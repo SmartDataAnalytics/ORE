@@ -72,6 +72,42 @@ import com.vaadin.ui.themes.ValoTheme;
  */
 public class KnowledgebaseView extends VerticalLayout implements View, KnowledgebaseLoadingListener {
 	
+	enum Tooltip{
+		OWL_2_PROFILE("An OWL 2 profile (commonly called a fragment or a sublanguage in computational logic) "
+				+ "is a trimmed down version of OWL 2 that trades some expressive power for the efficiency of reasoning."),
+				OWL_2(""),
+				OWL_2_EL("<em>OWL 2 EL</em> is particularly useful in applications employing ontologies that contain very large numbers of properties and/or classes. "
+						+ "This profile captures the expressive power used by many such ontologies and is a subset of OWL 2 for which the basic reasoning problems "
+						+ "can be performed in time that is polynomial with respect to the size of the ontology . Dedicated reasoning algorithms for this profile are"
+						+ " available and have been demonstrated to be implementable in a highly scalable way. The EL acronym reflects the profile's basis "
+						+ "in the EL family of description logics, logics that provide only Existential quantification."),
+				OWL_2_QL("<em>OWL 2 QL</em> is aimed at applications that use very large volumes of instance data, and where query answering is the most important reasoning task. "
+						+ "In OWL 2 QL, conjunctive query answering can be implemented using conventional relational database systems. Using a suitable reasoning technique, "
+						+ "sound and complete conjunctive query answering can be performed in LOGSPACE with respect to the size of the data (assertions). As in OWL 2 EL, "
+						+ "polynomial time algorithms can be used to implement the ontology consistency and class expression subsumption reasoning problems. The expressive "
+						+ "power of the profile is necessarily quite limited, although it does include most of the main features of conceptual models such as UML class diagrams"
+						+ " and ER diagrams. The QL acronym reflects the fact that query answering in this profile can be implemented by rewriting queries into a standard "
+						+ "relational Query Language."),
+				OWL_2_RL("<em>OWL 2 RL</em> is aimed at applications that require scalable reasoning without sacrificing too much expressive power. It is designed to accommodate OWL 2 "
+						+ "applications that can trade the full expressivity of the language for efficiency, as well as RDF(S) applications that need some added expressivity. OWL 2 RL "
+						+ "reasoning systems can be implemented using rule-based reasoning engines. The ontology consistency, class expression satisfiability, class expression subsumption, "
+						+ "instance checking, and conjunctive query answering problems can be solved in time that is polynomial with respect to the size of the ontology. The RL acronym reflects "
+						+ "the fact that reasoning in this profile can be implemented using a standard Rule Language.");
+		
+		String description;
+				
+		Tooltip(String description){
+			this.description = description;
+		}
+		
+		/**
+		 * @return the description
+		 */
+		public String getDescription() {
+			return description;
+		}
+	}
+	
 	private Label kbInfoLabel;
 	private OntologyRepositoryDialog repositoryDialog;
 	private KnowledgebaseChangesTable table;
@@ -450,16 +486,19 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		
 		String htmlTable = 
 				"<table>" +
-				"<tr class=\"even\"><td>#Classes</td><td>" + nrOfClasses + "</td></tr>" +
-				"<tr class=\"odd\"><td>#ObjectProperties</td><td>" + nrOfObjectProperties + "</td></tr>" +
-				"<tr class=\"even\"><td>#DataProperties</td><td>" + nrOfDataProperties + "</td></tr>" +
-				"<tr class=\"odd\"><td>#Individuals</td><td>" + nrOfIndividuals + "</td></tr>" +
-				"<tr class=\"even\"><td>OWL2 Profile</td><td>" + profile.getName() + "</td></tr>" +
-				"<tr class=\"odd\"><td>Consistent</td><td>" + kb.isConsistent() + "</td></tr>";
+				"<tr class=\"even\"><td>Classes</td><td>" + nrOfClasses + "</td></tr>" +
+				"<tr class=\"odd\"><td>Object Properties</td><td>" + nrOfObjectProperties + "</td></tr>" +
+				"<tr class=\"even\"><td>Data Properties</td><td>" + nrOfDataProperties + "</td></tr>" +
+				"<tr class=\"odd\"><td>Individuals</td><td>" + nrOfIndividuals + "</td></tr>" +
+				"<tr class=\"even\"><td title=\"" +  Tooltip.OWL_2_PROFILE.getDescription() + "\">OWL 2 Profile</td><td>" + profile.getName() + "</td></tr>" +
+				"<tr class=\"odd\"><td>Consistent</td><td>" + kb.isConsistent() 
+				+ (!kb.isConsistent() ? ("<font color=\"red\" style='margin-left: 10px;'>" + FontAwesome.EXCLAMATION_TRIANGLE.getHtml() + "</font>") : "")
+				+ "</td></tr>";
 		if(kb.isConsistent()){
 			htmlTable += "<tr class=\"even\"><td>Coherent</td><td>" + kb.isCoherent() + "</td></tr>";
 			if(!kb.isCoherent()){
-				htmlTable += "<tr class=\"odd\"><td>#Unsatisfiable Classes</td><td>" + kb.getReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom().size() + FontAwesome.EXCLAMATION_TRIANGLE.getHtml() + "</td></tr>";
+				htmlTable += "<tr class=\"odd\"><td>Unsatisfiable Classes</td><td>" + kb.getReasoner().getUnsatisfiableClasses().getEntitiesMinusBottom().size()
+						+ "<font color=\"red\" style='margin-left: 10px;'>" + FontAwesome.EXCLAMATION_TRIANGLE.getHtml() + "</font>" + "</td></tr>";
 			}
 					
 		}

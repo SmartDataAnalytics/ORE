@@ -8,9 +8,7 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
@@ -19,7 +17,7 @@ import com.vaadin.ui.VerticalLayout;
 public class LearningOptionsPanel extends VerticalLayout{
 	
 	enum Profile {
-		DEFAULT, OWL2, EL
+		DEFAULT, OWL_2, OWL_EL
 	}
 	
 	private IntStepper maxExecutionTimeSpinner;
@@ -206,13 +204,13 @@ public class LearningOptionsPanel extends VerticalLayout{
 			negationCheckBox.setValue(false);
 			hasValueCheckBox.setValue(false);
 			cardinalityCheckBox.setValue(true);
-		} else if(profile == Profile.OWL2){
+		} else if(profile == Profile.OWL_2){
 			universalQuantifierCheckBox.setValue(true);
 			existentialQuantifierCheckBox.setValue(true);
 			negationCheckBox.setValue(true);
 			hasValueCheckBox.setValue(true);
 			cardinalityCheckBox.setValue(true);
-		} else if(profile == Profile.EL){
+		} else if(profile == Profile.OWL_EL){
 			universalQuantifierCheckBox.setValue(false);
 			existentialQuantifierCheckBox.setValue(true);
 			negationCheckBox.setValue(false);

@@ -136,8 +136,10 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
 			
 			FastInstanceChecker closedWorldReasoner = new FastInstanceChecker();
-			closedWorldReasoner.setReasonerComponent(new OWLAPIReasoner(reasoner));
 			try {
+				OWLAPIReasoner rc = new OWLAPIReasoner(reasoner);
+				rc.init();
+				closedWorldReasoner.setReasonerComponent(rc);
 				closedWorldReasoner.init();
 			} catch (ComponentInitException e) {
 				e.printStackTrace();

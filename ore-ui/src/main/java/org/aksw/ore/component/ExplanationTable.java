@@ -40,10 +40,7 @@ public class ExplanationTable extends Table implements RepairManagerListener{
 		setSizeFull();
 		setPageLength(0);
 		setHeight(null);
-//		setColumnWidth("Selected", 30);
 		setColumnExpandRatio("Axiom", 1.0f);
-//		setColumnWidth("Frequency", 60);
-//		setColumnWidth("Usage", 40);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);

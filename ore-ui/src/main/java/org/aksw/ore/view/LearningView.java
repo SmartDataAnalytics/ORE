@@ -39,6 +39,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
@@ -52,10 +53,13 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.Window;
 
 public class LearningView extends HorizontalSplitPanel implements View, Refreshable{
 	
@@ -183,28 +187,44 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				final OptionGroup options = new OptionGroup("Class hierarchy");
+				VerticalLayout content = new VerticalLayout();
+				content.setMargin(true);
+				content.setSpacing(true);
+				
+				final OptionGroup options = new OptionGroup("Class Hierarchy");
 				options.addItems(ClassHierarchy.values());
-				
 				options.select(currentClassHierarchyStyle);
+				content.addComponent(options);
 				
-				Dialog dialog = Dialog.createOkCancel("Settings", options, new DialogClickListener() {
-					
-					@Override
-					public boolean buttonClick(Event event, int action) {
-						switch (action) {
-						case Dialog.OK:{
-							currentClassHierarchyStyle = (ClassHierarchy) options.getValue();
-							showClassHierarchy(currentClassHierarchyStyle);break;
-						}
-						case Dialog.CANCEL:return false;
-						default:
-						}
-						return true;
-					}
-				});
-				dialog.center();
-				dialog.show();
+				Button apply = new Button("Apply");
+				apply.addStyleName(ValoTheme.BUTTON_PRIMARY);
+				content.addComponent(apply);
+				content.setComponentAlignment(apply, Alignment.MIDDLE_CENTER);
+				
+				Window w = new Window("Settings");
+				w.setContent(content);
+				w.center();
+				w.setCloseShortcut(KeyCode.ESCAPE);
+				
+				UI.getCurrent().addWindow(w);
+				
+//				Dialog dialog = Dialog.createOkCancel("Settings", options, new DialogClickListener() {
+//					
+//					@Override
+//					public boolean buttonClick(Event event, int action) {
+//						switch (action) {
+//						case Dialog.OK:{
+//							currentClassHierarchyStyle = (ClassHierarchy) options.getValue();
+//							showClassHierarchy(currentClassHierarchyStyle);break;
+//						}
+//						case Dialog.CANCEL:return false;
+//						default:
+//						}
+//						return true;
+//					}
+//				});
+//				dialog.center();
+//				dialog.show();
 			}
 		});
 		
@@ -229,9 +249,8 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 				onLearning();
 			}
 		});
-//		startBtn.addStyleName("icon-naming");
+		startBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		startBtn.setEnabled(false);
-		startBtn.setSizeUndefined();
 		
 		vl.addComponent(startBtn);
 		vl.setComponentAlignment(startBtn, Alignment.TOP_CENTER);
@@ -413,7 +432,7 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 	private void onClassSelectionChanged(){
 		//TODO use FastInstanceChecker
 		OWLClass cls = tree.getSelectedClass();
-		System.out.println(ORESession.getOWLReasoner().getInstances(cls, false));
+		System.out.println(cls + ":" + ORESession.getOWLReasoner().getInstances(cls, false));
 		if(ORESession.getOWLReasoner().getInstances(cls, true).getFlattened().size() >= 2){
 			setLearningEnabled(true);
 		} else {

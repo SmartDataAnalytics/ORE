@@ -291,7 +291,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 		view.setSizeFull();
 		
 		//filter button to allow for omitting patterns instances with selected super classes
-		PopupButton filterButton = new PopupButton("Pattern Instances Filter");
+		PopupButton filterButton = new PopupButton("Filter");
 		filterButton.addStyleName("filterTable");
 		filterButton.setDescription("Filter out pattern instances by super class.");
 		filteredSuperclassesTable = new Table("Omit pattern instances with super class:");
@@ -343,11 +343,14 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 				final Window filterDialog = new Window("Filter");
 				filterDialog.setModal(true);
 				VerticalLayout content = new VerticalLayout();
+				content.setMargin(true);
+				content.setSpacing(true);
 				filterDialog.setContent(content);
 				content.addComponent(filteredSuperclassesTable);
 				UI.getCurrent().addWindow(filterDialog);
 				filterDialog.setClosable(true);
 				Button applyButton = new Button("Apply");
+				applyButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 				applyButton.addClickListener(new ClickListener() {
 					
 					@Override

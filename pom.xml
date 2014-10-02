@@ -48,6 +48,7 @@
 		<!-- tell the compiler we can use 1.7 -->
 		<compiler.version>1.7</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<owlapi.version>3.5.2-dllearner-SNAPSHOT</owlapi.version>
 	</properties>
 
 	<repositories>
@@ -127,7 +128,7 @@
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
-				<version>3.5.1</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi.owllink</groupId>
