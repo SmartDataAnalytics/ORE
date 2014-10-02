@@ -6,18 +6,56 @@ import org.vaadin.risto.stepper.IntStepper;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Slider;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
+import com.vaadin.ui.themes.ValoTheme;
 import com.vaadin.ui.VerticalLayout;
 
 public class LearningOptionsPanel extends VerticalLayout{
 	
-	enum Profile {
-		DEFAULT, OWL_2, OWL_EL
+	public enum Profile {
+		CUSTOM("Custom"), OWL_2("OWL 2 DL"), OWL_EL("OWL 2 EL");
+		
+		private String name;
+
+		private Profile(String name){
+			this.name = name;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+	
+	public enum OWLConstruct {
+		HAS_VALUE("Value"), EXISTS("Some"), ALL("Only"), NEGATION("Not"), MIN_MAX("Min/Max");
+		
+		private String name;
+		private OWLConstruct(String name) {
+			this.name = name;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 	
 	private IntStepper maxExecutionTimeSpinner;
@@ -25,23 +63,16 @@ public class LearningOptionsPanel extends VerticalLayout{
 	private Slider noiseSlider;
 	private Slider thresholdSlider;
 	
-	private CheckBox universalQuantifierCheckBox;
-	private CheckBox existentialQuantifierCheckBox;
-	private CheckBox negationCheckBox;
-	private CheckBox hasValueCheckBox;
-	private CheckBox cardinalityCheckBox;
-	private IntStepper cardinalitySpinner;
-	
 	private OptionGroup profileOptions;
-	
+	private OptionGroup constructorOptions;
 	
 	public LearningOptionsPanel() {
 		setCaption("Options");
 		setSizeFull();
 		setHeight(null);
 		setSpacing(true);
+//		setMargin(true);
 		addStyleName("enrichment-options");
-		setMargin(true);
 		
 		maxExecutionTimeSpinner = new IntStepper();
 		maxExecutionTimeSpinner.setStepAmount(1);
@@ -80,12 +111,15 @@ public class LearningOptionsPanel extends VerticalLayout{
 		VerticalLayout profileForm = new VerticalLayout();
 		profileForm.setDescription("Choose which constructs are allowed in the generated class expressions.");
 		profileForm.setWidth("100%");
-		profileForm.setCaption("OWL Profile");
+//		profileForm.setCaption("OWL Profile");
 		profileForm.setSpacing(true);
 //		profileForm.setMargin(true);
 		
-		profileOptions = new OptionGroup("", Arrays.asList(Profile.values()));
+		profileOptions = new OptionGroup("OWL Profile");
 		profileOptions.setImmediate(true);
+		profileOptions.setContainerDataSource(new BeanItemContainer<Profile>(Profile.class, Arrays.asList(Profile.values())));
+		profileOptions.setItemCaptionPropertyId("name");
+		profileOptions.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		profileOptions.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
@@ -95,43 +129,14 @@ public class LearningOptionsPanel extends VerticalLayout{
 		profileForm.addComponent(profileOptions);
 		profileForm.setComponentAlignment(profileOptions, Alignment.BOTTOM_LEFT);
 		
-		VerticalLayout profileDetails = new VerticalLayout();
-//		grid.setSpacing(true);
-		profileDetails.setMargin(true);
-		profileForm.addComponent(profileDetails);
-		profileForm.setComponentAlignment(profileDetails, Alignment.MIDDLE_CENTER);
-		
-		universalQuantifierCheckBox = new CheckBox("only");
-		profileDetails.addComponent(universalQuantifierCheckBox);
-		
-		existentialQuantifierCheckBox = new CheckBox("some");
-		profileDetails.addComponent(existentialQuantifierCheckBox);
-		
-		negationCheckBox = new CheckBox("not");
-		profileDetails.addComponent(negationCheckBox);
-		
-		hasValueCheckBox = new CheckBox("value");
-		profileDetails.addComponent(hasValueCheckBox);
-		
-		cardinalityCheckBox = new CheckBox("min/max with");
-		GridLayout cardinalityLayout = new GridLayout(2,1);
-//		HorizontalLayout cardinalityLayout = new HorizontalLayout();
-		cardinalityLayout.addComponent(cardinalityCheckBox);
-//		cardinalityLayout.setComponentAlignment(cardinalityCheckBox, Alignment.MIDDLE_LEFT);
-		cardinalityLayout.setSizeUndefined();
-		cardinalityLayout.setWidth("100%");
-		cardinalityLayout.addStyleName("no-padding");
-		cardinalitySpinner = new IntStepper();
-		cardinalitySpinner.setStepAmount(1);
-		cardinalitySpinner.setMinValue(1);
-		cardinalitySpinner.setMaxValue(10);
-		cardinalitySpinner.setWidth("50px");
-		cardinalitySpinner.setImmediate(true);
-		cardinalityLayout.addComponent(cardinalitySpinner);
-//		cardinalityLayout.setComponentAlignment(cardinalitySpinner, Alignment.MIDDLE_LEFT);
-		profileDetails.addComponent(cardinalityLayout);
-		profileDetails.setComponentAlignment(cardinalityLayout, Alignment.MIDDLE_LEFT);
-		
+		constructorOptions = new OptionGroup("Used OWL Constructors");
+		constructorOptions.setContainerDataSource(new BeanItemContainer<OWLConstruct>(OWLConstruct.class, Arrays.asList(OWLConstruct.values())));
+		constructorOptions.setItemCaptionPropertyId("name");
+		constructorOptions.setItemCaptionMode(ItemCaptionMode.PROPERTY);
+		constructorOptions.setMultiSelect(true);
+		constructorOptions.addStyleName(ValoTheme.OPTIONGROUP_SMALL);
+		profileForm.addComponent(constructorOptions);
+		profileForm.setComponentAlignment(constructorOptions, Alignment.MIDDLE_CENTER);
 		
 		addComponent(profileForm);
 		
@@ -161,27 +166,27 @@ public class LearningOptionsPanel extends VerticalLayout{
 	}
 	
 	public boolean useUniversalQuantifier(){
-		return (Boolean) universalQuantifierCheckBox.getValue();
+		return constructorOptions.isSelected(OWLConstruct.ALL);
 	}
 	
 	public boolean useExistentialQuantifier(){
-		return (Boolean) existentialQuantifierCheckBox.getValue();
+		return constructorOptions.isSelected(OWLConstruct.EXISTS);
 	}
 	
 	public boolean useNegation(){
-		return (Boolean) negationCheckBox.getValue();
+		return constructorOptions.isSelected(OWLConstruct.NEGATION);
 	}
 	
 	public boolean useHasValueQuantifier(){
-		return (Boolean) hasValueCheckBox.getValue();
+		return constructorOptions.isSelected(OWLConstruct.HAS_VALUE);
 	}
 	
 	public boolean useCardinalityRestriction(){
-		return (Boolean) cardinalityCheckBox.getValue();
+		return constructorOptions.isSelected(OWLConstruct.MIN_MAX);
 	}
 	
 	public int getCardinalityLimit(){
-		return (Integer) cardinalitySpinner.getValue();
+		return 5;
 	}
 	
 	public void reset(){
@@ -192,30 +197,30 @@ public class LearningOptionsPanel extends VerticalLayout{
 		} catch (ValueOutOfBoundsException e) {
 			e.printStackTrace();
 		}
-		profileOptions.setValue(Profile.DEFAULT);
-		cardinalitySpinner.setValue(1);
+		profileOptions.setValue(Profile.CUSTOM);
+//		cardinalitySpinner.setValue(1);
 	}
 	
 	private void onProfileChanged(){
 		Profile profile = (Profile) profileOptions.getValue();
-		if(profile == Profile.DEFAULT){
-			universalQuantifierCheckBox.setValue(true);
-			existentialQuantifierCheckBox.setValue(true);
-			negationCheckBox.setValue(false);
-			hasValueCheckBox.setValue(false);
-			cardinalityCheckBox.setValue(true);
+		if(profile == Profile.CUSTOM){
+			constructorOptions.select(OWLConstruct.ALL);
+			constructorOptions.select(OWLConstruct.EXISTS);
+			constructorOptions.select(OWLConstruct.MIN_MAX);
+			constructorOptions.unselect(OWLConstruct.NEGATION);
+			constructorOptions.unselect(OWLConstruct.HAS_VALUE);
 		} else if(profile == Profile.OWL_2){
-			universalQuantifierCheckBox.setValue(true);
-			existentialQuantifierCheckBox.setValue(true);
-			negationCheckBox.setValue(true);
-			hasValueCheckBox.setValue(true);
-			cardinalityCheckBox.setValue(true);
+			constructorOptions.select(OWLConstruct.ALL);
+			constructorOptions.select(OWLConstruct.EXISTS);
+			constructorOptions.select(OWLConstruct.MIN_MAX);
+			constructorOptions.select(OWLConstruct.NEGATION);
+			constructorOptions.select(OWLConstruct.HAS_VALUE);
 		} else if(profile == Profile.OWL_EL){
-			universalQuantifierCheckBox.setValue(false);
-			existentialQuantifierCheckBox.setValue(true);
-			negationCheckBox.setValue(false);
-			hasValueCheckBox.setValue(false);
-			cardinalityCheckBox.setValue(false);
+			constructorOptions.unselect(OWLConstruct.ALL);
+			constructorOptions.select(OWLConstruct.EXISTS);
+			constructorOptions.unselect(OWLConstruct.MIN_MAX);
+			constructorOptions.unselect(OWLConstruct.NEGATION);
+			constructorOptions.unselect(OWLConstruct.HAS_VALUE);
 		}
 	}
 

@@ -12,8 +12,6 @@ import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.util.IRIShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleIRIShortFormProvider;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -21,7 +19,6 @@ import com.vaadin.ui.VerticalLayout;
 
 public class ExplanationsPanel extends VerticalLayout {
 	
-	private IRIShortFormProvider sfp = new SimpleIRIShortFormProvider();
 	private Set<ExplanationTable> tables = new HashSet<ExplanationTable>();
 	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
 	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<ExplanationTable, Property.ValueChangeListener>();

@@ -306,7 +306,8 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
         classExpressionTable.setSelectable(true);
         classExpressionTable.setSizeFull();
         classExpressionTable.setImmediate(true);
-        classExpressionTable.setColumnWidth("Accuracy", 100);
+//        classExpressionTable.setColumnWidth("Accuracy", 100);
+        classExpressionTable.setColumnExpandRatio("Class Expression", 1f);
         classExpressionTable.addValueChangeListener(new Property.ValueChangeListener(){
 
 			@Override
