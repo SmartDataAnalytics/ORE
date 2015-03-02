@@ -171,14 +171,12 @@ public class EnrichmentManager {
 	OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 	private MultiPropertyAxiomLearner la;
 	
-	public EnrichmentManager(SparqlEndpoint endpoint, CacheFrontend cache) {
-		this.endpoint = endpoint;
-		
-		reasoner = new SPARQLReasoner(new SparqlEndpointKS(endpoint), cache);
+	public EnrichmentManager(SparqlEndpointKS ks) {
+		reasoner = new SPARQLReasoner(ks);
 		
 		loadProperties();
 		
-		la = new MultiPropertyAxiomLearner(new SparqlEndpointKS(endpoint));
+		la = new MultiPropertyAxiomLearner(ks);
 	}
 	
 	private void loadProperties(){
@@ -265,7 +263,7 @@ public class EnrichmentManager {
 		if(entityType != null){
 			return entityType;
 		} else {
-			throw new OREException("Could not detect type of resource");
+			throw new OREException("Could not detect type of entity");
 		}
 	}
 	
@@ -634,9 +632,7 @@ public class EnrichmentManager {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		EnrichmentManager man = new EnrichmentManager(
-				SparqlEndpoint.getEndpointDBpedia(), 
-				CacheUtilsH2.createCacheFrontend("cache/enrichment", true, 100000));
+		EnrichmentManager man = new EnrichmentManager(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia()));
 		man.setMaxExecutionTimeInSeconds(10);
 		man.setThreshold(0.1);
 		

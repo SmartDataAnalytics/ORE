@@ -109,7 +109,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//dummy enrichment manager
-			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
+			EnrichmentManager enMan = new EnrichmentManager(ks);
 			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
 			//dummy incremental inconsistency finder
 			SPARQLBasedInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedInconsistencyFinder(ks, reasonerFactory);
@@ -166,7 +166,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);
 			//enrichment manager
-			EnrichmentManager enMan = new EnrichmentManager(ks.getEndpoint(), cache);
+			EnrichmentManager enMan = new EnrichmentManager(ks);
 			VaadinSession.getCurrent().setAttribute(EnrichmentManager.class, enMan);
 			//incremental inconsistency finder
 			SPARQLBasedTrivialInconsistencyFinder sparqlBasedInconsistencyFinder = new SPARQLBasedTrivialInconsistencyFinder(ks);
