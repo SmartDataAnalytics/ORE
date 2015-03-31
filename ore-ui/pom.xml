@@ -178,6 +178,10 @@
 					<artifactId>owlapi-apibinding</artifactId>
 					<groupId>net.sourceforge.owlapi</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>google-collections</artifactId>
+					<groupId>com.google.collections</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
