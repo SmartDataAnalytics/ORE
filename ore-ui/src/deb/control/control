@@ -1,10 +1,11 @@
 Package: ore-ui
-Version: 0.6.5
+Version: [[version]]
 Architecture: all
 Maintainer: Lorenz Bühmann <buehmann@informatik.uni-leipzig.de>
-Depends: tomcat7, lod2-java7 | java6-runtime-headless | java6-runtime
-Section: misc
-Priority: extra
+Depends: tomcat7, lod2-java7 | java7-runtime-headless | java7-runtime
+Section: web
+Priority: optional
+Distribution: ldstack-nightly
 Homepage: http://ore-tool.net/
 Description: (Linked Data) ORE - Web interface
 	(Linked Data) ORE allows for the enrichment, repair and data 
