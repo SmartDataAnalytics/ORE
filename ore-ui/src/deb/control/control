@@ -1,0 +1,9 @@
+Package: ore-ui
+Version: [[version]]
+Section: web
+Priority: optional
+Architecture: all
+Depends: tomcat6
+Maintainer: Lorenz Bühmann <buehmann@informatik.uni-leipzig.de>
+Description: Ontology Repair and Enrichment Web UI
+Distribution: ldstack-nightly
