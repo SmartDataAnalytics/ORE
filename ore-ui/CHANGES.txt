@@ -1,0 +1,20 @@
+release date=11:43 04.08.2014,version=0.6-5,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Added option to use different rendering for OWL entities and axioms.
+ * Improved naming issue detection.
+release date=07:05 15.07.2014,version=0.6-4,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Updated Vaadin dependencies.
+release date=20:50 28.05.2014,version=0.6-3,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Updated Vaadin dependencies.
+release date=12:13 28.04.2014,version=0.6-2,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Updated package dependencies.
+release date=11:12 04.04.2014,version=0.6-1,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Added export option for changes made to the knowledge base.
+release date=17:20 03.02.2014,version=0.6,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Added constraint validation task.
+release date=13:06 27.08.2012,version=0.3,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Integrated PatOMat service for detection of naming problems.
+ * Changed web framework to Vaadin.
+release date=15:40 26.08.2011,version=0.2-3,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Added preliminary support to set a SPARQL endpoint on startup via URL request parameters 'endpointURL' and 'defaultGraphURI'.
+release date=14:09 14.07.2011,version=0.2-2,urgency=low,by=Lorenz Buehmann <buehmann@informatik.uni-leipzig.de>,distribution=lod2
+ * Initial Release.
