@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.ore.ORESession;
@@ -15,6 +14,7 @@ import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.apache.log4j.Logger;
+import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -95,11 +95,9 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	 * might be also a question of performance.
 	 */
 	private void analyzeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
-		SparqlEndpoint endpoint = kb.getEndpoint();
-		QueryExecutionFactory qef = new QueryExecutionFactoryHttp(endpoint.getURL().toString(), endpoint.getDefaultGraphURIs());
-		if(kb.getCache()!= null){
-			qef = new QueryExecutionFactoryCacheEx(qef, kb.getCache());
-		}
+		SparqlEndpointKS ks = kb.getEndpoint();
+		QueryExecutionFactory qef = ks.getQueryExecutionFactory();
+		
 //		//get number of OWL classes
 //		String query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";
 //		int clsCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
@@ -256,12 +254,6 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 			return false;
 		}
 		return true;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		KnowledgebaseManager kbMan = new KnowledgebaseManager();
-		SPARQLEndpointKnowledgebase kb = new SPARQLEndpointKnowledgebase(SparqlEndpoint.getEndpointDBpedia());
-		kbMan.analyzeSPARQLEndpoint(kb);
 	}
 
 }

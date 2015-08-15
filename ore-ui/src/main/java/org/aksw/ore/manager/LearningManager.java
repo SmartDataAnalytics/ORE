@@ -17,7 +17,7 @@ import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.dllearner.reasoning.FastInstanceChecker;
+import org.dllearner.reasoning.ClosedWorldReasoner;
 import org.dllearner.refinementoperators.RhoDRDown;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -29,15 +29,14 @@ import org.semanticweb.owlapi.model.OWLNaryBooleanClassExpression;
 import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class LearningManager {
 	
@@ -52,7 +51,7 @@ public class LearningManager {
 
 	private ClassLearningProblem lp;
 	private CELOE la;
-	private FastInstanceChecker reasoner;
+	private ClosedWorldReasoner reasoner;
 
 	private LearningSetting learningSetting;
 
@@ -67,7 +66,7 @@ public class LearningManager {
 	
 	private OWLDataFactory df = new OWLDataFactoryImpl(false, false);
 
-	public LearningManager(FastInstanceChecker reasoner) {
+	public LearningManager(ClosedWorldReasoner reasoner) {
 		this.reasoner = reasoner;
 	}
 
@@ -79,7 +78,7 @@ public class LearningManager {
 		return learningType;
 	}
 	
-	public FastInstanceChecker getReasoner(){
+	public ClosedWorldReasoner getReasoner(){
 		return reasoner;
 	}
 	
@@ -305,7 +304,7 @@ public class LearningManager {
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
-		FastInstanceChecker rc = new FastInstanceChecker(new OWLAPIOntology(ontology));
+		ClosedWorldReasoner rc = new ClosedWorldReasoner(new OWLAPIOntology(ontology));
 		rc.init();
 		LearningManager lm = new LearningManager(rc);
 		LearningSetting setting = new LearningSetting(new OWLClassImpl(IRI.create("http://protege.stanford.edu/plugins/owl/owl-library/koala.owl#Degree")),

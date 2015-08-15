@@ -6,7 +6,7 @@ import java.util.Set;
 import org.aksw.mole.ore.explanation.api.Explanation;
 import org.dllearner.core.KnowledgeSource;
 import org.dllearner.kb.OWLAPIOntology;
-import org.dllearner.reasoning.FastInstanceChecker;
+import org.dllearner.reasoning.ClosedWorldReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -28,10 +28,10 @@ import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 
 public class ClosedWorldExplanationGenerator {
 	
-	private FastInstanceChecker reasoner;
+	private ClosedWorldReasoner reasoner;
 	OWLDataFactory df = new OWLDataFactoryImpl();
 	
-	public ClosedWorldExplanationGenerator(FastInstanceChecker reasoner) {
+	public ClosedWorldExplanationGenerator(ClosedWorldReasoner reasoner) {
 		this.reasoner = reasoner;
 	}
 	
@@ -145,7 +145,7 @@ public class ClosedWorldExplanationGenerator {
 		KnowledgeSource ks = new OWLAPIOntology(ont);
 		ks.init();
 		
-		FastInstanceChecker checker = new FastInstanceChecker(ks);
+		ClosedWorldReasoner checker = new ClosedWorldReasoner(ks);
 		checker.init();
 		
 		OWLClassExpression expr1 = f.getOWLObjectIntersectionOf(

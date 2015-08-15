@@ -37,7 +37,6 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
-import org.vaadin.hene.popupbutton.PopupButton;
 
 import com.google.common.base.Joiner;
 import com.vaadin.navigator.View;
@@ -439,7 +438,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	}
 	
 	private void visualizeSPARQLEndpoint(SPARQLEndpointKnowledgebase kb){
-		SparqlEndpoint endpoint = kb.getEndpoint();
+		SparqlEndpoint endpoint = kb.getEndpoint().getEndpoint();
 		SPARQLKnowledgebaseStats stats = kb.getStats();
 		
 		String header = "<h4>SPARQL Endpoint</h4><hr>";

@@ -4,10 +4,7 @@
 package org.aksw.ore;
 
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
-import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
 import org.aksw.mole.ore.sparql.trivial_old.SPARQLBasedTrivialInconsistencyFinder;
 import org.aksw.ore.manager.ConstraintValidationManager;
@@ -26,7 +23,7 @@ import org.aksw.ore.rendering.Renderer;
 import org.dllearner.core.ComponentInitException;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
-import org.dllearner.reasoning.FastInstanceChecker;
+import org.dllearner.reasoning.ClosedWorldReasoner;
 import org.dllearner.reasoning.OWLAPIReasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -81,7 +78,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			RepairManager repMan = new RepairManager(ontology);
 			VaadinSession.getCurrent().setAttribute(RepairManager.class, repMan);
 			//learning manager
-			FastInstanceChecker closedWorldReasoner = new FastInstanceChecker();
+			ClosedWorldReasoner closedWorldReasoner = new ClosedWorldReasoner();
 			closedWorldReasoner.setReasonerComponent(new OWLAPIReasoner(reasoner));
 			try {
 				closedWorldReasoner.init();
@@ -98,12 +95,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		//dummy SPARQL endpoint
 		try {
 			SparqlEndpoint endpoint = SparqlEndpoint.getEndpointDBpedia();
-			
-			//SPARQL cache
-			long timeToLive = TimeUnit.DAYS.toMillis(30);
-			CacheFrontend cache = CacheUtilsH2.createCacheFrontend(OREConfiguration.getCacheDirectory(), true, timeToLive);
-			
-			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, cache);
+			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, OREConfiguration.getCacheDirectory());
 			
 			//dummy constraint manager
 			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
@@ -135,7 +127,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			OWLReasoner reasoner = ontologyKB.getReasoner();
 			VaadinSession.getCurrent().setAttribute(OWLReasoner.class, reasoner);
 			
-			FastInstanceChecker closedWorldReasoner = new FastInstanceChecker();
+			ClosedWorldReasoner closedWorldReasoner = new ClosedWorldReasoner();
 			try {
 				OWLAPIReasoner rc = new OWLAPIReasoner(reasoner);
 				rc.init();
@@ -159,9 +151,7 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			
 			
 		} else if(knowledgebase instanceof SPARQLEndpointKnowledgebase){
-			SparqlEndpoint endpoint = ((SPARQLEndpointKnowledgebase) knowledgebase).getEndpoint();
-			CacheFrontend cache = ((SPARQLEndpointKnowledgebase) knowledgebase).getCache();
-			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, cache);
+			SparqlEndpointKS ks = ((SPARQLEndpointKnowledgebase) knowledgebase).getEndpoint();
 			//constraint manager
 			ConstraintValidationManager valMan = new ConstraintValidationManager(ks);
 			VaadinSession.getCurrent().setAttribute(ConstraintValidationManager.class, valMan);

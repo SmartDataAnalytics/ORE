@@ -29,8 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
-import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.mole.ore.rendering.KeywordColorMap;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.rendering.UnsortedManchesterSyntaxRendererImpl;
@@ -58,7 +56,7 @@ import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.learningproblems.AxiomScore;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.Heuristics.HeuristicType;
-import org.dllearner.reasoning.FastInstanceChecker;
+import org.dllearner.reasoning.ClosedWorldReasoner;
 import org.dllearner.reasoning.SPARQLReasoner;
 import org.dllearner.utilities.Helper;
 import org.dllearner.utilities.datastructures.SortedSetTuple;
@@ -402,7 +400,7 @@ public class EnrichmentManager {
 		}
 		ksFragment = new OWLAPIOntology(ontology);
 //		ksFragment.init();
-		rc = new FastInstanceChecker(ksFragment);
+		rc = new ClosedWorldReasoner(ksFragment);
 		rc.init();
 //		rc.setSubsumptionHierarchy(reasoner.getClassHierarchy());
 		
@@ -431,9 +429,9 @@ public class EnrichmentManager {
         System.out.println("done in " + runTime + " ms");	
 
         // convert the result to axioms (to make it compatible with the other algorithms)
-        List<? extends EvaluatedDescription> learnedDescriptions = la.getCurrentlyBestEvaluatedDescriptions(threshold);
+        List<? extends EvaluatedDescription<? extends Score>> learnedDescriptions = la.getCurrentlyBestEvaluatedDescriptions(threshold);
         List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new LinkedList<EvaluatedAxiom<OWLAxiom>>();
-        for(EvaluatedDescription learnedDescription : learnedDescriptions) {
+        for(EvaluatedDescription<? extends Score> learnedDescription : learnedDescriptions) {
         	OWLAxiom axiom;
         	if(equivalence) {
         		axiom = dataFactory.getOWLEquivalentClassesAxiom(nc, learnedDescription.getDescription());

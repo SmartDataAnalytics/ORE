@@ -7,13 +7,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.ore.OREConfiguration;
 import org.aksw.ore.ORESession;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.dllearner.core.ComponentInitException;
+import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 
 import com.vaadin.data.Validator;
-import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.event.Action;
 import com.vaadin.event.FieldEvents.BlurEvent;
 import com.vaadin.event.FieldEvents.BlurListener;
@@ -184,7 +186,10 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 					boolean isOnline = ORESession.getKnowledgebaseManager().isOnline(endpoint);
 					if(isOnline){
 //						Notification.show("Endpoint is online.");
-						ORESession.getKnowledgebaseManager().setKnowledgebase(new SPARQLEndpointKnowledgebase(endpoint));
+						SparqlEndpointKS ks = new SparqlEndpointKS(endpoint, OREConfiguration.getCacheDirectory());
+						ks.init();
+						
+						ORESession.getKnowledgebaseManager().setKnowledgebase(new SPARQLEndpointKnowledgebase(ks));
 						close();
 					} else {
 						Notification.show("Endpoint not available.", Notification.Type.ERROR_MESSAGE);
@@ -192,6 +197,8 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 					Notification.show("Invalid endpoint URL.", Notification.Type.ERROR_MESSAGE);
+				} catch (ComponentInitException e) {
+					e.printStackTrace();
 				}
 			}
 		});

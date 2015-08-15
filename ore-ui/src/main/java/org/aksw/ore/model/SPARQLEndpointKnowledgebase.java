@@ -1,15 +1,6 @@
 package org.aksw.ore.model;
 
-import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
-
-import org.aksw.jena_sparql_api.cache.extra.CacheBackend;
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
-import org.aksw.jena_sparql_api.cache.h2.CacheCoreH2;
-import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
-import org.aksw.ore.OREConfiguration;
-import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.dllearner.kb.SparqlEndpointKS;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -21,12 +12,11 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
-	private SparqlEndpoint endpoint;
-	private CacheFrontend cache;
+	private SparqlEndpointKS endpoint;
 	
 	private SPARQLKnowledgebaseStats stats;
 	
-	public SPARQLEndpointKnowledgebase(SparqlEndpoint endpoint) {
+	public SPARQLEndpointKnowledgebase(SparqlEndpointKS endpoint) {
 		this.endpoint = endpoint;
 		
 		manager = OWLManager.createOWLOntologyManager();
@@ -35,10 +25,6 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 		} catch (OWLOntologyCreationException e) {
 			e.printStackTrace();
 		}
-		
-		//create the cache
-		long timeToLive = TimeUnit.DAYS.toMillis(30);
-		cache = CacheUtilsH2.createCacheFrontend(OREConfiguration.getCacheDirectory(), true, timeToLive);
 		
 	}
 	
@@ -60,15 +46,8 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 		return true;
 	}
 	
-	public SparqlEndpoint getEndpoint() {
+	public SparqlEndpointKS getEndpoint() {
 		return endpoint;
-	}
-	
-	/**
-	 * @return the cache
-	 */
-	public CacheFrontend getCache() {
-		return cache;
 	}
 	
 	/**
@@ -98,6 +77,6 @@ public class SPARQLEndpointKnowledgebase implements Knowledgebase{
 	 */
 	@Override
 	public String toString() {
-		return "SPARQL Endpoint at " + endpoint.getURL().toString();
+		return "SPARQL Endpoint at " + endpoint.getEndpoint().getURL().toString();
 	}
 }
