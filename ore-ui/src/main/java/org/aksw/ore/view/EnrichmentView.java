@@ -312,7 +312,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		SPARQLEndpointKnowledgebase kb = (SPARQLEndpointKnowledgebase) ORESession.getKnowledgebaseManager().getKnowledgebase();
 		resourceURIField = new ComboBox("Resource URI");
-		resourceURIField.addStyleName("entity-combobox");
+//		resourceURIField.addStyleName("entity-combobox");
+		resourceURIField.addStyleName(ValoTheme.COMBOBOX_SMALL);
 		resourceURIField.setWidth("100%");
 		resourceURIField.setFilteringMode(FilteringMode.CONTAINS);
 		resourceURIField.setNewItemsAllowed(false);
