@@ -146,7 +146,6 @@ public class EnrichmentManager {
 	
 	private DecimalFormat df = new DecimalFormat("##0.0");
 	
-	private SparqlEndpoint endpoint;
 	private SPARQLReasoner reasoner;
 	private EntityType<? extends OWLEntity> resourceType;
 	
@@ -168,8 +167,10 @@ public class EnrichmentManager {
 	
 	OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 	private MultiPropertyAxiomLearner la;
+	private SparqlEndpointKS ks;
 	
 	public EnrichmentManager(SparqlEndpointKS ks) {
+		this.ks = ks;
 		reasoner = new SPARQLReasoner(ks);
 		
 		loadProperties();
@@ -192,12 +193,12 @@ public class EnrichmentManager {
 		la.setProgressMonitor(monitor);
 	}
 
-	public SparqlEndpoint getEndpoint() {
-		return endpoint;
+	public SparqlEndpointKS getEndpoint() {
+		return ks;
 	}
 
-	public void setEndpoint(SparqlEndpoint endpoint) {
-		this.endpoint = endpoint;
+	public void setEndpoint(SparqlEndpointKS ks) {
+		this.ks = ks;
 	}
 
 	public EntityType<? extends OWLEntity> getResourceType() {
@@ -277,6 +278,7 @@ public class EnrichmentManager {
 	public void generateEvaluatedAxioms(OWLEntity entity, Set<AxiomType<? extends OWLAxiom>> axiomTypes){
 		la.setEntityToDescribe(entity);
 		la.setAxiomTypes(axiomTypes);
+		la.setUseSampling(true);
 		la.start();
 	}
 	
@@ -297,9 +299,6 @@ public class EnrichmentManager {
 			resourceType = getEntityType(resourceURI);
 
 			OWLEntity currentEntity = getEntity(resourceURI, resourceType);
-
-			SparqlEndpointKS ks = new SparqlEndpointKS(endpoint);
-			ks.init();
 
 			// check if endpoint supports SPARQL 1.1
 			boolean supportsSPARQL_1_1 = reasoner.supportsSPARQL1_1();
@@ -411,7 +410,7 @@ public class EnrichmentManager {
         ClassLearningProblem lp = new ClassLearningProblem(rc);
 		lp.setClassToDescribe(nc);
         lp.setEquivalence(equivalence);
-        lp.setHeuristic(HeuristicType.FMEASURE);
+        lp.setAccuracyMethod(HeuristicType.FMEASURE);
         lp.setUseApproximations(false);
         lp.setMaxExecutionTimeInSeconds(10);
         lp.init();
@@ -630,12 +629,23 @@ public class EnrichmentManager {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		EnrichmentManager man = new EnrichmentManager(new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia()));
+		SparqlEndpointKS ks = new SparqlEndpointKS(SparqlEndpoint.getEndpointDBpedia());
+		ks.init();
+		
+		EnrichmentManager man = new EnrichmentManager(ks);
 		man.setMaxExecutionTimeInSeconds(10);
 		man.setThreshold(0.1);
 		
+		OWLEntity entity = new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/league"));
+		
+		Set<AxiomType<? extends OWLAxiom>> axiomTypes = Sets.<AxiomType<? extends OWLAxiom>>newHashSet(AxiomType.OBJECT_PROPERTY_DOMAIN, AxiomType.OBJECT_PROPERTY_RANGE);
+		
+		man.generateEvaluatedAxioms(entity, axiomTypes);
+		
 		List<EvaluatedAxiom<OWLAxiom>> axioms = man.getEvaluatedAxioms("http://dbpedia.org/ontology/league", AxiomType.OBJECT_PROPERTY_DOMAIN);
 		System.out.println(axioms);
+		
+		
 		
 		AxiomScoreExplanationGenerator.init();
 		for (EvaluatedAxiom<OWLAxiom> ax : axioms) {

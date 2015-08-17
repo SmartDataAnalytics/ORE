@@ -1,16 +1,12 @@
 package org.aksw.mole.ore.util;
 
-import org.dllearner.utilities.Helper;
-import org.dllearner.utilities.PrefixCCMap;
+import org.dllearner.algorithms.qtl.util.PrefixCCPrefixMapping;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 
 public class PrefixedShortFromProvider implements ShortFormProvider{
 	
-	private PrefixCCMap prefixes;
-	
 	public PrefixedShortFromProvider() {
-		prefixes = PrefixCCMap.getInstance();
 	}
 
 	@Override
@@ -21,7 +17,7 @@ public class PrefixedShortFromProvider implements ShortFormProvider{
 
 	@Override
 	public String getShortForm(OWLEntity entity) {
-		return Helper.getAbbreviatedString(entity.toStringID(), null, prefixes);
+		return PrefixCCPrefixMapping.Full.shortForm(entity.toStringID());
 	}
 
 }

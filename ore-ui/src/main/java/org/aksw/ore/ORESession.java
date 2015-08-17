@@ -33,6 +33,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import com.vaadin.server.VaadinService;
@@ -43,6 +45,8 @@ import com.vaadin.server.VaadinSession;
  *
  */
 public class ORESession extends VaadinSession implements KnowledgebaseLoadingListener{
+	
+	private static final Logger logger = LoggerFactory.getLogger(ORESession.class);
 
 	private static final long serialVersionUID = -3399015588524238428L;
 	
@@ -50,13 +54,14 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 		super(service);
 	}
 	
-	public static void init(){
-			//KB manager
-			KnowledgebaseManager kbMan = new KnowledgebaseManager();
-			VaadinSession.getCurrent().setAttribute(KnowledgebaseManager.class, kbMan);
-//			kbMan.addListener(this);
-			
-//			loadDummyKnowledgebases();
+	public static void init() {
+		logger.info("Initializing new session...");
+		//KB manager
+		KnowledgebaseManager kbMan = new KnowledgebaseManager();
+		VaadinSession.getCurrent().setAttribute(KnowledgebaseManager.class, kbMan);
+		//			kbMan.addListener(this);
+
+		//			loadDummyKnowledgebases();
 	}
 	
 	private static void loadDummyKnowledgebases(){
@@ -119,7 +124,8 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 	}
 	
 	public static void initialize(Knowledgebase knowledgebase){
-		System.out.println("init kb");
+		logger.info("Initializing knowledge base...");
+		long t1 = System.currentTimeMillis();
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		if(knowledgebase instanceof OWLOntologyKnowledgebase){
 			OWLOntologyKnowledgebase ontologyKB = (OWLOntologyKnowledgebase) knowledgebase;
@@ -180,6 +186,8 @@ public class ORESession extends VaadinSession implements KnowledgebaseLoadingLis
 			
 			repMan.addListener(expMan);
 		}
+		long t2 = System.currentTimeMillis();
+		logger.info("...done in {}ms.", (t2 -t1));
 	}
 	
 	public static KnowledgebaseManager getKnowledgebaseManager(){

@@ -3,8 +3,6 @@ package org.aksw.ore.view;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,42 +11,56 @@ import org.aksw.ore.ORESession;
 import org.aksw.ore.component.AxiomTypesTable;
 import org.aksw.ore.component.CollapsibleBox;
 import org.aksw.ore.component.EnrichmentProgressDialog;
+import org.aksw.ore.component.EvaluatedAxiomsGrid;
 import org.aksw.ore.component.EvaluatedAxiomsTable;
 import org.aksw.ore.component.WhitePanel;
 import org.aksw.ore.exception.OREException;
 import org.aksw.ore.manager.EnrichmentManager;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.dllearner.core.EvaluatedAxiom;
+import org.dllearner.learningproblems.AxiomScore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.EntityType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.vaadin.risto.stepper.IntStepper;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
+import com.google.common.collect.Lists;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
@@ -76,7 +88,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private Button startButton;
 	
-	private VerticalLayout axiomsPanel;
+	private AbstractLayout axiomsPanel;
 	
 	private List<AxiomType<OWLAxiom>> pendingAxiomTypes;
 	
@@ -89,24 +101,57 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	}
 	
 	private void initUI(){
-		addStyleName("dashboard-view");
 		addStyleName("enrichment-view");
 		setSizeFull();
 		setSplitPosition(25);
 		
 		Component leftSide = createLeftSide();
-		addComponent(new WhitePanel(leftSide));
+		addComponent(leftSide);
 		
+		Component rightSide = createRightSide();
+		addComponent(rightSide);
+		
+		
+//		addToKbButton.setEnabled(false);
+//		dumpSPARULButton.setEnabled(false);
+		
+		resourceURIField.focus();
+		
+		reset();
+//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
+//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+//		showDummyTables();
+	}
+	
+	/**
+	 * @return
+	 */
+	private Component createRightSide() {
 		VerticalLayout rightSide = new VerticalLayout();
-		rightSide.addStyleName("enrichment-axioms-panel");
+		rightSide.addStyleName("dashboard-view");
+//		rightSide.addStyleName("enrichment-axioms-panel");
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
 		rightSide.setCaption("Learned axioms");
-		addComponent(new WhitePanel(rightSide));
+		
+		Label titleLabel = new Label("Learned Axioms");
+        titleLabel.setId("dashboard-title");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        rightSide.addComponent(titleLabel);
+//		addComponent(new WhitePanel(rightSide));
+//		addComponent(createContentWrapper(rightSide));
 		
 		Component panel = createAxiomsPanel();
 		rightSide.addComponent(panel);
 		rightSide.setExpandRatio(panel, 1f);
+		// wrap in panel for scrolling
+//		Panel wrapperPanel = new Panel(panel);
+//		wrapperPanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
+//		wrapperPanel.setSizeFull();
+//		rightSide.addComponent(wrapperPanel);
+//		rightSide.setExpandRatio(wrapperPanel, 1f);
 		
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setSpacing(true);
@@ -154,35 +199,85 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		buttons.addComponent(dumpSPARULButton);
 		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
 		
-//		addToKbButton.setEnabled(false);
-//		dumpSPARULButton.setEnabled(false);
+		return rightSide;
+	}
+
+	private void showDummyTables() {
+		OWLDataFactory df = new OWLDataFactoryImpl();
 		
-		resourceURIField.focus();
+		OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("http://dbpedia.org/ontology/league"));
 		
-		reset();
-//		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
-//		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
+		List<EvaluatedAxiom<OWLAxiom>> axioms = Lists.newArrayList();
+		for (int i = 0; i < 10; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyRangeAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_RANGE, axioms);
+		
+		axioms = Lists.newArrayList();
+		for (int i = 0; i < 20; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyDomainAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
+		
+		axioms = Lists.newArrayList();
+		for (int i = 0; i < 2; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyDomainAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
 	}
 	
 	private Component createAxiomsPanel(){
-		axiomsPanel = new VerticalLayout();
-		axiomsPanel.setSizeFull();
-		axiomsPanel.setMargin(true);
-		axiomsPanel.setSpacing(true);
-		axiomsPanel.addStyleName("enrichment-axioms-panel");
-		axiomsPanel.setHeight(null);
+//		VerticalLayout component = new VerticalLayout();
+//		component.setSizeFull();
+//		component.setMargin(true);
+//		component.setSpacing(true);
+//		component.addStyleName("enrichment-axioms-panel");
+//		component.addStyleName("dashboard-panels");
+//		component.setHeight(null);
 		
-		Panel panel = new Panel(axiomsPanel);
-		panel.setSizeFull();
-		return panel;
+		CssLayout component = new CssLayout();
+//		component.addStyleName("enrichment-axioms-tables");
+		component.addStyleName("dashboard-panels");
+		component.addStyleName("axiom-panels");
+		component.setWidth("100%");
+		component.setHeight(null);
+		
+//		Panel panel = new Panel(component);
+//		panel.setSizeFull();
+		
+		axiomsPanel = component;
+		
+		return axiomsPanel;
 	}
 	
 	private VerticalLayout createLeftSide(){
 		VerticalLayout leftSide = new VerticalLayout();
+		leftSide.addStyleName("dashboard-view");
 		leftSide.setSizeFull();
 		leftSide.setCaption("Options");
 		leftSide.setSpacing(true);
 		leftSide.setMargin(new MarginInfo(false, false, true, false));
+		
+		Label titleLabel = new Label("Options");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        leftSide.addComponent(titleLabel);
 		
 		Component configForm = createConfigForm();
 //		configForm = new Panel(configForm);
@@ -250,7 +345,8 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		// axiom types
 		axiomTypesField = new AxiomTypesField();
-		axiomTypesField.setSizeFull();
+//		axiomTypesField.setSizeFull();
+//		axiomTypesField.setHeight("300px");
 //		axiomTypesField.setHeightUndefined();
 		form.addComponent(axiomTypesField);
 //		form.setExpandRatio(axiomTypesField, 1f);
@@ -436,11 +532,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 					axiomName = "Irreflexive Object Property";
 				}
 				axiomName = splitCamelCase(axiomName);
-				table.setCaption(axiomName + " Axioms");
+				table.setCaption(axiomName);
 				tables.add(table);
-//				WhitePanel c = new WhitePanel(table);
 //				c.setHeight(null);
-				axiomsPanel.addComponent(table);
+//				EvaluatedAxiomsTable table = new EvaluatedAxiomsTable(axiomType, axioms);
+				axiomsPanel.addComponent(createContentWrapper(table));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -494,10 +590,12 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			setCaption("Axiom types");
 			setDescription("Choose the types of axioms for which suggestions will be generated.");
 			setSizeFull();
-//			setHeightUndefined();
+//			setHeight("300px");
+			setHeightUndefined();
 			
 			//(de)select all checkbox
 			CheckBox allCheckBox = new CheckBox("All");
+			allCheckBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
 			allCheckBox.addStyleName("select-all-axiomtypes-checkbox");
 			allCheckBox.setImmediate(true);
 			allCheckBox.addValueChangeListener(new Property.ValueChangeListener() {
@@ -601,4 +699,64 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			evaluatedAxiomsTable.refreshRowCache();
 		}
 	}
+	
+	private Component createContentWrapper(final Component content) {
+        final CssLayout slot = new CssLayout();
+        slot.setWidth("100%");
+        slot.addStyleName("dashboard-panel-slot");
+
+        CssLayout card = new CssLayout();
+        card.setWidth("100%");
+        card.addStyleName(ValoTheme.LAYOUT_CARD);
+
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.addStyleName("dashboard-panel-toolbar");
+        toolbar.setWidth("100%");
+
+        Label caption = new Label(content.getCaption());
+        caption.addStyleName(ValoTheme.LABEL_H4);
+        caption.addStyleName(ValoTheme.LABEL_COLORED);
+        caption.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        content.setCaption(null);
+
+        MenuBar tools = new MenuBar();
+        tools.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+        MenuItem max = tools.addItem("", FontAwesome.EXPAND, new Command() {
+
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                if (!slot.getStyleName().contains("max")) {
+                    selectedItem.setIcon(FontAwesome.COMPRESS);
+//                    toggleMaximized(slot, true);
+                } else {
+                    slot.removeStyleName("max");
+                    selectedItem.setIcon(FontAwesome.EXPAND);
+//                    toggleMaximized(slot, false);
+                }
+            }
+        });
+        max.setStyleName("icon-only");
+        MenuItem root = tools.addItem("", FontAwesome.COG, null);
+        root.addItem("Configure", new Command() {
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                Notification.show("Not implemented in this demo");
+            }
+        });
+        root.addSeparator();
+        root.addItem("Close", new Command() {
+            @Override
+            public void menuSelected(final MenuItem selectedItem) {
+                Notification.show("Not implemented in this demo");
+            }
+        });
+
+        toolbar.addComponents(caption);//, tools);
+        toolbar.setExpandRatio(caption, 1);
+        toolbar.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
+
+        card.addComponents(toolbar, content);
+        slot.addComponent(card);
+        return slot;
+    }
 }

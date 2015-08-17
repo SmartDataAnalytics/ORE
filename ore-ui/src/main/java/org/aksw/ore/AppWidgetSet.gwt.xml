@@ -47,7 +47,7 @@
 
     
 
-    <inherits name="org.vaadin.resetbuttonfortextfield.widgetset.ResetButtonForTextFieldWidgetset" />
+    
 
     <inherits name="org.vaadin.hene.popupbutton.widgetset.PopupbuttonWidgetset" />
 
@@ -60,4 +60,6 @@
     <inherits name="org.vaadin.jouni.animator.AnimatorWidgetset" />
 
     <inherits name="org.vaadin.jouni.dom.DomWidgetset" />
+
+    <inherits name="org.vaadin.resetbuttonfortextfield.WidgetSet" />
 </module>

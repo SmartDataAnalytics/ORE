@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.ore.component.SettingsDialog;
+import org.aksw.ore.event.OREEventBus;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -19,6 +20,7 @@ import org.aksw.ore.view.EnrichmentView;
 import org.aksw.ore.view.InconsistencyDebuggingView;
 import org.aksw.ore.view.KnowledgebaseView;
 import org.aksw.ore.view.LearningView;
+import org.aksw.ore.view.MainView;
 import org.aksw.ore.view.NamingView;
 import org.aksw.ore.view.Refreshable;
 import org.aksw.ore.view.SPARQLDebuggingView;
@@ -35,6 +37,7 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Responsive;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
@@ -65,6 +68,9 @@ import com.vaadin.ui.themes.ValoTheme;
 @SuppressWarnings("serial")
 public class OREUI extends UI implements KnowledgebaseLoadingListener, RenderingListener
 {
+	
+	private final OREEventBus eventbus = new OREEventBus();
+	
 	Navigator navigator;
     
     HorizontalLayout root = new HorizontalLayout();
@@ -120,71 +126,77 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     
     @Override
     protected void init(VaadinRequest request) {
-    	System.out.println("INIT UI");
-    	UI.getCurrent().setLocale(Locale.ENGLISH);
-    	getPage().setTitle("ORE");
-    	root.addStyleName("root");
-        root.setSizeFull();
-        setContent(root);
-        
-        //create and add sidebar to the left
-        Component sidebar = createSidebar();
-        root.addComponent(sidebar);
-        
-        //create the main content panel
-        content.setSizeFull();
-        content.setStyleName("view-content");
-        root.addComponent(content);
-        root.setExpandRatio(content, 1f);
-        
-        //initialize the ORE session
+    	setLocale(Locale.ENGLISH);
+    	
+    	OREEventBus.register(this);
+    	Responsive.makeResponsive(this);
+    	
+    	addStyleName(ValoTheme.UI_WITH_MENU);
+    	
+    	 //initialize the ORE session
         ORESession.init();
-        
-        // Create a navigator to control the views
-        navigator = new Navigator(this, content);
-        
-        // Create and register the views
-        KnowledgebaseView knowledgebaseView = new KnowledgebaseView();
-        navigator.addView(view2Route.get(KnowledgebaseView.class), knowledgebaseView);
-        
-        updateAvailableViews();
-        updateMenuButtons();
-      
-        //default view is knowledgebase view
-        String f = view2Route.get(KnowledgebaseView.class);
-        
-//        navigator.navigateTo(f);
-    	viewNameToMenuButton.get(f).addStyleName("selected");
-    	navigator.setErrorView(knowledgebaseView);
     	
-    	helpManager = new HelpManager(this);
+    	setContent(new MainView());
     	
-    	navigator.addViewChangeListener(new ViewChangeListener() {
-
-            @Override
-            public boolean beforeViewChange(ViewChangeEvent event) {
-            	//avoid the navigation to views that are currently not available
-            	if(event.getNewView() instanceof DebuggingView && !ORESession.getKnowledgebaseManager().getKnowledgebase().canDebug()){
-            		return false;
-            	} else if(event.getNewView() instanceof LearningView && !ORESession.getKnowledgebaseManager().getKnowledgebase().canLearn()){
-            		return false;
-            	}
-            	currentView = event.getNewView();
-                helpManager.closeAll();
-                return true;
-            }
-
-            @Override
-            public void afterViewChange(ViewChangeEvent event) {
-                View newView = event.getNewView();
-                helpManager.showHelpFor(newView);
-            }
-        });
-    	
+//    	root.addStyleName("root");
+//        root.setSizeFull();
+//        setContent(root);
+//        
+//        //create and add sidebar to the left
+//        Component sidebar = createSidebar();
+//        root.addComponent(sidebar);
+//        
+//        //create the main content panel
+//        content.setSizeFull();
+//        content.setStyleName("view-content");
+//        root.addComponent(content);
+//        root.setExpandRatio(content, 1f);
+//        
+//        // Create a navigator to control the views
+//        navigator = new Navigator(this, content);
+//        
+//        // Create and register the views
+//        KnowledgebaseView knowledgebaseView = new KnowledgebaseView();
+//        navigator.addView(view2Route.get(KnowledgebaseView.class), knowledgebaseView);
+//        
+//        updateAvailableViews();
+//        updateMenuButtons();
+//      
+//        //default view is knowledgebase view
+//        String f = view2Route.get(KnowledgebaseView.class);
+//        
+////        navigator.navigateTo(f);
+//    	viewNameToMenuButton.get(f).addStyleName("selected");
+//    	navigator.setErrorView(knowledgebaseView);
+//    	
+//    	helpManager = new HelpManager(this);
+//    	
+//    	navigator.addViewChangeListener(new ViewChangeListener() {
+//
+//            @Override
+//            public boolean beforeViewChange(ViewChangeEvent event) {
+//            	//avoid the navigation to views that are currently not available
+//            	if(event.getNewView() instanceof DebuggingView && !ORESession.getKnowledgebaseManager().getKnowledgebase().canDebug()){
+//            		return false;
+//            	} else if(event.getNewView() instanceof LearningView && !ORESession.getKnowledgebaseManager().getKnowledgebase().canLearn()){
+//            		return false;
+//            	}
+//            	currentView = event.getNewView();
+//                helpManager.closeAll();
+//                return true;
+//            }
+//
+//            @Override
+//            public void afterViewChange(ViewChangeEvent event) {
+//                View newView = event.getNewView();
+//                helpManager.showHelpFor(newView);
+//            }
+//        });
+//    	
     	ORESession.getKnowledgebaseManager().addListener(this);
-    	
-    	String fragment = getPage().getUriFragment();
-    	enter(fragment);
+//    	
+//    	String fragment = getPage().getUriFragment();
+//    	enter(fragment);
     }
     
     private void enter(String fragment) {
@@ -455,8 +467,8 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
 	@Override
 	public void knowledgebaseAnalyzed(Knowledgebase knowledgebase) {
 //		ORESession.initialize(knowledgebase);
-		updateAvailableViews();
-		updateMenuButtons();
+//		updateAvailableViews();
+//		updateMenuButtons();
 	}
 
 	/* (non-Javadoc)
@@ -491,5 +503,12 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
 				((Refreshable) view).refreshRendering();
 			}
 		}
+	}
+	
+	/**
+	 * @return the event bus
+	 */
+	public static OREEventBus getEventBus() {
+		return ((OREUI) getCurrent()).eventbus;
 	}
 }

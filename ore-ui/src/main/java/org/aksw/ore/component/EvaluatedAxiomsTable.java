@@ -50,6 +50,15 @@ public class EvaluatedAxiomsTable extends Table{
 		
 		addStyleName("enrichment-axioms-table");
 		addStyleName(ValoTheme.TABLE_BORDERLESS);
+		
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
+        addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
+//        setRowHeaderMode(RowHeaderMode.INDEX);
+        setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
+		
+		
 		setWidth("100%");
 		setHeightUndefined();
 		setPageLength(0);
@@ -80,6 +89,7 @@ public class EvaluatedAxiomsTable extends Table{
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
 				if (columnId == Columns.SELECTED) {
 					CheckBox cb = new CheckBox();
+					cb.addStyleName(ValoTheme.CHECKBOX_SMALL);
 					cb.addValueChangeListener(new ValueChangeListener() {
 						
 						@Override
@@ -164,7 +174,14 @@ public class EvaluatedAxiomsTable extends Table{
 		setColumnHeader(Columns.ACCURACY, "Accuracy");
 		setColumnHeader(Columns.AXIOM, "Axiom");
 		
+		setVisibleColumns(Columns.SELECTED, Columns.AXIOM, Columns.ACCURACY);
+		
 		setColumnExpandRatio(Columns.AXIOM, 1f);
+		
+		setSortContainerPropertyId(Columns.ACCURACY);
+		setSortAscending(false);
+		
+		setColumnAlignment(Columns.ACCURACY, Align.RIGHT);
 		
 		Item item;
 		for(EvaluatedAxiom<OWLAxiom> ax : axioms){
@@ -188,6 +205,7 @@ public class EvaluatedAxiomsTable extends Table{
 			    return null;
 			}
 		});
+		sort();
 	}
 	
 	@Override

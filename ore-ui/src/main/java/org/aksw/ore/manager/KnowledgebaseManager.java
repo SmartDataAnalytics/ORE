@@ -9,6 +9,8 @@ import java.util.TreeSet;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.ore.ORESession;
+import org.aksw.ore.event.OREEvent.KnowledgebaseChangedEvent;
+import org.aksw.ore.event.OREEventBus;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
@@ -87,6 +89,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 		fireKnowledgebaseAnalyzed();
 		
 //		ORESession.initialize(knowledgebase);
+		OREEventBus.post(new KnowledgebaseChangedEvent(knowledgebase));
 	}
 	
 	/**

@@ -67,6 +67,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 			Label spinner = new Label();
 			spinner.addStyleName(ValoTheme.LABEL_SPINNER);
 			grid.addComponent(spinner, 1, i);
+			grid.setComponentAlignment(spinner, Alignment.MIDDLE_RIGHT);
 			axiomType2Label.put(axiomType, spinner);
 		}
         l.addComponent(grid);
@@ -155,7 +156,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 				label.removeStyleName(ValoTheme.LABEL_SPINNER);
 				label.setIcon(FontAwesome.THUMBS_UP);
 				if(finishedAxiomTypes.size() == pendingAxiomTypes.size()){
-					close();
+//					close();
 				}
 			}
 		});

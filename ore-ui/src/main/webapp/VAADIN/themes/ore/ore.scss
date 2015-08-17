@@ -25,11 +25,16 @@
 @import "components/table.scss";
 @import "components/window.scss";
 
+@import "views/login";
 @import "views/constraints.scss";
 @import "views/enrichment.scss";
 @import "views/knowledgebase.scss";
 @import "views/naming.scss";
 @import "views/debugging.scss";
+@import "views/dashboardview";
+
+// Main layout padding
+$view-padding: round($v-unit-size / 1.5) !default;
 
 $v-app-loading-text: "Loading ORE...";
 
@@ -56,48 +61,18 @@ $v-app-loading-text: "Loading ORE...";
 	@include ore-constraints-view;
 	@include ore-knowledgebase-view;
 
-	
+	@include dashboard-dashboard-view;
 
 	.v-view {
 		overflow: hidden;
 	}
 	
 	&.v-app {
-		background: #353637;
+		//background: #353637;
 	}
 	
 	&.v-app[id*="overlays"] {
 		height: 0;
-	}
-	
-	
-	.login-bg {
-		content: "";
-		position: absolute;
-		z-index: 1;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		
-		background: #353637;
-		
-		/* TODO mixin */
-		background: -moz-radial-gradient(center, ellipse cover, #4c4d4e 0%, #303131 100%);
-		background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#4c4d4e), color-stop(100%,#303131));
-		background: -webkit-radial-gradient(center, ellipse cover, #4c4d4e 0%,#303131 100%);
-		background: -o-radial-gradient(center, ellipse cover, #4c4d4e 0%,#303131 100%);
-		background: -ms-radial-gradient(center, ellipse cover, #4c4d4e 0%,#303131 100%);
-	/* 	background: radial-gradient(ellipse at center, #4c4d4e 0%,#303131 100%); */
-	
-		opacity: 0;
-		
-		/* TODO mixin */
-		-webkit-transition: opacity 300ms linear;
-		-moz-transition: opacity 300ms linear;
-		transition: opacity 300ms linear;
-		
-		@include fade-in;
 	}
 	
 	.main-view,
@@ -109,50 +84,6 @@ $v-app-loading-text: "Loading ORE...";
 	div.login-panel {
 		@include move-up-100;
 	}
-	
-	.login-panel {
-		background: #fff;
-		@include border-radius(4px);
-		@include box-shadow(0 4px 20px rgba(0,0,0,.5));
-		padding: 1em 1em 2em;
-	}
-	
-	.login-panel .labels,
-	.login-panel .fields {
-		display: block;
-	}
-	
-	.login-panel .v-textfield {
-		width: 150px;
-	}
-	
-	.login-panel .h2 {
-		padding: 0;
-		font-size: 20px;
-		color: #c4cacf;
-		letter-spacing: -0.05em;
-	}
-	
-	.login-panel .error {
-		font-size: 13px;
-		height: 20px;
-		padding-left: 14px;
-	}
-	
-	
-	.v-animate-reveal {
-		@include reveal;
-	}
-	
-	.v-animate-hide {
-		@include hide;
-	}
-	
-	
-	.login .login-bg {
-		opacity: 1;
-	}
-	
 	
 	.sidebar {
 		background: #414243 url(img/sidebar-gradient.png) repeat-y top right;
@@ -333,39 +264,11 @@ $v-app-loading-text: "Loading ORE...";
 		opacity: 1;
 	}
 	
-	.badge,
-	.notifications .v-button-caption {
-		display: inline-block;
-		font-size: 11px;
-		line-height: 1;
-		color: #fff;
-		text-shadow: 0 1px 1px rgba(0,0,0,.3);
-		padding: .1em .4em .2em;
-		
-		background: #f16433;
-		
-		/* TODO mixin */
-		background: -moz-linear-gradient(top, #faa290 0%, #f77b62 14%, #ec3120 87%, #ce2314 100%);
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#faa290), color-stop(14%,#f77b62), color-stop(87%,#ec3120), color-stop(100%,#ce2314));
-		background: -webkit-linear-gradient(top, #faa290 0%,#f77b62 14%,#ec3120 87%,#ce2314 100%);
-		background: -o-linear-gradient(top, #faa290 0%,#f77b62 14%,#ec3120 87%,#ce2314 100%);
-		background: -ms-linear-gradient(top, #faa290 0%,#f77b62 14%,#ec3120 87%,#ce2314 100%);
-		/* Sass compiler chokes on this */
-		/* background: linear-gradient(to bottom, #faa290 0%,#f77b62 14%,#ec3120 87%,#ce2314 100%); */
-		
-		@include border-radius(2px);
-		
-		@include box-shadow(0 1px 1px rgba(0,0,0,.3));
-	}
-	
 	.menu .v-nativebutton .badge {
 		position: absolute;
 		top: 6px;
 		right: 8px;
 	}
-	
-	
-	
 	
 	.sidebar .user {
 		display: block;
@@ -377,7 +280,7 @@ $v-app-loading-text: "Loading ORE...";
 		color: #898c8e;
 		text-shadow: 0 1px 1px rgba(0,0,0,.5);
 		
-		@include box-shadow(inset 0 1px 0 rgba(255,255,255,.08));
+		//@include box-shadow(inset 0 1px 0 rgba(255,255,255,.08));
 	}
 	
 	.sidebar .user > .v-slot {
@@ -460,22 +363,6 @@ $v-app-loading-text: "Loading ORE...";
 		width: 100%;
 	}
 	
-	
-	.layout-panel {
-		background: #fff;
-		@include border-radius(4px);
-		/* TODO make this work in the Sass compiler */
-		/* 	@include box-shadow(0 2px 3px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.07)); */
-		-webkit-box-shadow: 0 2px 3px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.07);
-		-moz-box-shadow: 0 2px 3px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.07);
-		box-shadow: 0 2px 3px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.07);
-	}
-	
-	.v-ie8 & .layout-panel {
-		border: 1px solid #d8d9d9;
-	}
-	
-	
 	.main-view {
 		@include fade-in;
 	}
@@ -488,12 +375,9 @@ $v-app-loading-text: "Loading ORE...";
 		background: #fff;
 	}
 	
-	
-	
-	
 	.help-overlay {
 		@include border-radius(2px);
-		@include box-shadow(0 3px 10px rgba(0,0,0,.5));
+		//@include box-shadow(0 3px 10px rgba(0,0,0,.5));
 		padding: 15px 20px;
 		background: #464646;
 		background-color: rgba(40,40,40,.85);
@@ -551,114 +435,7 @@ $v-app-loading-text: "Loading ORE...";
 	
 	
 	
-	.dashboard-view .v-horizontallayout {
-		padding: 0 20px 20px;
-	}
 	
-	.dashboard-view .v-spacing {
-		width: 20px;
-		height: 20px;
-	}
-	
-	.dashboard-view .toolbar .v-spacing {
-		width: 10px;
-	}
-	
-	
-	.dashboard-view .v-csslayout {
-		padding: 50px 20px 0;
-		overflow: auto;
-		position: relative;
-	}
-	
-	.dashboard-view .v-caption {
-		font-weight: 600;
-		font-size: 13px;
-		color: #349aff;
-		text-transform: capitalize;
-		padding: 0 20px;
-		line-height: 38px;
-		border-bottom: 1px solid #eee;
-		
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-	}
-	
-	.dashboard-view .configure {
-		position: absolute;
-		z-index: 1;
-		top: 9px;
-		right: 5px;
-	}
-	
-	.dashboard-view .notes {
-		padding: 40px 0 0;
-	}
-	
-	.dashboard-view .notes .v-caption {
-		color: #fff;
-		text-shadow: 0 1px 1px #000;
-		background: #5d6167;
-		background: -moz-linear-gradient(top, #5d6167 0%, #393939 100%);
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5d6167), color-stop(100%,#393939));
-		background: -webkit-linear-gradient(top, #5d6167 0%,#393939 100%);
-		background: -o-linear-gradient(top, #5d6167 0%,#393939 100%);
-		background: -ms-linear-gradient(top, #5d6167 0%,#393939 100%);
-		/* background: linear-gradient(to bottom, #5d6167 0%,#393939 100%); */
-	}
-	
-	.dashboard-view .notes .v-textarea {
-		border: none;
-		padding: 20px 20px 0;
-		line-height: 20px;
-		background: #fffdf2 url(img/notes-bg.png) repeat;
-		color: #545145;
-	}
-	
-	.dashboard-view .notes .v-textarea:focus {
-		outline: none;
-	}
-	
-	.dashboard-view .notes .configure {
-		color: #ddd;
-		text-shadow: 0 1px 1px #000;
-	}
-	
-	.dashboard-view .toolbar {
-		padding: 20px;
-		text-shadow: 0 1px 1px rgba(255,255,255,.5);
-		background: transparent;
-	}
-	
-	.dashboard-view .toolbar .v-button {
-		position: relative;
-		font-size: 16px;
-	}
-	
-	.dashboard-view .toolbar .notifications.unread .v-button-caption {
-		display: block;
-		position: absolute;
-		top: 2px;
-		right: 3px;
-	}
-	
-	.dashboard-view .h1 {
-		padding-right: 1em;
-	}
-	
-	.dashboard-view {
-		background: #dfe0e1;
-		
-		/* TODO mixin */
-		background: -moz-linear-gradient(top, #d8d9da 0%, #e6e7e8 10%, #e0e1e2 100%);
-		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d8d9da), color-stop(10%,#e6e7e8), color-stop(100%,#e0e1e2));
-		background: -webkit-linear-gradient(top, #d8d9da 0%,#e6e7e8 10%,#e0e1e2 100%);
-		background: -o-linear-gradient(top, #d8d9da 0%,#e6e7e8 10%,#e0e1e2 100%);
-		background: -ms-linear-gradient(top, #d8d9da 0%,#e6e7e8 10%,#e0e1e2 100%);
-	/* 	background: linear-gradient(to bottom, #d8d9da 0%,#e6e7e8 10%,#e0e1e2 100%); */
-	}
 	
 	.notifications.v-window {
 		margin-top: 45px !important;
@@ -1002,7 +779,7 @@ div.footnote {
   		border-radius: $v-border-radius;
   		margin-left: 20px;
   	
-  		@include box-shadow(valo-bevel-and-shadow($bevel: $v-bevel, $shadow: $v-shadow, $background-color: $v-background-color, $gradient: $v-gradient));
+  		//@include box-shadow(valo-bevel-and-shadow($bevel: $v-bevel, $shadow: $v-shadow, $background-color: $v-background-color, $gradient: $v-gradient));
     	@include valo-border-with-gradient($border: $v-border, $color: darkest-color($v-background-color, $v-background-color), $gradient: $v-gradient);
     	@include valo-gradient($v-background-color, $v-gradient);
     	
@@ -1084,7 +861,7 @@ div.footnote {
 		padding: initial;
 	}
 	
-	.dashboard-view .v-caption .enrichment-axioms-table {
+	.dashboard-view  .enrichment-axioms-table .v-caption{
 		font-weight: 0;
 		font-size: 13px;
 		color: #349aff;

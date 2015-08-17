@@ -46,6 +46,7 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * @author Lorenz Buehmann
@@ -85,6 +86,11 @@ public class AxiomTypesTable extends Table{
 	
 	public AxiomTypesTable(final Property.ValueChangeListener listener) {
 		addStyleName("axiomtypes-table");
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
+        addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
+        
 		setSizeFull();
 //		setHeightUndefined();
 		setImmediate(true);
@@ -100,6 +106,7 @@ public class AxiomTypesTable extends Table{
 			@Override
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
 				CheckBox box = new CheckBox();
+				box.addStyleName(ValoTheme.CHECKBOX_SMALL);
 				box.setValue(selectedAxiomsTypes.contains((AxiomType<OWLAxiom>) itemId));
 				box.setImmediate(true);
 				box.addValueChangeListener(new Property.ValueChangeListener() {

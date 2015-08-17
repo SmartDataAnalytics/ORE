@@ -49,8 +49,8 @@
 		<compiler.version>1.7</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<owlapi.version>3.5.1</owlapi.version>
-		 <jena.sparql.api.version>2.12.1-3</jena.sparql.api.version>
-		 <dllearner.version>1.1</dllearner.version>
+		 <jena.sparql.api.version>2.13.0-1</jena.sparql.api.version>
+		 <dllearner.version>1.2-SNAPSHOT</dllearner.version>
 	</properties>
 
 	<repositories>
@@ -141,16 +141,6 @@
 				<groupId>com.clarkparsia</groupId>
 				<artifactId>pellet</artifactId>
 				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-arq</artifactId>
-				<version>2.11.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-core</artifactId>
-				<version>2.11.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.coode.oppl</groupId>

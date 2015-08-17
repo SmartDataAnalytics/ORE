@@ -16,7 +16,7 @@
 	<properties>
 		<maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.4.0</vaadin.version>
+		<vaadin.version>7.5.3</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<repositories>
