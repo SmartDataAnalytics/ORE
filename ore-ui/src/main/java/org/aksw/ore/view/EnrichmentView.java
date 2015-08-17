@@ -67,6 +67,7 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -368,6 +369,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		useInferenceBox = new CheckBox();
 		useInferenceBox.setCaption("Use Inference");
+		useInferenceBox.addStyleName(ValoTheme.CHECKBOX_SMALL);
 		useInferenceBox.setDescription("If inference is enabled, some light weight form of reasoning is used to make use of implicit information. "
 				+ "Please note that this opton makes the algorihtms more complex and eventually slower!");
 		panel.addComponent(useInferenceBox);
@@ -700,7 +702,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		}
 	}
 	
-	private Component createContentWrapper(final Component content) {
+	private Component createContentWrapper(final Table content) {
         final CssLayout slot = new CssLayout();
         slot.setWidth("100%");
         slot.addStyleName("dashboard-panel-slot");
@@ -718,45 +720,66 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
         caption.addStyleName(ValoTheme.LABEL_COLORED);
         caption.addStyleName(ValoTheme.LABEL_NO_MARGIN);
         content.setCaption(null);
+        
+        toolbar.addComponent(caption);
+        
+        final int maxNrOfRowsDefault = 5;
+		if(content.getItemIds().size() > maxNrOfRowsDefault ) {
+			MenuBar tools = new MenuBar();
+	        tools.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
+	        MenuItem max = tools.addItem("", FontAwesome.EXPAND, new Command() {
 
-        MenuBar tools = new MenuBar();
-        tools.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        MenuItem max = tools.addItem("", FontAwesome.EXPAND, new Command() {
+	            @Override
+	            public void menuSelected(final MenuItem selectedItem) {
+	                if (!slot.getStyleName().contains("max")) {
+	                    selectedItem.setIcon(FontAwesome.COMPRESS);
+	                    toggleMaximized(slot, true);
+	                    content.setPageLength(0);
+	                    
+	                } else {
+	                    slot.removeStyleName("max");
+	                    selectedItem.setIcon(FontAwesome.EXPAND);
+	                    toggleMaximized(slot, false);
+	                    content.setPageLength(maxNrOfRowsDefault);
+	                }
+	            }
+	        });
+	        max.setStyleName("icon-only");
+//	        MenuItem root = tools.addItem("", FontAwesome.COG, null);
+//	        root.addItem("Configure", new Command() {
+//	            @Override
+//	            public void menuSelected(final MenuItem selectedItem) {
+//	                Notification.show("Not implemented in this demo");
+//	            }
+//	        });
+//	        root.addSeparator();
+//	        root.addItem("Close", new Command() {
+//	            @Override
+//	            public void menuSelected(final MenuItem selectedItem) {
+//	                Notification.show("Not implemented in this demo");
+//	            }
+//	        });
 
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                if (!slot.getStyleName().contains("max")) {
-                    selectedItem.setIcon(FontAwesome.COMPRESS);
-//                    toggleMaximized(slot, true);
-                } else {
-                    slot.removeStyleName("max");
-                    selectedItem.setIcon(FontAwesome.EXPAND);
-//                    toggleMaximized(slot, false);
-                }
-            }
-        });
-        max.setStyleName("icon-only");
-        MenuItem root = tools.addItem("", FontAwesome.COG, null);
-        root.addItem("Configure", new Command() {
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                Notification.show("Not implemented in this demo");
-            }
-        });
-        root.addSeparator();
-        root.addItem("Close", new Command() {
-            @Override
-            public void menuSelected(final MenuItem selectedItem) {
-                Notification.show("Not implemented in this demo");
-            }
-        });
+	        toolbar.addComponents(tools);
+	        
+	        content.setPageLength(maxNrOfRowsDefault);
+        }
 
-        toolbar.addComponents(caption);//, tools);
+        
         toolbar.setExpandRatio(caption, 1);
         toolbar.setComponentAlignment(caption, Alignment.MIDDLE_LEFT);
 
         card.addComponents(toolbar, content);
         slot.addComponent(card);
+        
         return slot;
+    }
+	
+	private void toggleMaximized(final Component panel, final boolean maximized) {
+        if (maximized) {
+            panel.addStyleName("max");
+        } else {
+            panel.removeStyleName("max");
+        }
     }
 }

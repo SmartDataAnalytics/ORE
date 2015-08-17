@@ -28,7 +28,8 @@ public class ORENavigator extends Navigator {
 
         initViewChangeListener();
         initViewProviders();
-
+        
+        OREEventBus.register(this);
     }
 
     private void initViewChangeListener() {
@@ -55,7 +56,7 @@ public class ORENavigator extends Navigator {
     }
     
     @Subscribe
-    public void updateAvailableViews(KnowledgebaseChangedEvent event) {
+    public void updateAvailableViews(KnowledgebaseChangedEvent event) {System.out.println(event);
     	Knowledgebase knowledgebase = event.getKb();
     	if(knowledgebase != null){
     		if(knowledgebase instanceof OWLOntologyKnowledgebase){
