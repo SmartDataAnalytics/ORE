@@ -1,14 +1,18 @@
 package org.aksw.ore;
 
+import java.util.List;
+
 import org.aksw.ore.event.OREEvent.KnowledgebaseChangedEvent;
 import org.aksw.ore.event.OREEvent.PostViewChangeEvent;
 import org.aksw.ore.event.OREEventBus;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
 import org.aksw.ore.view.DebuggingView;
+import org.aksw.ore.view.KnowledgebaseView;
 import org.aksw.ore.view.LearningView;
 import org.aksw.ore.view.OREViewType;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -26,8 +30,8 @@ public class ORENavigator extends Navigator {
     public ORENavigator(final ComponentContainer container) {
         super(UI.getCurrent(), container);
 
-        initViewChangeListener();
         initViewProviders();
+        initViewChangeListener();
         
         OREEventBus.register(this);
     }
@@ -56,27 +60,27 @@ public class ORENavigator extends Navigator {
     }
     
     @Subscribe
-    public void updateAvailableViews(KnowledgebaseChangedEvent event) {System.out.println(event);
-    	Knowledgebase knowledgebase = event.getKb();
-    	if(knowledgebase != null){
-    		if(knowledgebase instanceof OWLOntologyKnowledgebase){
-    			addView(OREViewType.ENRICHMENT_FILE.getViewName(), OREViewType.ENRICHMENT_FILE.getViewClass());
-    			if(((OWLOntologyKnowledgebase) knowledgebase).isConsistent()) {
-    				addView(OREViewType.DEBUGGING_INCOHERENCY.getViewName(), OREViewType.DEBUGGING_INCOHERENCY.getViewClass());
-    			} else {
-    				addView(OREViewType.DEBUGGING_INCONSISTENCY.getViewName(), OREViewType.DEBUGGING_INCONSISTENCY.getViewClass());
-    			}
-    		} else {
-    			addView(OREViewType.ENRICHMENT_SPARQL.getViewName(), OREViewType.ENRICHMENT_SPARQL.getViewClass());
-    			addView(OREViewType.DEBUGGING_SPARQL.getViewName(), OREViewType.DEBUGGING_SPARQL.getViewClass());
-    		}
-    	}
-    }
-    
-
-    private void initViewProviders() {
-        // A dedicated view provider is added for each separate view type
-        for (final OREViewType viewType : OREViewType.values()) {
+    public void updateAvailableViews(KnowledgebaseChangedEvent event) {
+    	Knowledgebase kb = event.getKb();
+    	
+    	List<OREViewType> availableViews = Lists.newArrayList();
+    	
+    	if(kb instanceof OWLOntologyKnowledgebase){
+    		availableViews.add(OREViewType.ENRICHMENT_FILE);
+			if(((OWLOntologyKnowledgebase) kb).isConsistent()) {
+				availableViews.add(OREViewType.DEBUGGING_INCOHERENCY);
+			} else {
+				availableViews.add(OREViewType.DEBUGGING_INCONSISTENCY);
+			}
+			availableViews.add(OREViewType.NAMING);
+			availableViews.add(OREViewType.CONSTRAINT);
+		} else {
+			availableViews.add(OREViewType.ENRICHMENT_SPARQL);
+			availableViews.add(OREViewType.DEBUGGING_SPARQL);
+		}
+    	
+    	 // A dedicated view provider is added for each separate view type
+    	for (final OREViewType viewType : availableViews) {
             ViewProvider viewProvider = new ClassBasedViewProvider(
                     viewType.getViewName(), viewType.getViewClass()) {
             	
@@ -112,17 +116,24 @@ public class ORENavigator extends Navigator {
 
             addProvider(viewProvider);
         }
-
-        setErrorProvider(new ViewProvider() {
-            @Override
-            public String getViewName(final String viewAndParameters) {
-                return ERROR_VIEW.getViewName();
-            }
-
-            @Override
-            public View getView(final String viewName) {
-                return errorViewProvider.getView(ERROR_VIEW.getViewName());
-            }
-        });
+    }
+    
+    private void initViewProviders() {
+    	KnowledgebaseView view = new KnowledgebaseView();
+		addView(OREViewType.KNOWLEDGEBASE.getViewName(), view);
+		
+		setErrorView(view);
+    	
+//        setErrorProvider(new ViewProvider() {
+//            @Override
+//            public String getViewName(final String viewAndParameters) {
+//                return ERROR_VIEW.getViewName();
+//            }
+//
+//            @Override
+//            public View getView(final String viewName) {
+//                return errorViewProvider.getView(ERROR_VIEW.getViewName());
+//            }
+//        });
     }
 }

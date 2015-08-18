@@ -76,35 +76,12 @@
         .v-table, .v-table-table {
           background: transparent;
         }
-      }
-
-      .top10-revenue {
-        .card {
-          padding-left: 0;
-          padding-right: 0;
-        }
-
-        .v-table-table {
-          @include box-shadow(none);
-        }
-
-        .v-table-cell-wrapper {
-          padding-left: round($view-padding / 2);
-          padding-right: round($view-padding / 2);
-        }
-
-        .v-table-cell-content {
-          border-color: first-color(valo-border($strength: 0.3));
-        }
-
-        .v-table-cell-content-rowheader {
-          color: valo-font-color($v-app-background-color, 0.4);
-
-          .v-table-cell-wrapper {
-            padding-right: 0;
-          }
+        
+        .explanation {
+        	 padding: 0px 0px 0;
         }
       }
+      
 
       .dashboard-panel-slot {
         padding: round($view-padding / 3);
@@ -142,22 +119,6 @@
         padding-bottom: 0;
       }
 
-      .notes {
-        .card {
-          padding: $v-unit-size + 2px 0 0;
-        }
-
-        .v-textarea {
-          border-top: valo-border($strength: 0.5);
-          padding: 20px 20px 0;
-          line-height: 20px;
-          font-size: 13px;
-          background: #fffdf2 url(../img/notes-bg.png) repeat;
-          background-attachment: local;
-          color: #545145;
-          overflow: auto;
-        }
-      }
     }
 
   }
