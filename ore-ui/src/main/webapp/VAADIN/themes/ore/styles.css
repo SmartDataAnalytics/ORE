@@ -13205,7 +13205,45 @@ div.v-layout.v-horizontal.v-widget {
 	padding: 25px;
 }
 
-.ore .main-view .dashboard-panel-toolbar {
+.ore .enrichment-view {
+	padding: 25px;
+	overflow: visible;
+}
+
+.ore .enrichment-view .enrichment-options .v-button {
+	padding: 0;
+}
+
+.ore .enrichment-view .enrichment-options .v-csslayout-collapsiblebox {
+	overflow: hidden;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.ore .enrichment-view .enrichment-options .v-button:focus:after {
+	border: 0;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
+
+.ore .enrichment-view .enrichment-options .v-csslayout .collapsiblebox-body {
+	overflow: hidden;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.ore .enrichment-view .enrichment-options .select-all-axiomtypes-checkbox {
+	margin-left: 13px;
+}
+
+.ore .enrichment-view .enrichment-options .v-table-axiomtypes-table .v-scrollable {
+	overflow: hidden;
+}
+
+.ore .enrichment-view .dashboard-panel-toolbar {
 	padding: 1px 0 1px 21px;
 	height: 39px;
 	position: absolute;
@@ -13213,52 +13251,118 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 }
 
-.ore .main-view .axiom-panels {
-	overflow: auto;
-}
-
-.ore .main-view .dashboard-panels {
+.ore .enrichment-view .dashboard-panels {
 	display: block;
 	height: 100%;
 	margin: 0 -8px;
 }
 
-.ore .main-view .dashboard-panels .card {
+.ore .enrichment-view .dashboard-panels .card {
 	height: 100%;
 	overflow: hidden;
 	padding: 39px 13px 0;
 	position: relative;
 }
 
-.ore .main-view .dashboard-panels .card .v-table, .ore .main-view .dashboard-panels .card .v-table-table {
+.ore .enrichment-view .dashboard-panels .card .v-table, .ore .enrichment-view .dashboard-panels .card .v-table-table {
 	background: transparent;
 }
 
-.ore .main-view .dashboard-panels .card .explanation {
+.ore .enrichment-view .dashboard-panels .card .explanation {
 	padding: 0px 0px 0;
 }
 
-.ore .main-view .dashboard-panels .dashboard-panel-slot {
+.ore .enrichment-view .dashboard-panels .dashboard-panel-slot {
 	padding: 8px;
 }
 
-.ore .main-view .dashboard-panels[width-range~="0-700px"] .dashboard-panel-slot {
+.ore .enrichment-view .dashboard-panels[width-range~="0-700px"] .dashboard-panel-slot {
 	width: 100% !important;
 }
 
-.ore .main-view .dashboard-panels[width-range~="701px-"] .dashboard-panel-slot {
+.ore .enrichment-view .dashboard-panels[width-range~="701px-"] .dashboard-panel-slot {
 	width: 50% !important;
 }
 
-.ore .main-view .dashboard-panels[height-range~="0-440px"] .dashboard-panel-slot {
+.ore .enrichment-view .dashboard-panels[height-range~="0-440px"] .dashboard-panel-slot {
 	height: 100%;
 }
 
-.ore .main-view .dashboard-panels[height-range~="441px-"] .dashboard-panel-slot {
+.ore .enrichment-view .dashboard-panels[height-range~="441px-"] .dashboard-panel-slot {
 	height: 50%;
 }
 
-.ore .main-view .dashboard-panels .dashboard-panel-slot.max {
+.ore .enrichment-view .dashboard-panels .dashboard-panel-slot.max {
+	width: 100% !important;
+	height: 100%;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.ore .enrichment-view .enrichment-view[width-range~="0-480px"] {
+	padding-left: 13px;
+	padding-right: 13px;
+}
+
+.ore .dashboard-view {
+	padding: 25px;
+	overflow: visible;
+}
+
+.ore .dashboard-view .dashboard-panel-toolbar {
+	padding: 1px 0 1px 21px;
+	height: 39px;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.ore .dashboard-view .axiom-panels {
+	overflow: auto;
+}
+
+.ore .dashboard-view .dashboard-panels {
+	display: block;
+	height: 100%;
+	margin: 0 -8px;
+}
+
+.ore .dashboard-view .dashboard-panels .card {
+	height: 100%;
+	overflow: hidden;
+	padding: 39px 13px 0;
+	position: relative;
+}
+
+.ore .dashboard-view .dashboard-panels .card .v-table, .ore .dashboard-view .dashboard-panels .card .v-table-table {
+	background: transparent;
+}
+
+.ore .dashboard-view .dashboard-panels .card .explanation {
+	padding: 0px 0px 0;
+}
+
+.ore .dashboard-view .dashboard-panels .dashboard-panel-slot {
+	padding: 8px;
+}
+
+.ore .dashboard-view .dashboard-panels[width-range~="0-700px"] .dashboard-panel-slot {
+	width: 100% !important;
+}
+
+.ore .dashboard-view .dashboard-panels[width-range~="701px-"] .dashboard-panel-slot {
+	width: 50% !important;
+}
+
+.ore .dashboard-view .dashboard-panels[height-range~="0-440px"] .dashboard-panel-slot {
+	height: 100%;
+}
+
+.ore .dashboard-view .dashboard-panels[height-range~="441px-"] .dashboard-panel-slot {
+	height: 50%;
+}
+
+.ore .dashboard-view .dashboard-panels .dashboard-panel-slot.max {
 	width: 100% !important;
 	height: 100%;
 	padding-top: 0;
@@ -13737,25 +13841,6 @@ div.v-layout.v-horizontal.v-widget {
 	color: graytext;
 }
 
-.ore .dashboard-view .enrichment-options .v-caption {
-	font-weight: 0;
-	font-size: 13px;
-	color: #349aff;
-	padding: 3px 3px 3px 3px;
-	line-height: 1em;
-	border-bottom: 1px solid #eee;
-	top: 0;
-	left: 0;
-	right: 0;
-	text-transform: none;
-	position: relative;
-	border-bottom: none;
-}
-
-.ore .dashboard-view .enrichment-options .v-spacing {
-	height: 5px;
-}
-
 .ore .explain-button img {
 	height: 16px;
 }
@@ -14009,63 +14094,9 @@ div.v-layout.v-horizontal.v-widget {
 	visibility: visible;
 }
 
-.ore .enrichment-view .v-filterselect-suggestpopup {
-	text-shadow: none;
-	background: transparent;
-}
-
-.ore .enrichment-view .entity-combobox {
-	text-shadow: none;
-	background: transparent;
-	padding-bottom: 0;
-	padding: 0;
-}
-
-.ore .enrichment-view .entity-combobox .v-filterselect {
-	padding-bottom: 0;
-	padding: 0;
-}
-
-.ore .enrichment-view .entity-combobox .v-filterselect-input {
-	border: none;
-}
-
 .ore .v-filterselect-suggestpopup-entity-combobox {
 	text-shadow: none;
 	background: transparent;
-}
-
-.ore .enrichment-view .enrichment-options .v-button {
-	padding: 0;
-}
-
-.ore .enrichment-view .enrichment-options .v-csslayout-collapsiblebox {
-	overflow: hidden;
-	padding: 0;
-	height: 100%;
-	width: 100%;
-}
-
-.ore .enrichment-view .enrichment-options .v-button:focus:after {
-	border: 0;
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-}
-
-.ore .enrichment-view .enrichment-options .v-csslayout .collapsiblebox-body {
-	overflow: hidden;
-	padding: 0;
-	height: 100%;
-	width: 100%;
-}
-
-.ore .enrichment-view .enrichment-options .select-all-axiomtypes-checkbox {
-	margin-left: 13px;
-}
-
-.ore .enrichment-view .enrichment-options .v-table-axiomtypes-table .v-scrollable {
-	overflow: hidden;
 }
 
 .ore .linked-data-uris-panel .v-horizontallayout {

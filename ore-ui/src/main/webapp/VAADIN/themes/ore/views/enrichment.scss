@@ -1,3 +1,119 @@
 @mixin ore-enrichment-view {
+
+	.enrichment-view {
+		padding: $view-padding;
+	    overflow: visible;
+	    
+		.enrichment-options {
 	
+			.v-button {
+				padding:0;
+			}
+			
+			 .v-csslayout-collapsiblebox {
+				overflow:hidden;
+				padding:0;
+				height:100%;
+				width: 100%;
+			}
+			
+			.v-button:focus:after {
+				/* border-color: #197de1; */
+				border:0;
+				-webkit-box-shadow: none;
+				-moz-box-shadow: none;
+				box-shadow: none;
+			}
+			
+			.v-csslayout .collapsiblebox-body{
+				overflow: hidden;
+				padding: 0;
+				height:100%;
+				width: 100%;
+			}
+			
+			.select-all-axiomtypes-checkbox {
+				margin-left: 13px;
+			}
+			
+			.v-table-axiomtypes-table .v-scrollable {
+	    		overflow: hidden;
+			}
+		}
+		
+		.dashboard-panel-toolbar {
+	      padding: 1px 0 1px round($v-unit-size / 1.8);
+	      height: $v-unit-size + 2px;
+	      position: absolute;
+	      top: 0;
+	      left: 0;
+    	}
+	
+	
+	.dashboard-panels {
+      display: block;
+      height: 100%;
+      margin: 0 round($view-padding / -3);
+
+      .card {
+        height: 100%;
+        overflow: hidden;
+        padding: $v-unit-size + 2px round($view-padding / 2) 0;
+        position: relative;
+
+        .v-table, .v-table-table {
+          background: transparent;
+        }
+        
+        .explanation {
+        	 padding: 0px 0px 0;
+        }
+      }
+      
+
+      .dashboard-panel-slot {
+        padding: round($view-padding / 3);
+       // min-height: 220px;
+      }
+
+  	  &[width-range~="0-700px"] {
+  	    .dashboard-panel-slot {
+  	      width: 100% !important;
+  	    }
+  	  }
+
+  	  &[width-range~="701px-"] {
+  	    .dashboard-panel-slot {
+  	      width: 50% !important;
+  	    }
+  	  }
+
+      &[height-range~="0-440px"] {
+  	    .dashboard-panel-slot {
+  	      height: 100%;
+  	    }
+  	  }
+
+  	  &[height-range~="441px-"] {
+  	    .dashboard-panel-slot {
+  	      height: 50%;
+  	    }
+  	  }
+
+      .dashboard-panel-slot.max {
+        width: 100% !important;
+        height: 100%;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+	}
+	
+	.enrichment-view {
+    @include width-range($max: 480px) {
+      padding-left: round($view-padding / 2);
+      padding-right: round($view-padding / 2);
+    }
+  }
+	
+	}
 }

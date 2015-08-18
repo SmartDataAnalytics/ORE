@@ -32,6 +32,7 @@
 @import "views/naming.scss";
 @import "views/debugging.scss";
 @import "views/mainview.scss";
+@import "views/dashboardview.scss";
 
 // Main layout padding
 $view-padding: round($v-unit-size / 1.5) !default;
@@ -48,6 +49,7 @@ $v-app-loading-text: "Loading ORE...";
 	@include ore-naming-view;
 	@include ore-constraints-view;
 	@include ore-knowledgebase-view;
+	@include dashboard-dashboard-view;
 	
 
 	.v-view {
@@ -495,25 +497,7 @@ $v-app-loading-text: "Loading ORE...";
 		color: graytext;
 	}
 	
-	.dashboard-view .enrichment-options .v-caption {
-	font-weight: 0;
-	font-size: 13px;
-	color: #349aff;
-	padding: 3px 3px 3px 3px;
-	line-height: 1em;
-	border-bottom: 1px solid #eee;
-	top: 0;
-	left: 0;
-	right: 0;
-	text-transform: none;
-	position: relative;
-	border-bottom: none;
-}
-
-
-.dashboard-view .enrichment-options .v-spacing{
-	height:5px;
-}
+	
 
 .explain-button img{
 	height:16px;
@@ -804,75 +788,10 @@ div.footnote {
 		}
 	}
 	
-	.enrichment-view {
-		.v-filterselect-suggestpopup{
-			text-shadow: none;
-			background: transparent;
-		}
-		.entity-combobox {
-			text-shadow: none;
-			background: transparent;
-			padding-bottom: 0;
-			padding:0;
-			
-			.v-filterselect{
-				padding-bottom: 0;
-				padding: 0;
-			}
-			
-			.v-filterselect-input {
-				border:none;
-				
-			}
-		}
-		
-	}
-	
 	.v-filterselect-suggestpopup-entity-combobox{
 		text-shadow: none;
 		background: transparent;
 	}
-	
-	
-	.enrichment-view .enrichment-options {
-	
-		.v-button {
-			padding:0;
-		}
-		
-		 .v-csslayout-collapsiblebox {
-			overflow:hidden;
-			padding:0;
-			height:100%;
-			width: 100%;
-		}
-		
-		
-		.v-button:focus:after {
-			/* border-color: #197de1; */
-			border:0;
-			-webkit-box-shadow: none;
-			-moz-box-shadow: none;
-			box-shadow: none;
-		}
-		
-		.v-csslayout .collapsiblebox-body{
-			overflow: hidden;
-			padding: 0;
-			height:100%;
-			width: 100%;
-		}
-		
-		.select-all-axiomtypes-checkbox {
-			margin-left: 13px;
-		}
-		
-		.v-table-axiomtypes-table .v-scrollable {
-    		overflow: hidden;
-		}
-	}
-	
-
 	
 	.linked-data-uris-panel .v-horizontallayout {
 		padding: 0;
