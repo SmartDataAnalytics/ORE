@@ -13197,62 +13197,15 @@ div.v-layout.v-horizontal.v-widget {
 	padding-bottom: 0.2em;
 }
 
-.ore .dashboard-view.dashboard-view {
-	padding: 25px;
+.ore .main-view {
 	overflow: visible;
 }
 
-.ore .dashboard-view.dashboard-view .sparks {
-	background: white;
-	color: #474747;
-	border-radius: 4px;
-	border: 1px solid #d5d5d5;
-	-webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-	-moz-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-	box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-	margin-bottom: 8px;
+.ore .main-view .view-content {
+	padding: 25px;
 }
 
-.ore .dashboard-view.dashboard-view .sparks[width-range~="0-680px"] .spark {
-	width: 50%;
-}
-
-.ore .dashboard-view.dashboard-view .sparks[width-range~="0-680px"] .spark:nth-child(2n+1) {
-	border-left: none;
-}
-
-.ore .dashboard-view.dashboard-view .sparks[width-range~="0-680px"] .spark:nth-child(n+3) {
-	border-top: 1px solid #eaeaea;
-}
-
-.ore .dashboard-view.dashboard-view .sparks[width-range~="0-270px"] .spark {
-	width: 100%;
-	border-left: none;
-	border-top: 1px solid #eaeaea;
-}
-
-.ore .dashboard-view.dashboard-view .sparks[width-range~="0-270px"] .spark:first-child {
-	border-top: none;
-}
-
-.ore .dashboard-view.dashboard-view .spark {
-	float: left;
-	text-align: center;
-	width: 25%;
-	padding: 12px 12px;
-	border-left: 1px solid #eaeaea;
-	line-height: 1.35;
-}
-
-.ore .dashboard-view.dashboard-view .spark  > tbody {
-	display: inline-block;
-}
-
-.ore .dashboard-view.dashboard-view .spark:first-child {
-	border-left: none;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panel-toolbar {
+.ore .main-view .dashboard-panel-toolbar {
 	padding: 1px 0 1px 21px;
 	height: 39px;
 	position: absolute;
@@ -13260,95 +13213,56 @@ div.v-layout.v-horizontal.v-widget {
 	left: 0;
 }
 
-.ore .dashboard-view.dashboard-view .axiom-panels {
+.ore .main-view .axiom-panels {
 	overflow: auto;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels {
+.ore .main-view .dashboard-panels {
 	display: block;
 	height: 100%;
 	margin: 0 -8px;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels .card {
+.ore .main-view .dashboard-panels .card {
 	height: 100%;
 	overflow: hidden;
 	padding: 39px 13px 0;
 	position: relative;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels .card .v-table, .ore .dashboard-view.dashboard-view .dashboard-panels .card .v-table-table {
+.ore .main-view .dashboard-panels .card .v-table, .ore .main-view .dashboard-panels .card .v-table-table {
 	background: transparent;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .card {
-	padding-left: 0;
-	padding-right: 0;
+.ore .main-view .dashboard-panels .card .explanation {
+	padding: 0px 0px 0;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .v-table-table {
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .v-table-cell-wrapper {
-	padding-left: 13px;
-	padding-right: 13px;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .v-table-cell-content {
-	border-color: #eaeaea;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .v-table-cell-content-rowheader {
-	color: #969696;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .top10-revenue .v-table-cell-content-rowheader .v-table-cell-wrapper {
-	padding-right: 0;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .dashboard-panel-slot {
+.ore .main-view .dashboard-panels .dashboard-panel-slot {
 	padding: 8px;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels[width-range~="0-700px"] .dashboard-panel-slot {
+.ore .main-view .dashboard-panels[width-range~="0-700px"] .dashboard-panel-slot {
 	width: 100% !important;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels[width-range~="701px-"] .dashboard-panel-slot {
+.ore .main-view .dashboard-panels[width-range~="701px-"] .dashboard-panel-slot {
 	width: 50% !important;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels[height-range~="0-440px"] .dashboard-panel-slot {
+.ore .main-view .dashboard-panels[height-range~="0-440px"] .dashboard-panel-slot {
 	height: 100%;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels[height-range~="441px-"] .dashboard-panel-slot {
+.ore .main-view .dashboard-panels[height-range~="441px-"] .dashboard-panel-slot {
 	height: 50%;
 }
 
-.ore .dashboard-view.dashboard-view .dashboard-panels .dashboard-panel-slot.max {
+.ore .main-view .dashboard-panels .dashboard-panel-slot.max {
 	width: 100% !important;
 	height: 100%;
 	padding-top: 0;
 	padding-bottom: 0;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .notes .card {
-	padding: 39px 0 0;
-}
-
-.ore .dashboard-view.dashboard-view .dashboard-panels .notes .v-textarea {
-	border-top: 1px solid #dfdfdf;
-	padding: 20px 20px 0;
-	line-height: 20px;
-	font-size: 13px;
-	background: #fffdf2 url(img/notes-bg.png) repeat;
-	background-attachment: local;
-	color: #545145;
-	overflow: auto;
 }
 
 .ore .dashboard-view[width-range~="0-480px"] {
@@ -13420,6 +13334,10 @@ div.v-layout.v-horizontal.v-widget {
 
 .ore.v-app[id*="overlays"] {
 	height: 0;
+}
+
+.ore .view-content {
+	padding: 25px;
 }
 
 .ore .main-view, .ore .login-layout {
@@ -14115,49 +14033,6 @@ div.v-layout.v-horizontal.v-widget {
 .ore .v-filterselect-suggestpopup-entity-combobox {
 	text-shadow: none;
 	background: transparent;
-}
-
-.ore .enrichment-axioms-panel .v-csslayout {
-	padding: 50px 0 0;
-}
-
-.ore .enrichment-axioms-panel .v-caption {
-	margin: 10px auto;
-}
-
-.ore .enrichment-axioms-panel .enrichment-axioms-table {
-	margin-top: -10px;
-}
-
-.ore .dashboard-view .enrichment-axioms-table .v-horizontallayout {
-	padding: initial;
-}
-
-.ore .dashboard-view .enrichment-axioms-table .v-caption {
-	font-weight: 0;
-	font-size: 13px;
-	color: #349aff;
-	padding: 3px 3px 3px 3px;
-	line-height: 1em;
-	border-bottom: 1px solid #eee;
-	top: 0;
-	left: 0;
-	right: 0;
-	text-transform: none;
-	position: relative;
-	border-bottom: none;
-}
-
-.ore .explanations-panel .v-csslayout {
-	padding: 50px 0 0;
-}
-
-.ore .explanations-panel .v-caption {
-	margin: 10px auto;
-}
-
-.ore .explanations-panel .explanation-table {
-	margin-top: -10px;
 }
 
 .ore .enrichment-view .enrichment-options .v-button {

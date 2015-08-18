@@ -111,7 +111,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 //		query = "SELECT (COUNT(?s) AS ?cnt) WHERE {?s a <http://www.w3.org/2002/07/owl#DatatypeProperty>.}";
 //		int dpCnt = qef.createQueryExecution(query).execSelect().next().getLiteral("cnt").getInt();
 		
-		//pre load entities
+		//pre-load entities
 		//get OWL classes
 		message("Loading classes...");
 		String query = "SELECT ?s WHERE {?s a <http://www.w3.org/2002/07/owl#Class>.}";

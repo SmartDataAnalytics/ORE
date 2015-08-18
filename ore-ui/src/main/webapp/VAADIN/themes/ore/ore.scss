@@ -31,7 +31,7 @@
 @import "views/knowledgebase.scss";
 @import "views/naming.scss";
 @import "views/debugging.scss";
-@import "views/dashboardview";
+@import "views/mainview.scss";
 
 // Main layout padding
 $view-padding: round($v-unit-size / 1.5) !default;
@@ -41,27 +41,14 @@ $v-app-loading-text: "Loading ORE...";
 @mixin ore {
 	
 	@include valo;
-	//@include base;
-	
-	//@include dashboard-loading-indicator;
-	//@include dashboard-common;
-	
-	//@include dashboard-button;
-	//@include dashboard-combobox;
-	//@include dashboard-label;
-	//@include dashboard-notification;
-	//@include dashboard-table;
-	//@include dashboard-tabsheet;
 	@include dashboard-textfield;
-	//@include dashboard-window;
-	
+	@include ore-main-view;
 	@include ore-debugging-view;
 	@include ore-enrichment-view;
 	@include ore-naming-view;
 	@include ore-constraints-view;
 	@include ore-knowledgebase-view;
-
-	@include dashboard-dashboard-view;
+	
 
 	.v-view {
 		overflow: hidden;
@@ -74,6 +61,10 @@ $v-app-loading-text: "Loading ORE...";
 	&.v-app[id*="overlays"] {
 		height: 0;
 	}
+	
+	.view-content {
+    	padding: $view-padding;
+    }
 	
 	.main-view,
 	.login-layout {
@@ -842,54 +833,6 @@ div.footnote {
 		background: transparent;
 	}
 	
-	.enrichment-axioms-panel {
-		
-		.v-csslayout{
-			padding:50px 0 0;
-		}
-		
-		.v-caption{
-			margin:10px auto;
-		}
-		
-		.enrichment-axioms-table{
-			margin-top: -10px; //-20px auto;
-		} 	
-	}
-	
-	.dashboard-view .enrichment-axioms-table .v-horizontallayout {
-		padding: initial;
-	}
-	
-	.dashboard-view  .enrichment-axioms-table .v-caption{
-		font-weight: 0;
-		font-size: 13px;
-		color: #349aff;
-		padding: 3px 3px 3px 3px;
-		line-height: 1em;
-		border-bottom: 1px solid #eee;
-		top: 0;
-		left: 0;
-		right: 0;
-		text-transform: none;
-		position: relative;
-		border-bottom: none;
-	}
-	
-	.explanations-panel {
-		
-		.v-csslayout{
-			padding:50px 0 0;
-		}
-		
-		.v-caption{
-			margin:10px auto;
-		}
-		
-		.explanation-table{
-			margin-top: -10px; //-20px auto;
-		} 	
-	}
 	
 	.enrichment-view .enrichment-options {
 	

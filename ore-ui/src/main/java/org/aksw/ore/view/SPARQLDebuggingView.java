@@ -94,7 +94,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	private Set<Explanation<OWLAxiom>> currentExplanations;
 	
 	public SPARQLDebuggingView() {
-		addStyleName("dashboard-view");
 		addStyleName("sparql-debugging-view");
 		initUI();
 	}
@@ -278,10 +277,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		l.addComponent(explanationsPanel);
 		l.setExpandRatio(explanationsPanel, 1.0f);
 		
-		
-		
-//		WhitePanel configurablePanel = new WhitePanel(l);
-//		configurablePanel.addComponent(limit);
 		return l;
 	}
 	
@@ -588,7 +583,6 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 			setHeightUndefined();
 			addStyleName("linked-data-uris-panel");
 			
-			
 			uriList = new ListSelect();
 	        uriList.setRows(0);
 	        uriList.setMultiSelect(true);
@@ -616,6 +610,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 					});
 					w.center();
 					final TextField uriInputField = new TextField();
+					uriInputField.setWidth("100%");
 					String urlRegex = "(http|ftp|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#])?";
 					Validator uriValidator = new RegexpValidator(
 							urlRegex, "Not a valid URI.");
@@ -644,10 +639,14 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 			        HorizontalLayout buttonLayout = new HorizontalLayout();
 					buttonLayout.setWidth("100%");
 					buttonLayout.setHeight(null);
+					buttonLayout.setSpacing(true);
 					buttonLayout.addComponent(okButton);
 					buttonLayout.addComponent(cancelButton);
+					buttonLayout.setComponentAlignment(okButton, Alignment.MIDDLE_RIGHT);
 					
-			        FormLayout form = new FormLayout();
+			        VerticalLayout form = new VerticalLayout();
+			        form.setSpacing(true);
+			        form.setMargin(true);
 			        form.addComponent(uriInputField);
 			        form.addComponent(buttonLayout);
 			        

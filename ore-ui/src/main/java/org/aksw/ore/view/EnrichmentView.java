@@ -112,10 +112,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		Component rightSide = createRightSide();
 		addComponent(rightSide);
 		
-		
-//		addToKbButton.setEnabled(false);
-//		dumpSPARULButton.setEnabled(false);
-		
 		resourceURIField.focus();
 		
 		reset();
@@ -129,7 +125,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	 */
 	private Component createRightSide() {
 		VerticalLayout rightSide = new VerticalLayout();
-		rightSide.addStyleName("dashboard-view");
+		rightSide.addStyleName("enrichment-right-panel");
 //		rightSide.addStyleName("enrichment-axioms-panel");
 		rightSide.setSizeFull();
 		rightSide.setSpacing(true);
@@ -147,12 +143,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		Component panel = createAxiomsPanel();
 		rightSide.addComponent(panel);
 		rightSide.setExpandRatio(panel, 1f);
-		// wrap in panel for scrolling
-//		Panel wrapperPanel = new Panel(panel);
-//		wrapperPanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
-//		wrapperPanel.setSizeFull();
-//		rightSide.addComponent(wrapperPanel);
-//		rightSide.setExpandRatio(wrapperPanel, 1f);
 		
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setSpacing(true);
@@ -268,11 +258,11 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private VerticalLayout createLeftSide(){
 		VerticalLayout leftSide = new VerticalLayout();
-		leftSide.addStyleName("dashboard-view");
+		leftSide.addStyleName("enrichment-left-panel");
 		leftSide.setSizeFull();
 		leftSide.setCaption("Options");
 		leftSide.setSpacing(true);
-		leftSide.setMargin(new MarginInfo(false, false, true, false));
+//		leftSide.setMargin(true);
 		
 		Label titleLabel = new Label("Options");
         titleLabel.setSizeUndefined();

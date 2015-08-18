@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.SpinnerListModel;
+
 import org.aksw.ore.ORESession;
 import org.aksw.ore.manager.EnrichmentManager.EnrichmentProgressListener;
 import org.dllearner.core.AxiomLearningProgressMonitor;
@@ -61,10 +63,12 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
         setClosable(false);
         axiomType2Label = new HashMap<AxiomType<OWLAxiom>, Label>(axiomTypes.size());
         grid = new GridLayout(2, axiomTypes.size());
+        grid.setWidth("100%");
         for (int i = 0; i < axiomTypes.size(); i++) {
 			AxiomType<OWLAxiom> axiomType = axiomTypes.get(i);
 			grid.addComponent(new Label(axiomType.getName()), 0, i);
 			Label spinner = new Label();
+			spinner.setWidthUndefined();
 			spinner.addStyleName(ValoTheme.LABEL_SPINNER);
 			grid.addComponent(spinner, 1, i);
 			grid.setComponentAlignment(spinner, Alignment.MIDDLE_RIGHT);
@@ -156,7 +160,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 				label.removeStyleName(ValoTheme.LABEL_SPINNER);
 				label.setIcon(FontAwesome.THUMBS_UP);
 				if(finishedAxiomTypes.size() == pendingAxiomTypes.size()){
-//					close();
+					close();
 				}
 			}
 		});
