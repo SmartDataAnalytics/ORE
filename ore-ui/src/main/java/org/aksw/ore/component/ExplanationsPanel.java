@@ -15,9 +15,10 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.VerticalLayout;
 
-public class ExplanationsPanel extends VerticalLayout {
+public class ExplanationsPanel extends CssLayout {
 	
 	private Set<ExplanationTable> tables = new HashSet<ExplanationTable>();
 	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
@@ -27,10 +28,9 @@ public class ExplanationsPanel extends VerticalLayout {
 	private boolean aggregatedView = false;
 	
 	public ExplanationsPanel() {
-		addStyleName("explanations-panel");
-		setImmediate(true);
-		setSpacing(true);
-		setSizeFull();
+		addStyleName("dashboard-panels");
+		addStyleName("axiom-panels");
+		setWidth("100%");
 	}
 	
 	public void showExplanations(Collection<Explanation<OWLAxiom>> explanations){
@@ -77,6 +77,9 @@ public class ExplanationsPanel extends VerticalLayout {
 			OWLClass cls = ((OWLSubClassOfAxiom)explanation.getEntailment()).getSubClass().asOWLClass();
 			t.setCaption(ORESession.getRenderer().render(cls));
 		}
+		
+		
+		
 	t.addValueChangeListener(new Property.ValueChangeListener() {
 		{table2Listener.put(t, this);}
 		

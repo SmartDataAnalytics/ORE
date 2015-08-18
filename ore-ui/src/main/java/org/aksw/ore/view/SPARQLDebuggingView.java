@@ -24,8 +24,10 @@ import org.aksw.ore.manager.ExplanationManagerListener;
 import org.semanticweb.owl.explanation.api.Explanation;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.vaadin.risto.stepper.IntStepper;
 
+import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -41,13 +43,19 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -131,7 +139,12 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		l.setSizeFull();
 		l.setSpacing(true);
 		l.setMargin(new MarginInfo(false, false, true, false));
-		l.setCaption("Options");
+		
+		Label titleLabel = new Label("Options");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        l.addComponent(titleLabel);
 		
 		Component configForm = createConfigForm();
 		l.addComponent(configForm);
@@ -220,8 +233,14 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	
 	private Component createExplanationsPanel(){
 		VerticalLayout l = new VerticalLayout();
+//		l.addStyleName("dashboard-view");
 		l.setSizeFull();
-		l.setCaption("Explanations");
+		
+		Label titleLabel = new Label("Explanations");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        l.addComponent(titleLabel);
 		
 		limitExplanationCountCheckbox = new CheckBox("Limit explanation count to");
 		limitExplanationCountCheckbox.setValue(true);
@@ -251,26 +270,30 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 //		optionsPanel.setWidth(null);
 //		l.addComponent(optionsPanel);
 		
+		l.addComponent(limit);
 		
 		explanationsPanel = new ExplanationsPanel();
-		explanationsPanel.setCaption("Explanations");
 		explanationsPanel.setHeight(null);
-		//wrapper for scrolling
-		Panel panel = new Panel(explanationsPanel);
-		panel.setSizeFull();
-//		panel.setCaption("Explanations");
-		l.addComponent(panel);
-		l.setExpandRatio(panel, 1.0f);
 		
-		WhitePanel configurablePanel = new WhitePanel(l);
-		configurablePanel.addComponent(limit);
-		return configurablePanel;
+		l.addComponent(explanationsPanel);
+		l.setExpandRatio(explanationsPanel, 1.0f);
+		
+		
+		
+//		WhitePanel configurablePanel = new WhitePanel(l);
+//		configurablePanel.addComponent(limit);
+		return l;
 	}
 	
 	private Component createRepairPlanPanel(){
 		VerticalLayout repairPlanPanel = new VerticalLayout();
-		repairPlanPanel.setCaption("Repair Plan");
 		repairPlanPanel.setSizeFull();
+		
+		Label titleLabel = new Label("Repair Plan");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        repairPlanPanel.addComponent(titleLabel);
 		
 		repairPlanTable = new RepairPlanTable();
 		repairPlanPanel.addComponent(repairPlanTable);
@@ -310,7 +333,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		buttons.addComponent(dumpSPARULButton);
 		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
 		
-		return new WhitePanel(repairPlanPanel);
+		return repairPlanPanel;
 	}
 	
 	private void onApplyRepairPlan(){
@@ -344,9 +367,10 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	}
 	
 	private void clearExplanations(){
-		for(SPARQLBasedExplanationTable t : tables){
-			explanationsPanel.removeComponent(t);
-		}
+		explanationsPanel.removeAllComponents();
+//		for(SPARQLBasedExplanationTable t : tables){
+//			explanationsPanel.removeComponent(t);
+//		}
 	}
 	
 	private void onSearchInconsistency(){
@@ -403,8 +427,12 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		
 		Set<Explanation<OWLAxiom>> newExplanations = ORESession.getSPARQLExplanationManager().getExplanations();
 		Set<Explanation<OWLAxiom>> shownExplanations = new HashSet<Explanation<OWLAxiom>>();
+		
+		boolean diff = currentExplanations == null 
+				|| newExplanations.size() != currentExplanations.size() 
+				|| !Sets.difference(newExplanations, currentExplanations).isEmpty();
 		// we only have to repaint if the set of explanations has changed
-		if(currentExplanations != null || newExplanations.size() != shownExplanations.size()){
+		if(diff){
 			clearExplanations();
 			
 			currentExplanations = newExplanations;
@@ -413,7 +441,10 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 				final SPARQLBasedExplanationTable t = new SPARQLBasedExplanationTable(explanation, selectedAxioms);
 				ORESession.getRepairManager().addListener(t);
 //				t.setCaption(((OWLSubClassOfAxiom) explanation.getEntailment()).getSubClass().toString());
-				explanationsPanel.addComponent(t);
+				explanationsPanel.addComponent(createContentWrapper(t));
+				
+				
+				
 				t.addValueChangeListener(new Property.ValueChangeListener() {
 
 					{
@@ -441,6 +472,22 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	public void onStopSearchingInconsistency() {
 		incFinder.stop();
 	}
+	
+	private Component createContentWrapper(final Table content) {
+        final CssLayout slot = new CssLayout();
+        slot.setWidth("100%");
+        slot.addStyleName("dashboard-panel-slot");
+
+        CssLayout card = new CssLayout();
+        card.setWidth("100%");
+        card.addStyleName(ValoTheme.LAYOUT_CARD);
+        card.addStyleName("explanation");
+        card.addComponent(content);
+        
+        slot.addComponent(card);
+        
+        return slot;
+    }
 	
 //	private void showExplanations() {
 //		clearExplanations();

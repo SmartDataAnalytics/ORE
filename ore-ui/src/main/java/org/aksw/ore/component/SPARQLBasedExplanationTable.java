@@ -18,6 +18,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 public class SPARQLBasedExplanationTable extends Table implements RepairManagerListener{
@@ -38,12 +39,20 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 		this.explanation = explanation;
 		selectedObjects.addAll(selectedAxioms);
 		
+		addStyleName("explanation-table");
+		addStyleName(ValoTheme.TABLE_BORDERLESS);
+        addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
+		
 		setWidth("100%");
 		setPageLength(0);
 		setHeight(null);
 		setSelectable(true);
         setMultiSelect(true);
         setImmediate(true);
+        
+        setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 		
 		IndexedContainer container = new IndexedContainer();
 		container.addContainerProperty(Columns.SELECTED, CheckBox.class, null);
@@ -57,6 +66,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 			public Object generateCell(Table source, final Object itemId, Object columnId) {
 				if (Columns.SELECTED.equals(columnId)) {
 					CheckBox cb = new CheckBox();
+					cb.addStyleName(ValoTheme.CHECKBOX_SMALL);
 					cb.setValue(selectedObjects.contains(itemId));
 					cb.setImmediate(true);
 					cb.addValueChangeListener(new ValueChangeListener() {

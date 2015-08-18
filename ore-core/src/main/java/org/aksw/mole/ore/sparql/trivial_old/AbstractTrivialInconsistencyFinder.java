@@ -3,6 +3,7 @@ package org.aksw.mole.ore.sparql.trivial_old;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,7 @@ public abstract class AbstractTrivialInconsistencyFinder extends AbstractSPARQLB
 	protected Map<String, Integer> filterToOffset = new HashMap<String, Integer>();
 	protected OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 	protected boolean stopIfInconsistencyFound = true;
-	protected Set<Explanation<OWLAxiom>> explanations = new HashSet<>();
+	protected Set<Explanation<OWLAxiom>> explanations = new LinkedHashSet<>();
 //	protected Set<Explanation<OWLAxiom>> allExplanations = new HashSet<>();
 	
 	private List<SPARQLBasedInconsistencyProgressMonitor> progressMonitors = new ArrayList<SPARQLBasedInconsistencyProgressMonitor>();

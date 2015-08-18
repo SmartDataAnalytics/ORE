@@ -36,6 +36,9 @@ public class ExplanationTable extends Table implements RepairManagerListener{
 		
 		addStyleName("explanation-table");
 		addStyleName(ValoTheme.TABLE_BORDERLESS);
+        addStyleName(ValoTheme.TABLE_NO_STRIPES);
+        addStyleName(ValoTheme.TABLE_NO_VERTICAL_LINES);
+        addStyleName(ValoTheme.TABLE_SMALL);
 		
 		setSizeFull();
 		setPageLength(0);
