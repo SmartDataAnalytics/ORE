@@ -72,6 +72,7 @@ public final class OREMenu extends CustomComponent {
         logo.setHeight("95%");
         HorizontalLayout logoWrapper = new HorizontalLayout(logo);
         logoWrapper.setComponentAlignment(logo, Alignment.MIDDLE_CENTER);
+        logoWrapper.setMargin(true);
         logoWrapper.addStyleName("valo-menu-title");
         return logoWrapper;
     }

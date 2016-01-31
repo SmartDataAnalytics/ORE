@@ -65,6 +65,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private void initUI(){
 		addStyleName("enrichment-view");
+//		addStyleName("dashboard-view");
 		setSizeFull();
 		setSplitPosition(25);
 		
@@ -80,142 +81,6 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 //		resourceURIField.setValue("http://dbpedia.org/ontology/birthPlace");
 //		resourceTypeField.setResourceType(ResourceType.OBJECT_PROPERTY);
 //		showDummyTables();
-	}
-	
-	/**
-	 * @return
-	 */
-	private Component createRightSide() {
-		VerticalLayout rightSide = new VerticalLayout();
-		rightSide.addStyleName("enrichment-right-panel");
-//		rightSide.addStyleName("enrichment-axioms-panel");
-		rightSide.setSizeFull();
-		rightSide.setSpacing(true);
-		rightSide.setCaption("Learned axioms");
-		
-		Label titleLabel = new Label("Learned Axioms");
-        titleLabel.setId("dashboard-title");
-        titleLabel.setSizeUndefined();
-        titleLabel.addStyleName(ValoTheme.LABEL_H2);
-        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
-        rightSide.addComponent(titleLabel);
-//		addComponent(new WhitePanel(rightSide));
-//		addComponent(createContentWrapper(rightSide));
-		
-		Component panel = createAxiomsPanel();
-		rightSide.addComponent(panel);
-		rightSide.setExpandRatio(panel, 1f);
-		
-		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.setSpacing(true);
-		buttons.setWidth(null);
-		rightSide.addComponent(buttons);
-		rightSide.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
-		
-		addToKbButton = new Button("Add");
-		addToKbButton.setHeight(null);
-		addToKbButton.setImmediate(true);
-		addToKbButton.setDescription("(Virtually) add the selected axioms to the knowledge base.(visible in 'Knowledge Base' view)");
-		addToKbButton.addClickListener(new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				OWLOntology ontology = ((SPARQLEndpointKnowledgebase)ORESession.getKnowledgebaseManager().getKnowledgebase()).getBaseOntology();
-				List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-				for(EvaluatedAxiomsTable table : tables){
-					Set<Object> selectedObjects = table.getSelectedObjects();
-					for(Object o : selectedObjects){
-						changes.add(new AddAxiom(ontology, ((EvaluatedAxiom)o).getAxiom()));
-					}
-				}
-				if(!changes.isEmpty()){
-					ORESession.getRepairManager().addToRepairPlan(changes);
-					ORESession.getKnowledgebaseManager().addChanges(changes);
-					Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
-				}
-			}
-		});
-		buttons.addComponent(addToKbButton);
-		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
-		
-		dumpSPARULButton = new Button("Export");
-		dumpSPARULButton.setHeight(null);
-		dumpSPARULButton.setImmediate(true);
-		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL 1.1 Update statements.");
-		dumpSPARULButton.addClickListener(new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				onDumpSPARUL();
-			}
-		});
-		buttons.addComponent(dumpSPARULButton);
-		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
-		
-		return rightSide;
-	}
-
-	private void showDummyTables() {
-		OWLDataFactory df = new OWLDataFactoryImpl();
-		
-		OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("http://dbpedia.org/ontology/league"));
-		
-		List<EvaluatedAxiom<OWLAxiom>> axioms = Lists.newArrayList();
-		for (int i = 0; i < 10; i++) {
-			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
-					df.getOWLObjectPropertyRangeAxiom(
-							p, 
-							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
-					new AxiomScore(score)));
-		}
-		showTable(AxiomType.OBJECT_PROPERTY_RANGE, axioms);
-		
-		axioms = Lists.newArrayList();
-		for (int i = 0; i < 20; i++) {
-			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
-					df.getOWLObjectPropertyDomainAxiom(
-							p, 
-							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
-					new AxiomScore(score)));
-		}
-		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
-		
-		axioms = Lists.newArrayList();
-		for (int i = 0; i < 2; i++) {
-			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
-					df.getOWLObjectPropertyDomainAxiom(
-							p, 
-							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
-					new AxiomScore(score)));
-		}
-		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
-	}
-	
-	private Component createAxiomsPanel(){
-//		VerticalLayout component = new VerticalLayout();
-//		component.setSizeFull();
-//		component.setMargin(true);
-//		component.setSpacing(true);
-//		component.addStyleName("enrichment-axioms-panel");
-//		component.addStyleName("dashboard-panels");
-//		component.setHeight(null);
-		
-		CssLayout component = new CssLayout();
-//		component.addStyleName("enrichment-axioms-tables");
-		component.addStyleName("dashboard-panels");
-		component.addStyleName("axiom-panels");
-		component.setWidth("100%");
-		component.setHeight(null);
-		
-//		Panel panel = new Panel(component);
-//		panel.setSizeFull();
-		
-		axiomsPanel = component;
-		
-		return axiomsPanel;
 	}
 	
 	private VerticalLayout createLeftSide(){
@@ -355,6 +220,145 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		
 		return collapsibleBox;
 	}
+	
+	/**
+	 * @return
+	 */
+	private Component createRightSide() {
+		VerticalLayout rightSide = new VerticalLayout();
+		rightSide.addStyleName("enrichment-right-panel");
+//		rightSide.addStyleName("enrichment-axioms-panel");
+//		rightSide.addStyleName("dashboard-view");
+		rightSide.setSizeFull();
+		rightSide.setSpacing(true);
+		rightSide.setCaption("Learned axioms");
+		
+		Label titleLabel = new Label("Learned Axioms");
+        titleLabel.setId("dashboard-title");
+        titleLabel.setSizeUndefined();
+        titleLabel.addStyleName(ValoTheme.LABEL_H2);
+        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+        rightSide.addComponent(titleLabel);
+//		addComponent(new WhitePanel(rightSide));
+//		addComponent(createContentWrapper(rightSide));
+		
+		Component panel = createAxiomsPanel();
+		rightSide.addComponent(panel);
+		rightSide.setExpandRatio(panel, 1f);
+		
+		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.setSpacing(true);
+		buttons.setWidth(null);
+		rightSide.addComponent(buttons);
+		rightSide.setComponentAlignment(buttons, Alignment.MIDDLE_RIGHT);
+		
+		addToKbButton = new Button("Add");
+		addToKbButton.setHeight(null);
+		addToKbButton.setImmediate(true);
+		addToKbButton.setDescription("(Virtually) add the selected axioms to the knowledge base.(visible in 'Knowledge Base' view)");
+		addToKbButton.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				OWLOntology ontology = ((SPARQLEndpointKnowledgebase)ORESession.getKnowledgebaseManager().getKnowledgebase()).getBaseOntology();
+				List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+				for(EvaluatedAxiomsTable table : tables){
+					Set<Object> selectedObjects = table.getSelectedObjects();
+					for(Object o : selectedObjects){
+						changes.add(new AddAxiom(ontology, ((EvaluatedAxiom)o).getAxiom()));
+					}
+				}
+				if(!changes.isEmpty()){
+					ORESession.getRepairManager().addToRepairPlan(changes);
+					ORESession.getKnowledgebaseManager().addChanges(changes);
+					Notification.show("Applied changes.", Type.TRAY_NOTIFICATION);
+				}
+			}
+		});
+		buttons.addComponent(addToKbButton);
+		buttons.setComponentAlignment(addToKbButton, Alignment.MIDDLE_RIGHT);
+		
+		dumpSPARULButton = new Button("Export");
+		dumpSPARULButton.setHeight(null);
+		dumpSPARULButton.setImmediate(true);
+		dumpSPARULButton.setDescription("Export the selected axioms as SPARQL 1.1 Update statements.");
+		dumpSPARULButton.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				onDumpSPARUL();
+			}
+		});
+		buttons.addComponent(dumpSPARULButton);
+		buttons.setComponentAlignment(dumpSPARULButton, Alignment.MIDDLE_RIGHT);
+		
+		return rightSide;
+	}
+
+	private void showDummyTables() {
+		OWLDataFactory df = new OWLDataFactoryImpl();
+		
+		OWLObjectProperty p = df.getOWLObjectProperty(IRI.create("http://dbpedia.org/ontology/league"));
+		
+		List<EvaluatedAxiom<OWLAxiom>> axioms = Lists.newArrayList();
+		for (int i = 0; i < 10; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyRangeAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_RANGE, axioms);
+		
+		axioms = Lists.newArrayList();
+		for (int i = 0; i < 20; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyDomainAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
+		
+		axioms = Lists.newArrayList();
+		for (int i = 0; i < 2; i++) {
+			double score = 1 - Math.random();
+			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+					df.getOWLObjectPropertyDomainAxiom(
+							p, 
+							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
+					new AxiomScore(score)));
+		}
+		showTable(AxiomType.OBJECT_PROPERTY_DOMAIN, axioms);
+	}
+	
+	private Component createAxiomsPanel(){
+//		VerticalLayout component = new VerticalLayout();
+//		component.setSizeFull();
+//		component.setMargin(true);
+//		component.setSpacing(true);
+//		component.addStyleName("enrichment-axioms-panel");
+//		component.addStyleName("dashboard-panels");
+//		component.setHeight(null);
+		
+		CssLayout component = new CssLayout();
+//		component.addStyleName("enrichment-axioms-tables");
+		component.addStyleName("dashboard-panels");
+		component.addStyleName("axiom-panels");
+		component.setWidth("100%");
+		component.setHeight(null);
+		
+//		Panel panel = new Panel(component);
+//		panel.setSizeFull();
+		
+		axiomsPanel = component;
+		
+		return axiomsPanel;
+	}
+	
+	
 	
 	private void onLearning(){
 		axiomsPanel.removeAllComponents();
