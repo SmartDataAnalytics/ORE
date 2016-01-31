@@ -1,4 +1,16 @@
 package org.aksw.mole.ore.explanation.formatter;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import org.semanticweb.owl.explanation.api.Explanation;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrderer;
+import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrdererImpl;
+import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationTree;
+import uk.ac.manchester.cs.owl.explanation.ordering.Tree;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,19 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import org.semanticweb.owl.explanation.api.Explanation;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import uk.ac.manchester.cs.bhig.util.Tree;
-import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrderer;
-import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationOrdererImpl;
-import uk.ac.manchester.cs.owl.explanation.ordering.ExplanationTree;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 public class ExplanationFormatter2 {
 	

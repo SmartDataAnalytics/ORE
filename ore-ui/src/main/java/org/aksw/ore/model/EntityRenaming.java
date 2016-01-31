@@ -79,6 +79,11 @@ public class EntityRenaming extends OWLOntologyChange{
 		return null;
 	}
 
+	@Override
+	public OWLOntologyChange reverseChange() {
+		return new EntityRenaming(getOntology(), to, from);
+	}
+
 	/* (non-Javadoc)
 	 * @see org.semanticweb.owlapi.model.OWLOntologyChange#getAxiom()
 	 */

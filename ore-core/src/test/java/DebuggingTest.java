@@ -1,32 +1,19 @@
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.clarkparsia.modularity.IncremantalReasonerFactory;
+import com.clarkparsia.modularity.IncrementalReasoner;
+import com.clarkparsia.modularity.ModularityUtils;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import junit.framework.TestCase;
-
 import org.aksw.mole.ore.impact.ClassificationImpactChecker;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.EntityType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.util.OWLEntityCollector;
-
 import uk.ac.manchester.cs.owlapi.modularity.ModuleType;
 
-import com.clarkparsia.modularity.IncrementalClassifier;
-import com.clarkparsia.modularity.ModularityUtils;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class DebuggingTest extends TestCase{
@@ -61,7 +48,7 @@ public class DebuggingTest extends TestCase{
 	}
 	
 	public void testIncrementalClassifier(){
-		IncrementalClassifier incReasoner = new IncrementalClassifier(ontology);
+		IncrementalReasoner incReasoner = IncremantalReasonerFactory.getInstance().createNonBufferingReasoner(ontology);
 		incReasoner.classify();
 	}
 	
@@ -69,12 +56,12 @@ public class DebuggingTest extends TestCase{
 		OWLAnnotationProperty annoProp = dataFactory.getOWLAnnotationProperty(IRI.create(ONTOLOGY_BASE + "annoProp"));
 		OWLAxiom ax = dataFactory.getOWLAnnotationPropertyDomainAxiom(annoProp, IRI.create(ONTOLOGY_BASE + "annoDomain"));
 		manager.addAxiom(ontology, ax);
-		IncrementalClassifier incReasoner = new IncrementalClassifier(ontology);
+		IncrementalReasoner incReasoner = IncremantalReasonerFactory.getInstance().createNonBufferingReasoner(ontology);
 		incReasoner.classify();
 	}
 	
 	public void testClassificationImpactChecker(){
-		IncrementalClassifier incReasoner = new IncrementalClassifier(ontology);
+		IncrementalReasoner incReasoner = IncremantalReasonerFactory.getInstance().createNonBufferingReasoner(ontology);
 		incReasoner.classify();
 		ClassificationImpactChecker checker = new ClassificationImpactChecker(incReasoner);
 		OWLOntologyChange change = new RemoveAxiom(ontology, 

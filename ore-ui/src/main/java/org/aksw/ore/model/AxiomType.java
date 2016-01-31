@@ -1,9 +1,9 @@
 package org.aksw.ore.model;
 
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntax;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntax;
 
 public class AxiomType {
 	

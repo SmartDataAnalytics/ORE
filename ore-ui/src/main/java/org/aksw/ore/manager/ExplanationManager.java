@@ -1,14 +1,7 @@
 package org.aksw.ore.manager;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.clarkparsia.owlapi.explanation.GlassBoxExplanation;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import org.aksw.mole.ore.explanation.ExplanationCache;
 import org.aksw.mole.ore.explanation.api.ExplanationType;
 import org.aksw.mole.ore.explanation.formatter.ExplanationFormatter2;
@@ -19,12 +12,7 @@ import org.aksw.mole.ore.rootderived.RootClassFinder;
 import org.aksw.mole.ore.rootderived.StructureBasedRootClassFinder;
 import org.apache.log4j.Logger;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
-import org.semanticweb.owl.explanation.api.Explanation;
-import org.semanticweb.owl.explanation.api.ExplanationException;
-import org.semanticweb.owl.explanation.api.ExplanationGenerator;
-import org.semanticweb.owl.explanation.api.ExplanationGeneratorFactory;
-import org.semanticweb.owl.explanation.api.ExplanationGeneratorInterruptedException;
-import org.semanticweb.owl.explanation.api.ExplanationProgressMonitor;
+import org.semanticweb.owl.explanation.api.*;
 import org.semanticweb.owl.explanation.impl.blackbox.Configuration;
 import org.semanticweb.owl.explanation.impl.blackbox.EntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.blackbox.checker.BlackBoxExplanationGeneratorFactory;
@@ -32,22 +20,14 @@ import org.semanticweb.owl.explanation.impl.blackbox.checker.InconsistentOntolog
 import org.semanticweb.owl.explanation.impl.blackbox.checker.SatisfiabilityEntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.laconic.LaconicExplanationGeneratorFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
 
-import com.clarkparsia.owlapi.explanation.GlassBoxExplanation;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import java.util.*;
 
 public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	

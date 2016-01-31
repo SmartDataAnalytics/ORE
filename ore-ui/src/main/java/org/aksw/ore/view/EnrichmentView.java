@@ -1,41 +1,5 @@
 package org.aksw.ore.view;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.aksw.mole.ore.sparql.SPARULTranslator;
-import org.aksw.ore.ORESession;
-import org.aksw.ore.component.AxiomTypesTable;
-import org.aksw.ore.component.CollapsibleBox;
-import org.aksw.ore.component.EnrichmentProgressDialog;
-import org.aksw.ore.component.EvaluatedAxiomsGrid;
-import org.aksw.ore.component.EvaluatedAxiomsTable;
-import org.aksw.ore.component.WhitePanel;
-import org.aksw.ore.exception.OREException;
-import org.aksw.ore.manager.EnrichmentManager;
-import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
-import org.dllearner.core.EvaluatedAxiom;
-import org.dllearner.learningproblems.AxiomScore;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.EntityType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.vaadin.risto.stepper.IntStepper;
-
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-
 import com.google.common.collect.Lists;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -44,36 +8,34 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Slider;
 import com.vaadin.ui.Slider.ValueOutOfBoundsException;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.ValoTheme;
+import org.aksw.ore.ORESession;
+import org.aksw.ore.component.AxiomTypesTable;
+import org.aksw.ore.component.CollapsibleBox;
+import org.aksw.ore.component.EnrichmentProgressDialog;
+import org.aksw.ore.component.EvaluatedAxiomsTable;
+import org.aksw.ore.exception.OREException;
+import org.aksw.ore.manager.EnrichmentManager;
+import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
+import org.dllearner.core.EvaluatedAxiom;
+import org.dllearner.learningproblems.AxiomScore;
+import org.dllearner.utilities.owl.OWL2SPARULConverter;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
+import org.vaadin.risto.stepper.IntStepper;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+
+import java.util.*;
 
 public class EnrichmentView extends HorizontalSplitPanel implements View, Refreshable{
 	
@@ -485,7 +447,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = man.createOntology();
 			List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
-			SPARULTranslator translator = new SPARULTranslator(man, ontology, false);
+			OWL2SPARULConverter translator = new OWL2SPARULConverter(ontology, false);
 			for(EvaluatedAxiomsTable table : tables){
 				Set<Object> selectedObjects = table.getSelectedObjects();
 				for(Object o : selectedObjects){
@@ -494,7 +456,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			}
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.translate(changes, AddAxiom.class);
+				String sparulString = translator.translate(changes);
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
 				final Window window = new Window("SPARQL Update statements", content);
 				window.setWidth("1000px");

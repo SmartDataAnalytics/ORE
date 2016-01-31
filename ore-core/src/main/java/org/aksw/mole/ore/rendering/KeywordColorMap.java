@@ -1,9 +1,9 @@
 package org.aksw.mole.ore.rendering;
 
 
-import java.util.HashMap;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntax;
 
-import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntax;
+import java.util.HashMap;
 
 /**
  * Author: drummond<br>

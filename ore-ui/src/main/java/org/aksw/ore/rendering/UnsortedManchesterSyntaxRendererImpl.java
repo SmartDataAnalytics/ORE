@@ -1,19 +1,20 @@
 package org.aksw.ore.rendering;
 
+import org.aksw.mole.ore.util.PrefixedShortFromProvider;
+import org.semanticweb.owlapi.io.OWLObjectRenderer;
+import org.semanticweb.owlapi.manchestersyntax.renderer.ManchesterOWLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.util.CollectionFactory;
+import org.semanticweb.owlapi.util.ShortFormProvider;
+
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.aksw.mole.ore.util.PrefixedShortFromProvider;
-import org.semanticweb.owlapi.io.OWLObjectRenderer;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.util.ShortFormProvider;
-
-import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxObjectRenderer;
 
 /**
  * Extended OWL API class, but omit sorting.
@@ -95,18 +96,18 @@ public class UnsortedManchesterSyntaxRendererImpl implements OWLObjectRenderer{
 		public UnsortedManchesterSyntaxRenderer(Writer writer, ShortFormProvider entityShortFormProvider) {
 			super(writer, entityShortFormProvider);
 		}
-		
-		@Override
-		protected List<? extends OWLObject> sort(Collection<? extends OWLObject> objects) {
-			List<OWLObject> sorted = new ArrayList<OWLObject>();
-			sorted.add(firstEntity);
-			for(OWLObject o : objects){
-				if(!sorted.contains(o)){
-					sorted.add(o);
-				}
-			}
-			return sorted;
-		}
+
+//		@Override
+//		protected static List<T extends OWLObject> sort(Collection<T> objects) {
+//			List<OWLObject> sorted = new ArrayList<OWLObject>();
+//			sorted.add(firstEntity);
+//			for(OWLObject o : objects){
+//				if(!sorted.contains(o)){
+//					sorted.add(o);
+//				}
+//			}
+//			return sorted;
+//		}
 	}
 	
 

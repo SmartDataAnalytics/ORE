@@ -3,23 +3,23 @@
  */
 package org.aksw.ore.view;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
+import com.google.common.base.Joiner;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.*;
+import com.vaadin.server.StreamResource.StreamSource;
+import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.MenuBar.Command;
+import com.vaadin.ui.MenuBar.MenuItem;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
+import com.vaadin.ui.themes.ValoTheme;
 import org.aksw.mole.ore.repository.tones.TONESRepository;
-import org.aksw.mole.ore.sparql.SPARULTranslator;
 import org.aksw.ore.ORESession;
-import org.aksw.ore.component.FileUploadDialog;
-import org.aksw.ore.component.KnowledgebaseAnalyzationDialog;
-import org.aksw.ore.component.KnowledgebaseChangesTable;
-import org.aksw.ore.component.LoadFromURIDialog;
-import org.aksw.ore.component.OntologyRepositoryDialog;
-import org.aksw.ore.component.SPARQLEndpointDialog;
+import org.aksw.ore.component.*;
 import org.aksw.ore.manager.KnowledgebaseManager.KnowledgebaseLoadingListener;
 import org.aksw.ore.model.Knowledgebase;
 import org.aksw.ore.model.OWLOntologyKnowledgebase;
@@ -27,43 +27,22 @@ import org.aksw.ore.model.SPARQLEndpointKnowledgebase;
 import org.aksw.ore.model.SPARQLKnowledgebaseStats;
 import org.aksw.ore.util.URLParameters;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.dllearner.utilities.owl.OWL2SPARULConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
 
-import com.google.common.base.Joiner;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.MenuBar.Command;
-import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.ui.themes.ValoTheme;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * @author Lorenz Buehmann
@@ -319,7 +298,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						ByteArrayInputStream bais;
 						try {
-							ontology.getOWLOntologyManager().saveOntology(ontology, new RDFXMLOntologyFormat(), baos);
+							ontology.getOWLOntologyManager().saveOntology(ontology, new RDFXMLDocumentFormat(), baos);
 							bais = new ByteArrayInputStream(baos.toByteArray());
 							baos.close();
 							return bais;
@@ -412,11 +391,11 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 		try {
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = man.createOntology();
-			SPARULTranslator translator = new SPARULTranslator(man, ontology, false);
+			OWL2SPARULConverter translator = new OWL2SPARULConverter(ontology, false);
 			Set<OWLOntologyChange> changes = ORESession.getKnowledgebaseManager().getChanges();
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.translate(changes);
+				String sparulString = translator.translate(new ArrayList<OWLOntologyChange>(changes));
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
 				final Window window = new Window("SPARQL 1.1 Update statements", content);
 				window.setWidth("1000px");

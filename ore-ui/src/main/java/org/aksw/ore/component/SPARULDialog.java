@@ -5,7 +5,7 @@ package org.aksw.ore.component;
 
 import java.util.List;
 
-import org.aksw.mole.ore.sparql.SPARULTranslator;
+import org.dllearner.utilities.owl.OWL2SPARULConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -33,9 +33,9 @@ public class SPARULDialog extends Window{
 		try {
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = man.createOntology();
-			SPARULTranslator translator = new SPARULTranslator(man, ontology, false);
+			OWL2SPARULConverter translator = new OWL2SPARULConverter(ontology, false);
 			
-			String sparulString = translator.translate(changes, true);
+			String sparulString = translator.translate(changes);
 			
 			VerticalLayout content = new VerticalLayout();
 			content.setSizeUndefined();

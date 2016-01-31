@@ -64,7 +64,7 @@ public class LearningManager {
 
 	public LearningResultsCache learningCache = new LearningResultsCache();
 	
-	private OWLDataFactory df = new OWLDataFactoryImpl(false, false);
+	private OWLDataFactory df = new OWLDataFactoryImpl();
 
 	public LearningManager(ClosedWorldReasoner reasoner) {
 		this.reasoner = reasoner;

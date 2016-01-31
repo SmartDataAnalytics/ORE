@@ -3,13 +3,13 @@ package org.aksw.mole.ore.cache;
 import java.util.List;
 import java.util.Map;
 
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
 
 public class DLSyntaxRenderingCache implements OWLOntologyChangeListener, OWLOntologyLoaderListener{
 	

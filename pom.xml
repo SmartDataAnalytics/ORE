@@ -46,9 +46,9 @@
 
 	<properties>
 		<!-- tell the compiler we can use 1.7 -->
-		<compiler.version>1.7</compiler.version>
+		<compiler.version>1.8</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<owlapi.version>3.5.1</owlapi.version>
+		<owlapi.version>4.1.3</owlapi.version>
 		 <jena.sparql.api.version>2.13.0-1</jena.sparql.api.version>
 		 <dllearner.version>1.2-SNAPSHOT</dllearner.version>
 	</properties>
@@ -58,11 +58,23 @@
 			<id>maven.aksw.internal</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>http://maven.aksw.org/archiva/repository/internal</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>University Leipzig, AKSW Maven2 Repository</name>
 			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>apache-repo-snapshots</id>
@@ -128,19 +140,9 @@
 				<version>20090211</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-distribution</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.sourceforge.owlapi.owllink</groupId>
 				<artifactId>owllink</artifactId>
 				<version>1.2.2</version>
-			</dependency>
-			<dependency>
-				<groupId>com.clarkparsia</groupId>
-				<artifactId>pellet</artifactId>
-				<version>2.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.coode.oppl</groupId>

@@ -1,29 +1,18 @@
 package org.aksw.ore.manager;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
+import com.clarkparsia.modularity.IncremantalReasonerFactory;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import org.aksw.mole.ore.impact.AbstractImpactChecker;
 import org.aksw.mole.ore.impact.ClassificationImpactChecker;
 import org.aksw.mole.ore.impact.StructuralImpactChecker;
 import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
-import com.clarkparsia.modularity.IncrementalClassifier;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class ImpactManager {
 	
@@ -48,7 +37,7 @@ public class ImpactManager {
 	
 	public ImpactManager(OWLReasoner reasoner){
 		structuralChecker = new StructuralImpactChecker(reasoner);
-		classificationChecker = new ClassificationImpactChecker(new IncrementalClassifier(reasoner.getRootOntology()));
+		classificationChecker = new ClassificationImpactChecker(IncremantalReasonerFactory.getInstance().createNonBufferingReasoner(reasoner.getRootOntology()));
 	}
 	
 	public void computeImpact(final List<OWLOntologyChange> changes){

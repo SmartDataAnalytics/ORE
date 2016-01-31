@@ -1,12 +1,18 @@
 package org.aksw.mole.ore.sparql;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
+import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
+import com.jamonapi.Monitor;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
 import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
@@ -20,55 +26,19 @@ import org.apache.log4j.SimpleLayout;
 import org.dllearner.kb.extraction.ExtractionAlgorithm;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.utilities.JamonMonitorLogger;
+import org.dllearner.utilities.owl.OWL2SPARULConverter;
 import org.mindswap.pellet.PelletOptions;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
-import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
-
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
-import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
-import com.hp.hpl.jena.vocabulary.OWL;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
-import com.jamonapi.Monitor;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class IncrementalInconsistencyFinder {
 	
@@ -1620,14 +1590,15 @@ public class IncrementalInconsistencyFinder {
 		PelletExplanationGenerator expGen = new PelletExplanationGenerator(f.getOntology());
 		long startTime = System.currentTimeMillis();
 		System.out.print("Computing explanation...");
+		OWLDataFactory df = OWLManager.getOWLDataFactory();
 		Explanation exp = expGen.getExplanation(
-				OWLDataFactoryImpl.getInstance().getOWLSubClassOfAxiom(
-						OWLDataFactoryImpl.getInstance().getOWLThing(),
-						OWLDataFactoryImpl.getInstance().getOWLNothing()));
+				df.getOWLSubClassOfAxiom(
+						df.getOWLThing(),
+						df.getOWLNothing()));
 		System.out.println("done in " + (System.currentTimeMillis()-startTime) + "ms.");
 		System.out.println(exp);
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		SPARULTranslator trans = new SPARULTranslator(man, man.createOntology(exp.getAxioms()), false);
+		OWL2SPARULConverter trans = new OWL2SPARULConverter(ont, false);
 		java.util.List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
 		for(OWLAxiom ax : exp.getAxioms()){
 			changes.add(new RemoveAxiom(ont, ax));

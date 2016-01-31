@@ -1,60 +1,16 @@
 package org.aksw.mole.ore.rootderived;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.clarkparsia.modularity.ModularityUtils;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
 import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLClassExpressionVisitor;
-import org.semanticweb.owlapi.model.OWLDataAllValuesFrom;
-import org.semanticweb.owlapi.model.OWLDataExactCardinality;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataHasValue;
-import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
-import org.semanticweb.owlapi.model.OWLDataMinCardinality;
-import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
-import org.semanticweb.owlapi.model.OWLObjectComplementOf;
-import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
-import org.semanticweb.owlapi.model.OWLObjectHasSelf;
-import org.semanticweb.owlapi.model.OWLObjectHasValue;
-import org.semanticweb.owlapi.model.OWLObjectIntersectionOf;
-import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
-import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
-import org.semanticweb.owlapi.model.OWLObjectOneOf;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
-import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLQuantifiedRestriction;
-import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.model.UnknownOWLOntologyException;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-
+import org.semanticweb.owlapi.search.EntitySearcher;
 import uk.ac.manchester.cs.owlapi.modularity.ModuleType;
 
-import com.clarkparsia.modularity.ModularityUtils;
-import com.clarkparsia.owlapi.modularity.locality.LocalityClass;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import java.util.*;
 
 public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassExpressionVisitor {
 	
@@ -134,10 +90,10 @@ public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassE
 		
 			for(OWLClass cls : unsatClasses){
 				reset();
-				for(OWLClassExpression equi : cls.getEquivalentClasses(ontology)){
+				for(OWLClassExpression equi : EntitySearcher.getEquivalentClasses(cls, ontology)){
 					equi.accept(this);
 				}
-				for(OWLClassExpression sup : cls.getSuperClasses(ontology)){
+				for(OWLClassExpression sup : EntitySearcher.getSuperClasses(cls, ontology)){
 					sup.accept(this);
 				}
 				for(Integer depth : depth2UniversalRestrictionPropertyMap.keySet()){
@@ -188,7 +144,7 @@ public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassE
 			for (OWLClass root : new ArrayList<OWLClass>(roots)) {
 				
 				checker = reasonerFactory.createNonBufferingReasoner(manager.createOntology(ModularityUtils.extractModule
-						(ontology, root.getSignature(), ModuleType.TOP_OF_BOT)));
+						(ontology, root.getSignature(), ModuleType.STAR)));
 				if (!potentialRoots.contains(root) && checker.isSatisfiable(root)) {
 					rootClasses.remove(root);
 				}
@@ -215,7 +171,7 @@ public class StructureBasedRootClassFinder implements RootClassFinder, OWLClassE
 	}
 	
 
-	private void checkObjectRestriction(OWLQuantifiedRestriction<OWLClassExpression,OWLObjectPropertyExpression,OWLClassExpression> restr){
+	private void checkObjectRestriction(OWLQuantifiedObjectRestriction restr){
 		OWLClassExpression filler = restr.getFiller();
 		
 			if(filler.isAnonymous()){

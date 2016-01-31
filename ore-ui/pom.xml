@@ -201,16 +201,8 @@
 			</dependency> <dependency> <groupId>edu.stanford</groupId> <artifactId>tagger</artifactId> 
 			</dependency> -->
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-distribution</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.sourceforge.owlapi.owllink</groupId>
 			<artifactId>owllink</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.clarkparsia</groupId>
-			<artifactId>pellet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.semanticweb.owl.explanation</groupId>

@@ -1,46 +1,38 @@
 package org.aksw.mole.ore.impact;
 
+import com.clarkparsia.modularity.IncremantalReasonerFactory;
+import com.clarkparsia.modularity.IncrementalReasoner;
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import org.apache.log4j.Logger;
+import org.semanticweb.owlapi.OWLAPIConfigProvider;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.expression.OWLEntityChecker;
+import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxParserImpl;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
+import org.semanticweb.owlapi.util.SimpleShortFormProvider;
+import org.semanticweb.owlapi.util.mansyntax.ManchesterOWLSyntaxParser;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.expression.OWLEntityChecker;
-import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.OWLOntologyChangeException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
-import org.semanticweb.owlapi.util.ShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleShortFormProvider;
-
-import com.clarkparsia.modularity.IncrementalClassifier;
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
-
 public class ClassificationImpactChecker extends AbstractImpactChecker {
 
 	private static final Logger logger = Logger.getLogger(ClassificationImpactChecker.class.getName());
 
-	private IncrementalClassifier reasoner;
+	private IncrementalReasoner reasoner;
 	protected OWLOntology ontology;
 	protected OWLOntologyManager manager;
 	protected OWLDataFactory factory;
 
-	public ClassificationImpactChecker(IncrementalClassifier reasoner) {
+	public ClassificationImpactChecker(IncrementalReasoner reasoner) {
 		this.reasoner = reasoner;
 		this.ontology = reasoner.getRootOntology();
 		this.manager = ontology.getOWLOntologyManager();
@@ -170,16 +162,16 @@ public class ClassificationImpactChecker extends AbstractImpactChecker {
 		OWLOntology ontology = man.loadOntology(IRI.create(ontologyURL));
 		OWLReasonerFactory reasonerFactory = PelletReasonerFactory.getInstance();
 		OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(ontology);
-		IncrementalClassifier ic = new IncrementalClassifier(ontology);
+		IncrementalReasoner ic = IncremantalReasonerFactory.getInstance().createNonBufferingReasoner(ontology);
 		ClassificationImpactChecker impactChecker = new ClassificationImpactChecker(ic);
 		String axiomString = "metal EquivalentTo: chemical and (atomic-number some integer) and (atomic-number exactly 1 Thing)";
-		ManchesterOWLSyntaxEditorParser parser = new ManchesterOWLSyntaxEditorParser(dataFactory, axiomString);
-		ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
-		BidirectionalShortFormProvider bidiShortFormProvider = new org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter(man,man.getImportsClosure(ontology),shortFormProvider);
+		BidirectionalShortFormProvider bidiShortFormProvider = new org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter(
+				man, man.getImportsClosure(ontology), new SimpleShortFormProvider());
 		OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
+		ManchesterOWLSyntaxParser parser = new ManchesterOWLSyntaxParserImpl(new OWLAPIConfigProvider(), dataFactory);
 		parser.setOWLEntityChecker(entityChecker);
-//		parser.parseOntology(ontology);
 		parser.setDefaultOntology(ontology);
+//		parser.parseOntology(ontology);
 		OWLAxiom axiom = parser.parseAxiom();
 		OWLOntologyChange change = new RemoveAxiom(ontology, axiom);
 		impactChecker.getImpact(Collections.singletonList(change));

@@ -1,39 +1,22 @@
 package org.aksw.ore.rendering;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import org.aksw.mole.ore.rendering.KeywordColorMap;
-import org.aksw.mole.ore.util.PrefixedShortFromProvider;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.OWLObjectRenderer;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.model.PrefixManager;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.util.IRIShortFormProvider;
-import org.semanticweb.owlapi.util.QNameShortFormProvider;
-import org.semanticweb.owlapi.util.ShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleIRIShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleShortFormProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.aksw.mole.ore.rendering.KeywordColorMap;
+import org.aksw.mole.ore.util.PrefixedShortFromProvider;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.io.OWLObjectRenderer;
+import org.semanticweb.owlapi.manchestersyntax.renderer.ManchesterOWLSyntaxOWLObjectRendererImpl;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Renderer {
 	
@@ -87,14 +70,14 @@ public class Renderer {
 	}
 	
 	/**
-	 * @param renderingListeners the renderingListeners to set
+	 * @param renderingListener the renderingListeners to set
 	 */
 	public void addRenderingListener(RenderingListener renderingListener) {
 		this.renderingListeners.add(renderingListener);
 	}
 	
 	/**
-	 * @param renderingListeners the renderingListeners to set
+	 * @param renderingListener the renderingListeners to set
 	 */
 	public void removeRenderingListener(RenderingListener renderingListener) {
 		this.renderingListeners.remove(renderingListener);

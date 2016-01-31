@@ -1,20 +1,12 @@
 package experiments;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-
+import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
+import com.google.common.collect.*;
 import org.aksw.mole.ore.sparql.AxiomGenerationDistribution;
 import org.aksw.mole.ore.sparql.AxiomGenerationTracker;
 import org.aksw.mole.ore.sparql.TimeOutException;
 import org.aksw.mole.ore.sparql.generator.AxiomGenerator;
 import org.aksw.mole.ore.sparql.generator.SPARQLBasedInconsistencyFinder;
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.semanticweb.owl.explanation.api.Explanation;
@@ -26,24 +18,17 @@ import org.semanticweb.owl.explanation.impl.blackbox.EntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.blackbox.checker.ConsistencyEntailmentCheckerFactory;
 import org.semanticweb.owl.explanation.impl.blackbox.checker.InconsistentOntologyExplanationGeneratorFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
-import uk.ac.manchester.cs.owlapi.dlsyntax.DLSyntaxObjectRenderer;
-
-import com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
-import com.google.common.collect.Sets;
-import com.google.common.collect.SortedMultiset;
-import com.google.common.collect.TreeMultiset;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class QueryPlanLearner {
 
@@ -212,7 +197,7 @@ public class QueryPlanLearner {
 	
 	private void save(Set<OWLAxiom> axioms){
 		try {
-			manager.saveOntology(manager.createOntology(axioms), new TurtleOntologyFormat(), new FileOutputStream("inconsistent-fragment.ttl"));
+			manager.saveOntology(manager.createOntology(axioms), new TurtleDocumentFormat(), new FileOutputStream("inconsistent-fragment.ttl"));
 		} catch (OWLOntologyStorageException e) {
 			e.printStackTrace();
 		} catch (OWLOntologyCreationException e) {

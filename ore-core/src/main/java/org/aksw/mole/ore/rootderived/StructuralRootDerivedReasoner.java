@@ -43,6 +43,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.semanticweb.owlapi.search.EntitySearcher;
 
 public class StructuralRootDerivedReasoner
 {
@@ -234,10 +235,10 @@ public class StructuralRootDerivedReasoner
     SuperClassChecker checker = new SuperClassChecker();
     for (OWLClass cls : unsatisfiableClasses) {
       checker.reset();
-      for (OWLClassExpression sup : cls.getSuperClasses(this.reasoner.getRootOntology())) {
+      for (OWLClassExpression sup : EntitySearcher.getSuperClasses(cls, this.reasoner.getRootOntology())) {
         sup.accept(checker);
       }
-      for (OWLClassExpression sup : cls.getEquivalentClasses(this.reasoner.getRootOntology())) {
+      for (OWLClassExpression sup : EntitySearcher.getEquivalentClasses(cls, this.reasoner.getRootOntology())) {
         sup.accept(checker);
       }
       Set<OWLClass> dependencies = checker.getDependencies();

@@ -3,27 +3,6 @@
  */
 package org.aksw.ore.view;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Set;
-
-import org.aksw.mole.ore.validation.constraint.ConstraintViolation;
-import org.aksw.mole.ore.validation.constraint.SubjectObjectViolation;
-import org.aksw.mole.ore.validation.constraint.SubjectViolation;
-import org.aksw.ore.ORESession;
-import org.aksw.ore.component.ConstraintViolationExplanationWindow;
-import org.aksw.ore.component.ProgressDialog;
-import org.aksw.ore.component.WhitePanel;
-import org.coode.owlapi.functionalparser.OWLFunctionalSyntaxOWLParser;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.OWLParserException;
-import org.semanticweb.owlapi.io.StringDocumentSource;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.UnloadableImportException;
-
 import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
@@ -33,22 +12,28 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnHeaderMode;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import org.aksw.mole.ore.validation.constraint.ConstraintViolation;
+import org.aksw.mole.ore.validation.constraint.SubjectObjectViolation;
+import org.aksw.mole.ore.validation.constraint.SubjectViolation;
+import org.aksw.ore.ORESession;
+import org.aksw.ore.component.ConstraintViolationExplanationWindow;
+import org.aksw.ore.component.ProgressDialog;
+import org.aksw.ore.component.WhitePanel;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.functional.parser.OWLFunctionalSyntaxOWLParser;
+import org.semanticweb.owlapi.io.OWLParserException;
+import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.*;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Set;
 
 /**
  * @author Lorenz Buehmann
@@ -366,7 +351,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 			StringDocumentSource s = new StringDocumentSource("Ontology(<http://www.ore.org> " + functionalSyntaxAxiomString + ")");
 			OWLFunctionalSyntaxOWLParser p = new OWLFunctionalSyntaxOWLParser();
 			OWLOntology newOntology = OWLManager.createOWLOntologyManager().createOntology();
-			p.parse(s, newOntology);
+			p.parse(s, newOntology, new OWLOntologyLoaderConfiguration());
 			return newOntology;
 		} catch (UnloadableImportException e) {
 			e.printStackTrace();

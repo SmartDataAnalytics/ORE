@@ -53,6 +53,7 @@ import org.dllearner.kb.SparqlEndpointKS;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGenerator;
 import org.dllearner.kb.sparql.ConciseBoundedDescriptionGeneratorImpl;
 import org.dllearner.kb.sparql.SparqlEndpoint;
+import org.dllearner.learningproblems.AccMethodFMeasure;
 import org.dllearner.learningproblems.AxiomScore;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.Heuristics.HeuristicType;
@@ -410,8 +411,7 @@ public class EnrichmentManager {
         ClassLearningProblem lp = new ClassLearningProblem(rc);
 		lp.setClassToDescribe(nc);
         lp.setEquivalence(equivalence);
-        lp.setAccuracyMethod(HeuristicType.FMEASURE);
-        lp.setUseApproximations(false);
+        lp.setAccuracyMethod(new AccMethodFMeasure());
         lp.setMaxExecutionTimeInSeconds(10);
         lp.init();
 
