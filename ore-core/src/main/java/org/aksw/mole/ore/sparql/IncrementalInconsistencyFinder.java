@@ -1603,7 +1603,7 @@ public class IncrementalInconsistencyFinder {
 		for(OWLAxiom ax : exp.getAxioms()){
 			changes.add(new RemoveAxiom(ont, ax));
 		}
-		System.out.println(trans.translate(changes));
+		System.out.println(trans.convert(changes));
 	}
 	
 
