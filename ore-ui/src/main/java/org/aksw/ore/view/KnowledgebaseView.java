@@ -395,7 +395,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			Set<OWLOntologyChange> changes = ORESession.getKnowledgebaseManager().getChanges();
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.translate(new ArrayList<OWLOntologyChange>(changes));
+				String sparulString = translator.convert(new ArrayList<OWLOntologyChange>(changes));
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
 				final Window window = new Window("SPARQL 1.1 Update statements", content);
 				window.setWidth("1000px");

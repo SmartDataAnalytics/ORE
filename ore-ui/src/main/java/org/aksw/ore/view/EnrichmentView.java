@@ -460,7 +460,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			}
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.translate(changes);
+				String sparulString = translator.convert(changes);
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
 				final Window window = new Window("SPARQL Update statements", content);
 				window.setWidth("1000px");

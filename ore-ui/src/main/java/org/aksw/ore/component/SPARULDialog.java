@@ -35,7 +35,7 @@ public class SPARULDialog extends Window{
 			OWLOntology ontology = man.createOntology();
 			OWL2SPARULConverter translator = new OWL2SPARULConverter(ontology, false);
 			
-			String sparulString = translator.translate(changes);
+			String sparulString = translator.convert(changes);
 			
 			VerticalLayout content = new VerticalLayout();
 			content.setSizeUndefined();

@@ -16,7 +16,7 @@
 	<properties>
 		<maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.5.3</vaadin.version>
+		<vaadin.version>7.6.1</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<repositories>
@@ -233,19 +233,6 @@
 	<build>
 		<finalName>ore</finalName>
 		<plugins>
-			<!-- As we are doing "inplace" GWT compilation, ensure the widgetset -->
-			<!-- directory is cleaned properly -->
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.4.1</version>
-				<!-- <configuration> -->
-				<!-- <filesets> -->
-				<!-- <fileset> -->
-				<!-- <directory>src/main/webapp/VAADIN/widgetsets</directory> -->
-				<!-- </fileset> -->
-				<!-- </filesets> -->
-				<!-- </configuration> -->
-			</plugin>
 			<plugin>
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-maven-plugin</artifactId>
@@ -269,7 +256,6 @@
 				</configuration>
 				<executions>
 					<execution>
-						<configuration></configuration>
 						<goals>
 							<goal>resources</goal>
 							<goal>update-widgetset</goal>
@@ -278,11 +264,37 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--<plugin>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-maven-plugin</artifactId>
+				<version>${vaadin.plugin.version}</version>
+				<configuration>
+					<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+					<webappDirectory>${basedir}/src/main/webapp/VAADIN/widgetsets</webappDirectory>
+					<draftCompile>false</draftCompile>
+					<compileReport>false</compileReport>
+					<style>OBF</style>
+					<strict>true</strict>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>resources</goal>
+							<goal>update-theme</goal>
+							<goal>update-widgetset</goal>
+							<goal>compile-theme</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 					<version>8.1.16.v20140903</version>
 				<configuration>
+					<stopKey>stop</stopKey>
+					<stopPort>9988</stopPort>
 					<systemProperties>
 						<systemProperty>
 							<name>jetty.port</name>
@@ -335,30 +347,7 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>com.vaadin</groupId>
-				<artifactId>vaadin-maven-plugin</artifactId>
-				<version>${vaadin.plugin.version}</version>
-				<configuration>
-					<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
-					<webappDirectory>${basedir}/src/main/webapp/VAADIN/widgetsets</webappDirectory>
-					<draftCompile>false</draftCompile>
-					<compileReport>false</compileReport>
-					<style>OBF</style>
-					<strict>true</strict>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>resources</goal>
-							<goal>update-theme</goal>
-							<goal>update-widgetset</goal>
-							<goal>compile-theme</goal>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+
 		</plugins>
 		<pluginManagement>
 			<plugins>
