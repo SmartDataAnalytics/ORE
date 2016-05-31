@@ -23,7 +23,7 @@ import com.vaadin.ui.themes.ValoTheme;
 public class ExplanationTable extends Table implements RepairManagerListener{
 	
 	private Explanation<OWLAxiom> explanation;
-	private Set<Object> selectedObjects = new HashSet<Object>();
+	private Set<Object> selectedObjects = new HashSet<>();
 	private FormattedExplanation formattedExplanation;
 	
 	public ExplanationTable(Explanation<OWLAxiom> explanation, Set<OWLAxiom> selectedAxioms) {

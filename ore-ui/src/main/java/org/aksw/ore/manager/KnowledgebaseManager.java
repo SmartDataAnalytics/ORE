@@ -47,7 +47,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	
 	private Set<OWLOntologyChange> changes;
 	
-	private final List<KnowledgebaseLoadingListener> listeners = new ArrayList<KnowledgebaseLoadingListener>();
+	private final List<KnowledgebaseLoadingListener> listeners = new ArrayList<>();
 	
 	public void setKnowledgebase(Knowledgebase knowledgebase) {
 		logger.debug("Set knowledgebase to " + knowledgebase);
@@ -139,7 +139,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	private Set<String> asSet(ResultSet rs, String targetVar){
-		Set<String> result = new TreeSet<String>();
+		Set<String> result = new TreeSet<>();
 		
 		while(rs.hasNext()){
 			QuerySolution qs = rs.next();
@@ -191,7 +191,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	}
 	
 	private void message(String message){
-		for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
+		for (KnowledgebaseLoadingListener l : new ArrayList<>(listeners)) {
 			l.message(message);
 		}
 	}
@@ -199,7 +199,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	private void fireKnowledgebaseChanged(){//System.out.println("Fire KB changed");
 		logger.info("Knowledge base changed.");
 		synchronized(listeners){
-			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
+			for (KnowledgebaseLoadingListener l : new ArrayList<>(listeners)) {
 				l.knowledgebaseChanged(knowledgebase);
 			}
 		}
@@ -208,7 +208,7 @@ public class KnowledgebaseManager implements OWLOntologyLoaderListener{
 	private void fireKnowledgebaseAnalyzed(){//System.out.println("Fire KB analyzed");
 		logger.info("Knowledge base analyzed.");
 		synchronized (listeners) {
-			for (KnowledgebaseLoadingListener l : new ArrayList<KnowledgebaseLoadingListener>(listeners)) {
+			for (KnowledgebaseLoadingListener l : new ArrayList<>(listeners)) {
 				l.knowledgebaseAnalyzed(knowledgebase);
 			}
 		}

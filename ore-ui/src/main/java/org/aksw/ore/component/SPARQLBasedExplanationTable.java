@@ -28,7 +28,7 @@ public class SPARQLBasedExplanationTable extends Table implements RepairManagerL
 	}
 	
 	private Explanation<OWLAxiom> explanation;
-	private Set<Object> selectedObjects = new HashSet<Object>();
+	private Set<Object> selectedObjects = new HashSet<>();
 	private FormattedExplanation formattedExplanation;
 	
 	public SPARQLBasedExplanationTable(Explanation<OWLAxiom> explanation, Set<OWLAxiom> selectedAxioms) {

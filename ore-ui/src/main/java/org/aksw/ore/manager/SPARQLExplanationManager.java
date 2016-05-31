@@ -30,6 +30,8 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.AxiomAnnotations;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
@@ -50,7 +52,7 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	private ExplanationGeneratorFactory<OWLAxiom> regularInconsistencyExplanationGeneratorFactory;
 	private ExplanationGeneratorFactory<OWLAxiom> laconicInconsistencyExplanationGeneratorFactory;
 	
-	private Map<ExplanationType, ExplanationCache> explanationType2Cache = new HashMap<ExplanationType, ExplanationCache>();
+	private Map<ExplanationType, ExplanationCache> explanationType2Cache = new HashMap<>();
 	
 	private OWLOntology ontology;
 	private OWLReasoner reasoner;
@@ -63,7 +65,7 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	private ExplanationType currentExplanationType;
     boolean useModularization = true;
 	
-	private Collection<ExplanationManagerListener> listeners = new HashSet<ExplanationManagerListener>();
+	private Collection<ExplanationManagerListener> listeners = new HashSet<>();
 
 	protected final OWLAxiom inconsistencyEntailment = dataFactory.getOWLSubClassOfAxiom(dataFactory.getOWLThing(), dataFactory.getOWLNothing());
 	
@@ -81,7 +83,8 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 		regularExplanationGeneratorFactory = createExplanationGeneratorFactory(ExplanationType.REGULAR);
 		laconicExplanationGeneratorFactory = createExplanationGeneratorFactory(ExplanationType.LACONIC);
 		regularInconsistencyExplanationGeneratorFactory = new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE);
-		laconicInconsistencyExplanationGeneratorFactory = new LaconicExplanationGeneratorFactory<OWLAxiom>(new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE));
+		laconicInconsistencyExplanationGeneratorFactory = new LaconicExplanationGeneratorFactory<>(
+				new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE));
 		
 		for(ExplanationType type : ExplanationType.values()){
 			explanationType2Cache.put(type, new ExplanationCache(type));
@@ -92,10 +95,11 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	
 	private ExplanationGeneratorFactory<OWLAxiom> createExplanationGeneratorFactory(ExplanationType type){
 		EntailmentCheckerFactory<OWLAxiom> checkerFactory = new SatisfiabilityEntailmentCheckerFactory(reasonerFactory, useModularization);
-		Configuration<OWLAxiom> configuration = new Configuration<OWLAxiom>(checkerFactory);
-		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<OWLAxiom>(configuration);
+		Configuration<OWLAxiom> configuration = new Configuration<>(checkerFactory);
+		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<>(
+				configuration);
 		if(type == ExplanationType.LACONIC){
-			return new LaconicExplanationGeneratorFactory<OWLAxiom>(explanationGeneratorFactory);
+			return new LaconicExplanationGeneratorFactory<>(explanationGeneratorFactory);
 		}
 		return explanationGeneratorFactory;
 	}
@@ -240,7 +244,7 @@ public class SPARQLExplanationManager implements RepairManagerListener{
 	}
 	
 	public boolean isAxiomPart(OWLAxiom axiom){
-		return !ontology.containsAxiom(axiom, true);
+		return !ontology.containsAxiom(axiom, Imports.INCLUDED, AxiomAnnotations.IGNORE_AXIOM_ANNOTATIONS);
 	}
 	
 	public boolean isConsistent(){

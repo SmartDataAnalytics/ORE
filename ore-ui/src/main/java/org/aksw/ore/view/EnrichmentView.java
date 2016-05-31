@@ -55,7 +55,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private List<AxiomType<OWLAxiom>> pendingAxiomTypes;
 	
-	private Set<EvaluatedAxiomsTable> tables = new HashSet<EvaluatedAxiomsTable>();
+	private Set<EvaluatedAxiomsTable> tables = new HashSet<>();
 	private Button addToKbButton;
 	private Button dumpSPARULButton;
 
@@ -135,7 +135,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		resourceURIField.setWidth("100%");
 		resourceURIField.setFilteringMode(FilteringMode.CONTAINS);
 		resourceURIField.setNewItemsAllowed(false);
-		Set<String> entities = new TreeSet<String>();
+		Set<String> entities = new TreeSet<>();
 		entities.addAll(kb.getStats().getClasses());
 		entities.addAll(kb.getStats().getObjectProperties());
 		entities.addAll(kb.getStats().getDataProperties());
@@ -261,7 +261,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 			@Override
 			public void buttonClick(ClickEvent event) {
 				OWLOntology ontology = ((SPARQLEndpointKnowledgebase)ORESession.getKnowledgebaseManager().getKnowledgebase()).getBaseOntology();
-				List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+				List<OWLOntologyChange> changes = new ArrayList<>();
 				for(EvaluatedAxiomsTable table : tables){
 					Set<Object> selectedObjects = table.getSelectedObjects();
 					for(Object o : selectedObjects){
@@ -303,9 +303,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		List<EvaluatedAxiom<OWLAxiom>> axioms = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
 			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+			axioms.add(new EvaluatedAxiom<>(
 					df.getOWLObjectPropertyRangeAxiom(
-							p, 
+							p,
 							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
 					new AxiomScore(score)));
 		}
@@ -314,9 +314,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		axioms = Lists.newArrayList();
 		for (int i = 0; i < 20; i++) {
 			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+			axioms.add(new EvaluatedAxiom<>(
 					df.getOWLObjectPropertyDomainAxiom(
-							p, 
+							p,
 							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
 					new AxiomScore(score)));
 		}
@@ -325,9 +325,9 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		axioms = Lists.newArrayList();
 		for (int i = 0; i < 2; i++) {
 			double score = 1 - Math.random();
-			axioms.add(new EvaluatedAxiom<OWLAxiom>(
+			axioms.add(new EvaluatedAxiom<>(
 					df.getOWLObjectPropertyDomainAxiom(
-							p, 
+							p,
 							df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Class" + i))),
 					new AxiomScore(score)));
 		}
@@ -362,13 +362,13 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 	
 	private void onLearning(){
 		axiomsPanel.removeAllComponents();
-		tables = new HashSet<EvaluatedAxiomsTable>();
+		tables = new HashSet<>();
 		
 		final EnrichmentManager man = ORESession.getEnrichmentManager();
 		
 		final String resourceURI = (String) resourceURIField.getValue();
 		
-		pendingAxiomTypes = new ArrayList<AxiomType<OWLAxiom>>(axiomTypesField.getSelectedAxiomsTypes());
+		pendingAxiomTypes = new ArrayList<>(axiomTypesField.getSelectedAxiomsTypes());
 		
 		boolean useInference = (Boolean) useInferenceBox.getValue();
 		man.setUseInference(useInference);
@@ -406,7 +406,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 				
 				@Override
 				public void run() {
-					man.generateEvaluatedAxioms(entity, new HashSet<AxiomType<? extends OWLAxiom>>(pendingAxiomTypes));
+					man.generateEvaluatedAxioms(entity, new HashSet<>(pendingAxiomTypes));
 					for (final AxiomType<OWLAxiom> axiomType : pendingAxiomTypes) {
 						final List<EvaluatedAxiom<OWLAxiom>> evaluatedAxioms = man.getEvaluatedAxioms(entity, axiomType);
 						
@@ -450,7 +450,7 @@ public class EnrichmentView extends HorizontalSplitPanel implements View, Refres
 		try {
 			OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 			OWLOntology ontology = man.createOntology();
-			List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+			List<OWLOntologyChange> changes = new ArrayList<>();
 			OWL2SPARULConverter translator = new OWL2SPARULConverter(ontology, false);
 			for(EvaluatedAxiomsTable table : tables){
 				Set<Object> selectedObjects = table.getSelectedObjects();

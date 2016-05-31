@@ -15,7 +15,7 @@ public class PatOMatPatternLibrary {
 
 	private static String patternFile = "patomat_pattern.txt";
 	
-	private static List<NamingPattern> pattern = new ArrayList<NamingPattern>();
+	private static List<NamingPattern> pattern = new ArrayList<>();
 
 	public static void init() {
 		loadPatterns();
@@ -46,9 +46,6 @@ public class PatOMatPatternLibrary {
 					}
 				}
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

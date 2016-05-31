@@ -48,7 +48,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
 	public EnrichmentProgressDialog(List<AxiomType<OWLAxiom>> axiomTypes) {
 		super("Computing axioms...");
 		this.pendingAxiomTypes = axiomTypes;
-		finishedAxiomTypes = new HashSet<AxiomType<? extends OWLAxiom>>(axiomTypes.size());
+		finishedAxiomTypes = new HashSet<>(axiomTypes.size());
 		
 		VerticalLayout l = new VerticalLayout();
         l.setWidth("400px");
@@ -61,7 +61,7 @@ public class EnrichmentProgressDialog extends Window implements EnrichmentProgre
         setDraggable(false);
         addStyleName("dialog");
         setClosable(false);
-        axiomType2Label = new HashMap<AxiomType<OWLAxiom>, Label>(axiomTypes.size());
+        axiomType2Label = new HashMap<>(axiomTypes.size());
         grid = new GridLayout(2, axiomTypes.size());
         grid.setWidth("100%");
         for (int i = 0; i < axiomTypes.size(); i++) {

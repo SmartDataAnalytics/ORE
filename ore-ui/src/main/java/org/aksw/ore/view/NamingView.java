@@ -302,7 +302,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 		filteredSuperclassesTable.addContainerProperty("superclass", String.class, null);
 		filteredSuperclassesTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 		filteredSuperclassesTable.setColumnExpandRatio("superclass", 1f);
-		selectedSuperClasses = new TreeSet<String>();
+		selectedSuperClasses = new TreeSet<>();
 		filteredSuperclassesTable.addGeneratedColumn("selected", new ColumnGenerator() {
 			
 			@SuppressWarnings("unchecked")
@@ -422,7 +422,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 		instructionsTable.setCaption("Renaming instructions");
 		instructionsTable.setImmediate(true);
 		instructionsTable.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
-		selectedInstructions = new ArrayList<RenamingInstruction>();
+		selectedInstructions = new ArrayList<>();
 		instructionsTable.addGeneratedColumn("selected", new ColumnGenerator() {
 			
 			@SuppressWarnings("unchecked")
@@ -462,7 +462,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 		    	transformButton.setEnabled(true);
 		    }
 		});
-		instructionsTable.setVisibleColumns(new Object[] {"selected", "instruction"});
+		instructionsTable.setVisibleColumns("selected", "instruction");
 		instructionsTable.setColumnExpandRatio("instruction", 1f);
 		
 		return new WhitePanel(instructionsTable);
@@ -521,7 +521,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 	
 	private void updateSuperClassesFilter(){
 		filteredSuperclassesTable.removeAllItems();
-		Set<String> superClasses = new TreeSet<String>();
+		Set<String> superClasses = new TreeSet<>();
 		for (NamingIssue patternInstance : detectedPatternInstances) {
 			superClasses.add(patternInstance.getSuperClass());
 		}
@@ -625,7 +625,7 @@ public class NamingView extends VerticalLayout implements View, Refreshable{
 	    }
 	    
 	    private void generateInstructions(){
-	    	generatedInstructions = new ArrayList<RenamingInstruction>();
+	    	generatedInstructions = new ArrayList<>();
 	    	for(NamingIssue pi : selectedPatternInstances){
 				generatedInstructions.add(pi.getRenamingInstruction());
 			}

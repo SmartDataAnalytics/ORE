@@ -63,7 +63,7 @@ public class LoadFromURIDialog extends Window{
 		setWidth("400px");
 		addStyleName("no-vertical-drag-hints");
 		addStyleName("no-horizontal-drag-hints");
-		setCloseShortcut(KeyCode.ESCAPE);
+		addCloseShortcut(KeyCode.ESCAPE);
 		
 		VerticalLayout main = new VerticalLayout();
 		main.setSizeFull();

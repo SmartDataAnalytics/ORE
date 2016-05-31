@@ -22,14 +22,14 @@ public class ImpactManager {
 		void impactComputationCanceled();
 	}
 	
-	private final Set<ImpactManagerListener> listeners = new CopyOnWriteArraySet<ImpactManager.ImpactManagerListener>();
+	private final Set<ImpactManagerListener> listeners = new CopyOnWriteArraySet<>();
 	
 	private static final Logger logger = Logger.getLogger(ImpactManager.class.getName());
 	
 	private AbstractImpactChecker structuralChecker;
 	private AbstractImpactChecker classificationChecker;
 	
-	private Map<Set<OWLOntologyChange>, Set<OWLOntologyChange>> cache = new HashMap<Set<OWLOntologyChange>, Set<OWLOntologyChange>>();
+	private Map<Set<OWLOntologyChange>, Set<OWLOntologyChange>> cache = new HashMap<>();
 	
 	private volatile boolean canceled = false;
 	
@@ -45,7 +45,7 @@ public class ImpactManager {
 		fireImpactComputationStarted();
 		new Thread(new Runnable() {
 			public void run() {
-				Set<OWLOntologyChange> impact = new HashSet<OWLOntologyChange>();
+				Set<OWLOntologyChange> impact = new HashSet<>();
 				if(!canceled){
 					impact.addAll(structuralChecker.getImpact(changes));
 				}
@@ -59,7 +59,7 @@ public class ImpactManager {
 			
 		}
 		logger.info("Done.");
-		cache.put(new HashSet<OWLOntologyChange>(changes), impact);
+		cache.put(new HashSet<>(changes), impact);
 	}
 	
 	public boolean isRunning(){
@@ -70,7 +70,7 @@ public class ImpactManager {
 		canceled = false;
 		impact = null;
 		fireImpactComputationStarted();
-		impact = cache.get(new HashSet<OWLOntologyChange>(changes));
+		impact = cache.get(new HashSet<>(changes));
 		if(impact == null){
 			computeImpact(changes);
 		}

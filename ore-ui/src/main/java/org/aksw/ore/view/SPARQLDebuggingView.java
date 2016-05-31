@@ -84,9 +84,9 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	
 	private int currentLimit = 0;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
-	private Set<SPARQLBasedExplanationTable> tables = new HashSet<SPARQLBasedExplanationTable>();
-	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private Map<SPARQLBasedExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<SPARQLBasedExplanationTable, Property.ValueChangeListener>();
+	private Set<SPARQLBasedExplanationTable> tables = new HashSet<>();
+	private Set<OWLAxiom> selectedAxioms = new HashSet<>();
+	private Map<SPARQLBasedExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<>();
 	
 //	private SPARQLBasedInconsistencyFinder incFinder;
 	SPARQLBasedTrivialInconsistencyFinder incFinder;
@@ -332,7 +332,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	}
 	
 	private void onApplyRepairPlan(){
-		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+		Set<OWLAxiom> axioms = new HashSet<>();
 		for (SPARQLBasedExplanationTable t : tables) {
 			axioms.addAll(t.getSelectedAxioms());
 		}
@@ -373,7 +373,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 		incFinder.setStopIfInconsistencyFound(stopIfInconsistencyFoundCheckBox.getValue());
 		incFinder.setApplyUniqueNameAssumption(assumeUNA.getValue());
 //		incFinder.setUseLinkedData((Boolean) useLinkedDataCheckBox.getValue());
-		Set<String> namespaces = new HashSet<String>();
+		Set<String> namespaces = new HashSet<>();
 		for(Object item : uriList.getItemIds()){
 			namespaces.add((String)item);
 		}
@@ -421,7 +421,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	private void showExplanations() {
 		
 		Set<Explanation<OWLAxiom>> newExplanations = ORESession.getSPARQLExplanationManager().getExplanations();
-		Set<Explanation<OWLAxiom>> shownExplanations = new HashSet<Explanation<OWLAxiom>>();
+		Set<Explanation<OWLAxiom>> shownExplanations = new HashSet<>();
 		
 		boolean diff = currentExplanations == null 
 				|| newExplanations.size() != currentExplanations.size() 
@@ -530,7 +530,7 @@ public class SPARQLDebuggingView extends HorizontalSplitPanel implements View, R
 	}
 	
 	private void onDumpSPARUL(){
-		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>(ORESession.getRepairManager().getRepairPlan());
+		List<OWLOntologyChange> changes = new ArrayList<>(ORESession.getRepairManager().getRepairPlan());
 		if(!changes.isEmpty()){
 			final SPARULDialog window = new SPARULDialog(changes);
 			window.addCloseListener(new CloseListener() {

@@ -80,16 +80,16 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	ExplanationProgressDialog progressDialog;
 	private Table classesTable;
 	
-	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private List<ExplanationTable> explanationTables = new ArrayList<ExplanationTable>();
-	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<ExplanationTable, Property.ValueChangeListener>();
+	private Set<OWLAxiom> selectedAxioms = new HashSet<>();
+	private List<ExplanationTable> explanationTables = new ArrayList<>();
+	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<>();
 	
 	private int currentLimit = 1;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
 	
 	private boolean firstViewVisit = true;
 	
-	private Map<OWLAxiom, OWLAxiomBean> axiom2Bean = new HashMap<OWLAxiom, OWLAxiomBean>();
+	private Map<OWLAxiom, OWLAxiomBean> axiom2Bean = new HashMap<>();
 
 	private Set<Table> tables = new HashSet<>();
 
@@ -168,7 +168,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 			    return null;
 			}});
 		
-		classesTable.setVisibleColumns(new Object[]{"root", "class"});
+		classesTable.setVisibleColumns("root", "class");
 	}
 	
 	private Component createRightSide(){
@@ -320,11 +320,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 //				boolean root = ORESession.getExplanationManager().getRootUnsatisfiableClasses().contains(cls);
 //				i.getItemProperty("root").setValue(root ? "R" : "");
 			}
-		} catch (TimeOutException e) {
-			e.printStackTrace();
-		} catch (InconsistentOntologyException e) {
-			e.printStackTrace();
-		} catch (ReasonerInterruptedException e) {
+		} catch (TimeOutException | ReasonerInterruptedException | InconsistentOntologyException e) {
 			e.printStackTrace();
 		}
 		classesTable.setContainerDataSource(c);
@@ -405,7 +401,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	}
 	
 	private Collection<OWLAxiomBean> getBeans(Set<OWLAxiom> axioms){
-		Collection<OWLAxiomBean> beans = new HashSet<OWLAxiomBean>();
+		Collection<OWLAxiomBean> beans = new HashSet<>();
 		
 		for (OWLAxiom axiom : axioms) {
 			OWLAxiomBean bean = axiom2Bean.get(axiom);
@@ -420,7 +416,7 @@ public class DebuggingView extends HorizontalSplitPanel implements View, Refresh
 	}
 	
 	private Table generateTable(Explanation<OWLAxiom> explanation){
-		final BeanItemContainer<OWLAxiomBean> container = new BeanItemContainer<OWLAxiomBean>(OWLAxiomBean.class);
+		final BeanItemContainer<OWLAxiomBean> container = new BeanItemContainer<>(OWLAxiomBean.class);
 		container.addAll(getBeans(explanation.getAxioms()));
 		
 		Table table = new Table("axioms", container);

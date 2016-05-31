@@ -102,7 +102,7 @@ public class EnrichmentManager {
 		public void onEnrichmentFailed(AxiomType<?extends OWLAxiom> arg);
 	}
 
-	private final List<EnrichmentProgressListener> enrichmentProgressListeners = new LinkedList<EnrichmentProgressListener>();
+	private final List<EnrichmentProgressListener> enrichmentProgressListeners = new LinkedList<>();
 
 	public final void addEnrichmentProgressListener(EnrichmentProgressListener listener) {
 		synchronized (enrichmentProgressListeners) {
@@ -162,7 +162,7 @@ public class EnrichmentManager {
 	
 	private OWLEntity currentEntity;
 	
-	private Map<AxiomType, AbstractAxiomLearningAlgorithm> learningAlgorithmInstances = new HashMap<AxiomType, AbstractAxiomLearningAlgorithm>();
+	private Map<AxiomType, AbstractAxiomLearningAlgorithm> learningAlgorithmInstances = new HashMap<>();
 	private int maxNrOfPositiveExamples = 10;
 	private int maxNrOfNegativeExamples = 20;
 	
@@ -251,7 +251,7 @@ public class EnrichmentManager {
 	}
 	
 	public List<EvaluatedAxiom<OWLAxiom>> getCurrentlyEvaluatedAxioms(){
-		return new ArrayList<EvaluatedAxiom<OWLAxiom>>(learnedAxioms);
+		return new ArrayList<>(learnedAxioms);
 	}
 	
 	public Collection<AxiomType<? extends OWLAxiom>> getAxiomTypes(EntityType<? extends OWLEntity> entityType){
@@ -294,7 +294,7 @@ public class EnrichmentManager {
 	public List<EvaluatedAxiom<OWLAxiom>> getEvaluatedAxioms(String resourceURI, AxiomType<? extends OWLAxiom> axiomType)
 			throws OREException {
 		fireEnrichmentStarted(axiomType);
-		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<EvaluatedAxiom<OWLAxiom>>();
+		List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new ArrayList<>();
 
 		try {
 			resourceType = getEntityType(resourceURI);
@@ -380,7 +380,7 @@ public class EnrichmentManager {
 		startTime = System.currentTimeMillis();
 		AutomaticNegativeExampleFinderSPARQL2 finder = new AutomaticNegativeExampleFinderSPARQL2(reasoner, "http://dbpedia.org/ontology");
 		SortedSet<OWLIndividual> negExamples = finder.getNegativeExamples(nc, posExamples, maxNrOfNegativeExamples);
-		SortedSetTuple<OWLIndividual> examples = new SortedSetTuple<OWLIndividual>(posExamples, negExamples);
+		SortedSetTuple<OWLIndividual> examples = new SortedSetTuple<>(posExamples, negExamples);
 		runTime = System.currentTimeMillis() - startTime;
 		System.out.println("done (" + negExamples.size()+ " examples found in " + runTime + " ms)");
 		
@@ -429,7 +429,7 @@ public class EnrichmentManager {
 
         // convert the result to axioms (to make it compatible with the other algorithms)
         List<? extends EvaluatedDescription<? extends Score>> learnedDescriptions = la.getCurrentlyBestEvaluatedDescriptions(threshold);
-        List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new LinkedList<EvaluatedAxiom<OWLAxiom>>();
+        List<EvaluatedAxiom<OWLAxiom>> learnedAxioms = new LinkedList<>();
         for(EvaluatedDescription<? extends Score> learnedDescription : learnedDescriptions) {
         	OWLAxiom axiom;
         	if(equivalence) {
@@ -438,7 +438,7 @@ public class EnrichmentManager {
         		axiom = dataFactory.getOWLSubClassOfAxiom(nc, learnedDescription.getDescription());
         	}
         	Score score = lp.computeScore(learnedDescription.getDescription());
-        	learnedAxioms.add(new EvaluatedAxiom<OWLAxiom>(axiom, new AxiomScore(score.getAccuracy()))); 
+        	learnedAxioms.add(new EvaluatedAxiom<>(axiom, new AxiomScore(score.getAccuracy())));
         }
         System.out.println(prettyPrint(learnedAxioms));	
         	
@@ -448,8 +448,8 @@ public class EnrichmentManager {
 	private void filter(Model model) {
 		// filter out triples with String literals, as therein often occur
 		// some syntax errors and they are not relevant for learning
-		List<Statement> statementsToRemove = new ArrayList<Statement>();
-		List<Statement> statementsToAdd = new ArrayList<Statement>();
+		List<Statement> statementsToRemove = new ArrayList<>();
+		List<Statement> statementsToAdd = new ArrayList<>();
 		for (Iterator<Statement> iter = model.listStatements().toList().iterator(); iter.hasNext();) {
 			Statement st = iter.next();
 			RDFNode subject = st.getSubject();
@@ -485,7 +485,8 @@ public class EnrichmentManager {
 					if (lit.getDatatype() == null || lit.getDatatype().equals(XSD.STRING)) {
 						newObject = model.createLiteral("shortened", "en");
 					}
-					validTriple = CheckerLiterals.checkLiteral(object.asNode(), ErrorHandlerFactory.errorHandlerNoLogging, 1l, 1l);
+					validTriple = CheckerLiterals.checkLiteral(object.asNode(), ErrorHandlerFactory.errorHandlerNoLogging,
+															   1L, 1L);
 				}
 				if(validTriple){
 					statementsToAdd.add(model.createStatement(newSubject, st.getPredicate(), newObject));
@@ -526,7 +527,7 @@ public class EnrichmentManager {
 	private Model getFragmentMultithreaded(final SparqlEndpointKS ks, Set<OWLIndividual> individuals){
 		Model model = ModelFactory.createDefaultModel();
 		ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		List<Future<Model>> futures = new ArrayList<Future<Model>>();
+		List<Future<Model>> futures = new ArrayList<>();
 		for (final OWLIndividual ind : individuals) {
 			futures.add(threadPool.submit(new Callable<Model>() {
 				@Override
@@ -539,9 +540,7 @@ public class EnrichmentManager {
 		for (Future<Model> future : futures) {
 			try {
 				model.add(future.get());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
@@ -593,7 +592,7 @@ public class EnrichmentManager {
 	public String render(OWLAxiom value, int depth){
 		String renderedString = manchesterSyntaxRenderer.render(value, currentEntity);
 		StringTokenizer st = new StringTokenizer(renderedString);
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		
 		bf.append("<html>");
 		
@@ -638,7 +637,7 @@ public class EnrichmentManager {
 		
 		OWLEntity entity = new OWLObjectPropertyImpl(IRI.create("http://dbpedia.org/ontology/league"));
 		
-		Set<AxiomType<? extends OWLAxiom>> axiomTypes = Sets.<AxiomType<? extends OWLAxiom>>newHashSet(AxiomType.OBJECT_PROPERTY_DOMAIN, AxiomType.OBJECT_PROPERTY_RANGE);
+		Set<AxiomType<? extends OWLAxiom>> axiomTypes = Sets.newHashSet(AxiomType.OBJECT_PROPERTY_DOMAIN, AxiomType.OBJECT_PROPERTY_RANGE);
 		
 		man.generateEvaluatedAxioms(entity, axiomTypes);
 		

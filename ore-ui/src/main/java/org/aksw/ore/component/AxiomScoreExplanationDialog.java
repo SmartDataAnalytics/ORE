@@ -40,7 +40,7 @@ public class AxiomScoreExplanationDialog extends Window{
 		super("Explanation");
 		setHeight("600px");
 		setWidth("600px");
-		setCloseShortcut(KeyCode.ESCAPE);
+		addCloseShortcut(KeyCode.ESCAPE);
 		
 		VerticalLayout content = new VerticalLayout();
 		content.setSizeFull();

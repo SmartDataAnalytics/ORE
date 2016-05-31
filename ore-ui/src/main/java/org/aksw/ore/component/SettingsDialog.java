@@ -39,7 +39,7 @@ public class SettingsDialog extends Window{
 	public SettingsDialog() {
 		super("Settings");
 		setModal(true);
-		setCloseShortcut(KeyCode.ESCAPE);
+		addCloseShortcut(KeyCode.ESCAPE);
 		
 		VerticalLayout main = new VerticalLayout();
 		main.setSizeUndefined();

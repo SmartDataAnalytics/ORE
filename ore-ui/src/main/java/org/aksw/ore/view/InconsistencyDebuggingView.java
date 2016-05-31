@@ -59,9 +59,9 @@ public class InconsistencyDebuggingView extends VerticalSplitPanel implements Vi
 	ExplanationManager expMan;
 	ExplanationProgressDialog progressDialog;
 	
-	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private List<ExplanationTable> explanationTables = new ArrayList<ExplanationTable>();
-	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<ExplanationTable, Property.ValueChangeListener>();
+	private Set<OWLAxiom> selectedAxioms = new HashSet<>();
+	private List<ExplanationTable> explanationTables = new ArrayList<>();
+	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<>();
 	
 	private int currentLimit = 1;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;

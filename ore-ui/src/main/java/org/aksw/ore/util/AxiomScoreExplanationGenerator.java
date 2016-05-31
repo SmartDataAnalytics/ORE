@@ -47,7 +47,7 @@ public class AxiomScoreExplanationGenerator {
 	private static Renderer entityRenderer = new Renderer();
 	
 	public static void init(){
-		axiomType2Pattern = new HashMap<AxiomType<OWLAxiom>, String>();
+		axiomType2Pattern = new HashMap<>();
 
 		try (DataInputStream in = new DataInputStream(PatOMatPatternLibrary.class.getClassLoader().getResourceAsStream(patternFile))){
 
@@ -69,8 +69,6 @@ public class AxiomScoreExplanationGenerator {
 				}
 			}
 			initialized = true;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -20,9 +20,9 @@ import com.vaadin.ui.VerticalLayout;
 
 public class ExplanationsPanel extends CssLayout {
 	
-	private Set<ExplanationTable> tables = new HashSet<ExplanationTable>();
-	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<ExplanationTable, Property.ValueChangeListener>();
+	private Set<ExplanationTable> tables = new HashSet<>();
+	private Set<OWLAxiom> selectedAxioms = new HashSet<>();
+	private Map<ExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<>();
 	
 	private Collection<Explanation<OWLAxiom>> explanations;
 	private boolean aggregatedView = false;
@@ -107,7 +107,7 @@ public class ExplanationsPanel extends CssLayout {
 		tables.clear();
 		table2Listener.clear();
 		selectedAxioms.clear();
-		explanations = new HashSet<Explanation<OWLAxiom>>();
+		explanations = new HashSet<>();
 	}
 	
 	public void showAggregatedView(boolean aggregatedView) {
@@ -117,11 +117,11 @@ public class ExplanationsPanel extends CssLayout {
 	
 	private void showAggregatedTable(){
 		try {
-			Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+			Set<OWLAxiom> axioms = new HashSet<>();
 			for(Explanation<OWLAxiom> exp : explanations){
 				axioms.addAll(exp.getAxioms());
 			}
-			Explanation<OWLAxiom> aggregatedExplanation = new Explanation<OWLAxiom>(null, axioms);
+			Explanation<OWLAxiom> aggregatedExplanation = new Explanation<>(null, axioms);
 			ExplanationTable aggregatedTable = new ExplanationTable(aggregatedExplanation, selectedAxioms, false);
 			addComponent(aggregatedTable);
 		} catch (Exception e) {

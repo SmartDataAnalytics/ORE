@@ -26,13 +26,13 @@ public class RepairManager {
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
-	private Collection<RepairManagerListener> listeners = new HashSet<RepairManagerListener>();
+	private Collection<RepairManagerListener> listeners = new HashSet<>();
 	
 	public RepairManager(OWLOntology ontology) {
 		this.ontology = ontology;
 		this.manager = ontology.getOWLOntologyManager();
 		
-		repairPlan = new HashSet<OWLOntologyChange>();
+		repairPlan = new HashSet<>();
 	}
 	
 	public void clearRepairPlan(){
@@ -50,7 +50,7 @@ public class RepairManager {
 	}
 	
 	public void addAxiomsToRemove(Collection<OWLAxiom> axioms){
-		Collection<OWLOntologyChange> changes = new HashSet<OWLOntologyChange>();
+		Collection<OWLOntologyChange> changes = new HashSet<>();
 		for(OWLAxiom ax : axioms){
 			changes.add(new RemoveAxiom(ontology, ax));
 		}
@@ -59,7 +59,7 @@ public class RepairManager {
 	
 	public void setAxiomsToRemove(Collection<OWLAxiom> axioms){
 		removeChanges(RemoveAxiom.class);
-		Collection<OWLOntologyChange> changes = new HashSet<OWLOntologyChange>();
+		Collection<OWLOntologyChange> changes = new HashSet<>();
 		for(OWLAxiom ax : axioms){
 			changes.add(new RemoveAxiom(ontology, ax));
 		}
@@ -77,7 +77,7 @@ public class RepairManager {
 	
 	
 	public void addAxiomsToAdd(Collection<OWLAxiom> axioms){
-		Collection<OWLOntologyChange> changes = new HashSet<OWLOntologyChange>();
+		Collection<OWLOntologyChange> changes = new HashSet<>();
 		for(OWLAxiom ax : axioms){
 			changes.add(new AddAxiom(ontology, ax));
 		}
@@ -109,13 +109,13 @@ public class RepairManager {
 	}
 	
 	public void execute(){
-		manager.applyChanges(new ArrayList<OWLOntologyChange>(repairPlan));
+		manager.applyChanges(new ArrayList<>(repairPlan));
 		repairPlan.clear();
 		fireRepairPlanExecuted();
 	}
 	
 	public Collection<OWLOntologyChange> reverse(Collection<OWLOntologyChange> changes){
-		Collection<OWLOntologyChange> reversedChanges = new HashSet<OWLOntologyChange>();
+		Collection<OWLOntologyChange> reversedChanges = new HashSet<>();
 		for(OWLOntologyChange change : changes){
 			reversedChanges.add(reverse(change));
 		}

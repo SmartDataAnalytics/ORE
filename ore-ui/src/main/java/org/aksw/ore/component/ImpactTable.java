@@ -148,7 +148,7 @@ public class ImpactTable extends Table implements RepairManagerListener{
 		}
 		impact = null;
 		final ImpactManager impMan = ORESession.getImpactManager();
-		final List<OWLOntologyChange> repairPlan = new ArrayList<OWLOntologyChange>(ORESession.getRepairManager().getRepairPlan());
+		final List<OWLOntologyChange> repairPlan = new ArrayList<>(ORESession.getRepairManager().getRepairPlan());
 		Thread t = new Thread(new Runnable() {
 			
 			@Override

@@ -21,7 +21,7 @@ public class AxiomType {
 	}
 	
 	public static List<AxiomType> getClassAxiomTypes(){
-		List<AxiomType> types = new ArrayList<AxiomType>();
+		List<AxiomType> types = new ArrayList<>();
 		types.add(new AxiomType("SubClassOf"));
 		types.add(new AxiomType("EquivalentClasses"));
 		types.add(new AxiomType("DisjointClasses"));
@@ -29,7 +29,7 @@ public class AxiomType {
 	}
 	
 	public static List<AxiomType> getObjectPropertyAxiomTypes(){
-		List<AxiomType> types = new ArrayList<AxiomType>();
+		List<AxiomType> types = new ArrayList<>();
 		types.add(new AxiomType("SubObjectPropertyOf"));
 		types.add(new AxiomType("EquivalentObjectProperties"));
 		types.add(new AxiomType("DisjointObjectProperties"));
@@ -46,7 +46,7 @@ public class AxiomType {
 	}
 	
 	public static List<AxiomType> getDataPropertyAxiomTypes(){
-		List<AxiomType> types = new ArrayList<AxiomType>();
+		List<AxiomType> types = new ArrayList<>();
 		types.add(new AxiomType("SubDataPropertyOf"));
 		types.add(new AxiomType("EquivalentDataProperties"));
 		types.add(new AxiomType("DisjointDataProperties"));
@@ -57,7 +57,7 @@ public class AxiomType {
 	}
 	
 	public static List<AxiomType> getAllAxiomTypes(){
-		List<AxiomType> types = new ArrayList<AxiomType>();
+		List<AxiomType> types = new ArrayList<>();
 		types.addAll(getClassAxiomTypes());
 		types.addAll(getObjectPropertyAxiomTypes());
 		types.addAll(getDataPropertyAxiomTypes());
@@ -65,7 +65,7 @@ public class AxiomType {
 	}
 	
 	public static List<AxiomType> getGoldMinerAxiomTypes(){
-		List<AxiomType> types = new ArrayList<AxiomType>();
+		List<AxiomType> types = new ArrayList<>();
 		/*
 		 * c_sub_c=true
 c_and_c_sub_c=true

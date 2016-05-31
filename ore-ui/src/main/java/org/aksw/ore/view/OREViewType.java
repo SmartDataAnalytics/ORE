@@ -19,9 +19,9 @@ public enum OREViewType {
     private final Resource icon;
     private final boolean stateful;
 
-    private OREViewType(final String viewName,
-            final Class<? extends View> viewClass, final Resource icon,
-            final boolean stateful) {
+    OREViewType(final String viewName,
+                final Class<? extends View> viewClass, final Resource icon,
+                final boolean stateful) {
         this.viewName = viewName;
         this.viewClass = viewClass;
         this.icon = icon;

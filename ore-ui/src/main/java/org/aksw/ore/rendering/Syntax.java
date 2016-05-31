@@ -5,11 +5,11 @@ public enum Syntax{
 		private String label;
 		private String description;
 		
-		private Syntax(String label) {
+		Syntax(String label) {
 			this(label, label);
 		}
 
-		private Syntax(String label, String description) {
+		Syntax(String label, String description) {
 			this.label = label;
 			this.description = description;
 		}

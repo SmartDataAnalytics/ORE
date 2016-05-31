@@ -353,11 +353,7 @@ public class ConstraintValidationView extends VerticalLayout implements View{
 			OWLOntology newOntology = OWLManager.createOWLOntologyManager().createOntology();
 			p.parse(s, newOntology, new OWLOntologyLoaderConfiguration());
 			return newOntology;
-		} catch (UnloadableImportException e) {
-			e.printStackTrace();
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (UnloadableImportException | IOException | OWLOntologyCreationException e) {
 			e.printStackTrace();
 		}
 		return null;

@@ -76,9 +76,9 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 	
 	private int currentLimit = 0;
 	private ExplanationType currentExplanationType = ExplanationType.REGULAR;
-	private Set<SPARQLBasedExplanationTable> tables = new HashSet<SPARQLBasedExplanationTable>();
-	private Set<OWLAxiom> selectedAxioms = new HashSet<OWLAxiom>();
-	private Map<SPARQLBasedExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<SPARQLBasedExplanationTable, Property.ValueChangeListener>();
+	private Set<SPARQLBasedExplanationTable> tables = new HashSet<>();
+	private Set<OWLAxiom> selectedAxioms = new HashSet<>();
+	private Map<SPARQLBasedExplanationTable, Property.ValueChangeListener> table2Listener = new HashMap<>();
 	
 //	private SPARQLBasedInconsistencyFinder incFinder;
 	SPARQLBasedTrivialInconsistencyFinder incFinder;
@@ -324,7 +324,7 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 	}
 	
 	private void onApplyRepairPlan(){
-		Set<OWLAxiom> axioms = new HashSet<OWLAxiom>();
+		Set<OWLAxiom> axioms = new HashSet<>();
 		for (SPARQLBasedExplanationTable t : tables) {
 			axioms.addAll(t.getSelectedAxioms());
 		}
@@ -364,7 +364,7 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 		incFinder.setStopIfInconsistencyFound(stopIfInconsistencyFoundCheckBox.getValue());
 		incFinder.setApplyUniqueNameAssumption(assumeUNA.getValue());
 //		incFinder.setUseLinkedData((Boolean) useLinkedDataCheckBox.getValue());
-		Set<String> namespaces = new HashSet<String>();
+		Set<String> namespaces = new HashSet<>();
 		for(Object item : uriList.getItemIds()){
 			namespaces.add((String)item);
 		}
@@ -488,7 +488,7 @@ public class SPARQLDebuggingView3 extends CssLayout implements View, Refreshable
 	}
 	
 	private void onDumpSPARUL(){
-		List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>(ORESession.getRepairManager().getRepairPlan());
+		List<OWLOntologyChange> changes = new ArrayList<>(ORESession.getRepairManager().getRepairPlan());
 		if(!changes.isEmpty()){
 			final SPARULDialog window = new SPARULDialog(changes);
 			window.addCloseListener(new CloseListener() {

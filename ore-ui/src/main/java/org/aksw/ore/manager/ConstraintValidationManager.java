@@ -69,7 +69,7 @@ public class ConstraintValidationManager {
 	}
 	
 	public Set<String> validateWithExplanations(OWLAxiom constraint){
-		Set<String> violations = new HashSet<String>();
+		Set<String> violations = new HashSet<>();
 		
 		Query query = conv.asQuery("?s", constraint);query.setLimit(100);
 		System.out.println(query);
@@ -91,7 +91,7 @@ public class ConstraintValidationManager {
 	
 	public Set<ConstraintViolation> getViolatingResources(OWLAxiom constraint){
 		logger.info("Validating axiom " + constraint);
-		Set<ConstraintViolation> violations = new HashSet<ConstraintViolation>();
+		Set<ConstraintViolation> violations = new HashSet<>();
 		
 		Query query = conv2.asQuery(constraint, "?s", "?o");
 		logger.info("Running query\n" + query);
@@ -119,7 +119,7 @@ public class ConstraintValidationManager {
 	
 	public Set<ConstraintViolation> getViolatingResources(OWLAxiom constraint, int limit){
 		logger.info("Validating axiom " + constraint);
-		Set<ConstraintViolation> violations = new HashSet<ConstraintViolation>();
+		Set<ConstraintViolation> violations = new HashSet<>();
 		
 		Query query = conv2.asQuery(constraint, "?s", "?o");
 		query.setLimit(limit);

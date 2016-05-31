@@ -24,13 +24,13 @@ public class Renderer {
 
     private static final KeywordColorMap colorMap = new KeywordColorMap();
 	
-	private List<RenderingListener> renderingListeners = new ArrayList<RenderingListener>();
+	private List<RenderingListener> renderingListeners = new ArrayList<>();
 	
 	private EntityRenderingStyle entityRenderingStyle = EntityRenderingStyle.SHORT_FORM;
 	private Syntax axiomRenderingStyle = Syntax.MANCHESTER;
 
 	//the short form providers for each entity rendering style
-	Map<EntityRenderingStyle, ShortFormProvider> shortFormProviders = new HashMap<EntityRenderingStyle, ShortFormProvider>();
+	Map<EntityRenderingStyle, ShortFormProvider> shortFormProviders = new HashMap<>();
 	
 	IRIShortFormProvider sfp = new SimpleIRIShortFormProvider();
 	
@@ -162,7 +162,7 @@ public class Renderer {
 	private String renderManchesterSyntaxHTML(OWLObject object){
 		String renderedString = renderManchesterSyntax(object);
 		StringTokenizer st = new StringTokenizer(renderedString);
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		
 		bf.append("<html>");
 		

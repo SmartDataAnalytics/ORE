@@ -24,7 +24,7 @@ public class OWL2Doc {
 	private static final String DOCUMENTATION_URL = "http://www.w3.org/TR/owl2-syntax/";
 	private Document doc;
 	
-	private static Map<AxiomType, String> axiomType2anchor = new HashMap<AxiomType, String>();
+	private static Map<AxiomType, String> axiomType2anchor = new HashMap<>();
 	
 	static {
 		axiomType2anchor.put(AxiomType.SUB_OBJECT_PROPERTY, "Object_Subproperties");
@@ -60,8 +60,6 @@ public class OWL2Doc {
 			URL url = new URL(DOCUMENTATION_URL);
 			doc = Jsoup.parse(url, 60000);
 			
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -85,12 +83,10 @@ public class OWL2Doc {
 		while(!el.hasClass("anexample")){
 			el = el.nextElementSibling();
 		}
-		Iterator<Element> children = el.children().listIterator();
-		while (children.hasNext()) {
-			Element child = (Element) children.next();
-			if(child.hasClass("rdf")){
+		for (Element child : el.children()) {
+			if (child.hasClass("rdf")) {
 				child.remove();
-			} 
+			}
 		}
 		documentation += el.html();
 		

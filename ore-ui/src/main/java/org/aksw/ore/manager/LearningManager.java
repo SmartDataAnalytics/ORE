@@ -109,7 +109,7 @@ public class LearningManager {
 	public List<OWLClass> getClasses(){
 //		reasoner.realise();
 //		reasoner.dematerialise();
-		List<OWLClass> classes = new ArrayList<OWLClass>();
+		List<OWLClass> classes = new ArrayList<>();
 		for(OWLClass nc : reasoner.getAtomicConceptsList()){
 			if(reasoner.getIndividuals(nc).size() >= 2){
 				classes.add(nc);
@@ -124,7 +124,7 @@ public class LearningManager {
 	 */
 	public SortedSet<OWLClass> getTopLevelClasses(){
 		SortedSet<OWLClassExpression> subClasses = reasoner.getSubClasses(df.getOWLThing());
-		SortedSet<OWLClass> classes = new TreeSet<OWLClass>();
+		SortedSet<OWLClass> classes = new TreeSet<>();
 		for (OWLClassExpression subClass : subClasses) {
 			classes.add(subClass.asOWLClass());
 		}
@@ -137,7 +137,7 @@ public class LearningManager {
 	 */
 	public SortedSet<OWLClass> getDirectSubClasses(OWLClass cls){
 		SortedSet<OWLClassExpression> subClasses = reasoner.getSubClasses(cls);
-		SortedSet<OWLClass> classes = new TreeSet<OWLClass>();
+		SortedSet<OWLClass> classes = new TreeSet<>();
 		for (OWLClassExpression subClass : subClasses) {
 			classes.add(subClass.asOWLClass());
 		}
@@ -185,8 +185,6 @@ public class LearningManager {
 
 		try {
 			la.init();
-		} catch (ComponentInitException e) {
-			e.printStackTrace();
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -273,7 +271,7 @@ public class LearningManager {
 	 */
 	public Set<OWLClassExpression> getNegCriticalDescriptions(OWLIndividual ind, OWLClassExpression desc){
 		
-		Set<OWLClassExpression> criticals = new HashSet<OWLClassExpression>();
+		Set<OWLClassExpression> criticals = new HashSet<>();
 		
 		if(reasoner.hasType(desc, ind)){
 			

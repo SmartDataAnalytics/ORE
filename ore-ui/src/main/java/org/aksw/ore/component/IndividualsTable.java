@@ -11,14 +11,14 @@ import com.vaadin.ui.Table;
 
 public class IndividualsTable extends Table {
 	
-	private BeanItemContainer<OWLIndividual> container = new BeanItemContainer<OWLIndividual>(OWLIndividual.class);
+	private BeanItemContainer<OWLIndividual> container = new BeanItemContainer<>(OWLIndividual.class);
 	private Renderer renderer = ORESession.getRenderer();
 	
 	public IndividualsTable() {
 		super();
 //		setContainerDataSource(container);
 		addContainerProperty("name", String.class, null);
-		setVisibleColumns(new Object[]{"name"});
+		setVisibleColumns("name");
 		setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
 	}
 	

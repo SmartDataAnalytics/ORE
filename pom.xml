@@ -48,9 +48,9 @@
 		<!-- tell the compiler we can use 1.7 -->
 		<compiler.version>1.8</compiler.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<owlapi.version>4.1.3</owlapi.version>
+		<owlapi.version>4.2.4</owlapi.version>
 		 <jena.sparql.api.version>2.13.0-1</jena.sparql.api.version>
-		 <dllearner.version>1.2-SNAPSHOT</dllearner.version>
+		 <dllearner.version>1.2</dllearner.version>
 	</properties>
 
 	<repositories>
@@ -224,6 +224,11 @@
 		<artifactId>jena-sparql-api-cache-h2</artifactId>
 		<version>${jena.sparql.api.version}</version>
 	</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.4</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>

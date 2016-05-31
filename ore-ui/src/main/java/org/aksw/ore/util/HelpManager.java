@@ -17,10 +17,10 @@ import com.vaadin.ui.UI;
 public class HelpManager {
 
     private UI ui;
-    private List<HelpOverlay> overlays = new ArrayList<HelpOverlay>();
+    private List<HelpOverlay> overlays = new ArrayList<>();
     private String helpText;
     
-    private Set<View> disabledHelp = new HashSet<View>();
+    private Set<View> disabledHelp = new HashSet<>();
 
     public HelpManager(UI ui) {
         this.ui = ui;
@@ -29,14 +29,11 @@ public class HelpManager {
     
     private void loadHelp(){
     	StringBuilder text = new StringBuilder();
-        Scanner scanner = new Scanner(this.getClass().getClassLoader().getResourceAsStream("help-naming-view.txt"), "UTF-8");
-        try {
-          while (scanner.hasNextLine()){
-            text.append(scanner.nextLine()).append(" ");
-          }
-        }
-        finally{
-          scanner.close();
+        try (Scanner scanner = new Scanner(this.getClass().getClassLoader().getResourceAsStream("help-naming-view.txt"),
+                                           "UTF-8")) {
+            while (scanner.hasNextLine()) {
+                text.append(scanner.nextLine()).append(" ");
+            }
         }
         helpText = text.toString();
     }

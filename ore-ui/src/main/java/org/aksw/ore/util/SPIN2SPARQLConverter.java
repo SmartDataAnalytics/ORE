@@ -27,8 +27,6 @@ public class SPIN2SPARQLConverter {
 			return query;
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -42,8 +40,6 @@ public class SPIN2SPARQLConverter {
 			String query = IOUtils.toString(url.openStream());
 			return query;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -38,7 +38,7 @@ public class ExplanationProgressDialog extends Window implements ExplanationProg
 	public ExplanationProgressDialog(Set<OWLClass> unsatisfiableClasses, int maxNrOfExplanations) {
 		super("Computing at most " + maxNrOfExplanations + " explanations...");
 		
-		this.unsatisfiableClasses = new HashSet<OWLClass>(unsatisfiableClasses);
+		this.unsatisfiableClasses = new HashSet<>(unsatisfiableClasses);
 		this.maxNrOfExplanations = maxNrOfExplanations;
 		
 		VerticalLayout l = new VerticalLayout();

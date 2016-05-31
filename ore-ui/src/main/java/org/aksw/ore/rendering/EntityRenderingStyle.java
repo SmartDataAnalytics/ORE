@@ -6,11 +6,11 @@ public enum EntityRenderingStyle {
 	private String label;
 	private String description;
 	
-	private EntityRenderingStyle(String label) {
+	EntityRenderingStyle(String label) {
 		this(label, label);
 	}
 
-	private EntityRenderingStyle(String label, String description) {
+	EntityRenderingStyle(String label, String description) {
 		this.label = label;
 		this.description = description;
 	}

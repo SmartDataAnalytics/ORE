@@ -24,7 +24,7 @@ public class LearningOptionsPanel extends VerticalLayout{
 		
 		private String name;
 
-		private Profile(String name){
+		Profile(String name){
 			this.name = name;
 		}
 		public String getName() {
@@ -43,7 +43,7 @@ public class LearningOptionsPanel extends VerticalLayout{
 		HAS_VALUE("Value"), EXISTS("Some"), ALL("Only"), NEGATION("Not"), MIN_MAX("Min/Max");
 		
 		private String name;
-		private OWLConstruct(String name) {
+		OWLConstruct(String name) {
 			this.name = name;
 		}
 		public String getName() {
@@ -117,7 +117,7 @@ public class LearningOptionsPanel extends VerticalLayout{
 		
 		profileOptions = new OptionGroup("OWL Profile");
 		profileOptions.setImmediate(true);
-		profileOptions.setContainerDataSource(new BeanItemContainer<Profile>(Profile.class, Arrays.asList(Profile.values())));
+		profileOptions.setContainerDataSource(new BeanItemContainer<>(Profile.class, Arrays.asList(Profile.values())));
 		profileOptions.setItemCaptionPropertyId("name");
 		profileOptions.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		profileOptions.addValueChangeListener(new ValueChangeListener() {
@@ -130,7 +130,8 @@ public class LearningOptionsPanel extends VerticalLayout{
 		profileForm.setComponentAlignment(profileOptions, Alignment.BOTTOM_LEFT);
 		
 		constructorOptions = new OptionGroup("Used OWL Constructors");
-		constructorOptions.setContainerDataSource(new BeanItemContainer<OWLConstruct>(OWLConstruct.class, Arrays.asList(OWLConstruct.values())));
+		constructorOptions.setContainerDataSource(
+				new BeanItemContainer<>(OWLConstruct.class, Arrays.asList(OWLConstruct.values())));
 		constructorOptions.setItemCaptionPropertyId("name");
 		constructorOptions.setItemCaptionMode(ItemCaptionMode.PROPERTY);
 		constructorOptions.setMultiSelect(true);

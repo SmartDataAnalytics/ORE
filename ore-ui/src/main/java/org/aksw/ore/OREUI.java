@@ -79,7 +79,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     
     View currentView;
     
-    Set<View> views = new HashSet<View>();
+    Set<View> views = new HashSet<>();
     
     Map<String, Class<? extends View>> routes = new HashMap<String, Class<? extends View>>() {
         {
@@ -105,7 +105,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     
     private final static BiMap<Class<? extends View>, String> view2Route;
     static{
-    	Map<Class<? extends View>, String> tmpView2Route = new HashMap<Class<? extends View>, String>();
+    	Map<Class<? extends View>, String> tmpView2Route = new HashMap<>();
     	tmpView2Route.put(KnowledgebaseView.class, "knowledgebase");
     	tmpView2Route.put(EnrichmentView.class, "enrichment");
     	tmpView2Route.put(DebuggingView.class, "logical");
@@ -116,7 +116,7 @@ public class OREUI extends UI implements KnowledgebaseLoadingListener, Rendering
     	view2Route = ImmutableBiMap.copyOf(tmpView2Route);
     }
     
-    Map<String, Button> viewNameToMenuButton = new HashMap<String, Button>();
+    Map<String, Button> viewNameToMenuButton = new HashMap<>();
     
     private HelpManager helpManager;
 

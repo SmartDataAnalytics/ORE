@@ -23,6 +23,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.dlsyntax.renderer.DLSyntaxObjectRenderer;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.AxiomAnnotations;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
@@ -43,7 +45,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	private ExplanationGeneratorFactory<OWLAxiom> regularInconsistencyExplanationGeneratorFactory;
 	private ExplanationGeneratorFactory<OWLAxiom> laconicInconsistencyExplanationGeneratorFactory;
 	
-	private Map<ExplanationType, ExplanationCache> explanationType2Cache = new HashMap<ExplanationType, ExplanationCache>();
+	private Map<ExplanationType, ExplanationCache> explanationType2Cache = new HashMap<>();
 	
 	private OWLOntology ontology;
 	private OWLReasoner reasoner;
@@ -57,9 +59,9 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	private ExplanationType currentExplanationType;
     boolean useModularization = true;
 	
-	private Collection<ExplanationManagerListener> listeners = new HashSet<ExplanationManagerListener>();
+	private Collection<ExplanationManagerListener> listeners = new HashSet<>();
 
-	private List<ExplanationProgressMonitorExtended<OWLAxiom>> explanationProgressMonitors = new ArrayList<ExplanationProgressMonitorExtended<OWLAxiom>>();
+	private List<ExplanationProgressMonitorExtended<OWLAxiom>> explanationProgressMonitors = new ArrayList<>();
 
 	private Set<Explanation<OWLAxiom>> currentlyFoundExplanations;
 	
@@ -73,7 +75,8 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 		regularExplanationGeneratorFactory = createExplanationGeneratorFactory(ExplanationType.REGULAR);
 		laconicExplanationGeneratorFactory = createExplanationGeneratorFactory(ExplanationType.LACONIC);
 		regularInconsistencyExplanationGeneratorFactory = new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE);
-		laconicInconsistencyExplanationGeneratorFactory = new LaconicExplanationGeneratorFactory<OWLAxiom>(new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE));
+		laconicInconsistencyExplanationGeneratorFactory = new LaconicExplanationGeneratorFactory<>(
+				new InconsistentOntologyExplanationGeneratorFactory(reasonerFactory, Long.MAX_VALUE));
 		
 		for(ExplanationType type : ExplanationType.values()){
 			explanationType2Cache.put(type, new ExplanationCache(type));
@@ -87,10 +90,11 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	
 	private ExplanationGeneratorFactory<OWLAxiom> createExplanationGeneratorFactory(ExplanationType type){
 		EntailmentCheckerFactory<OWLAxiom> checkerFactory = new SatisfiabilityEntailmentCheckerFactory(reasonerFactory, useModularization);
-		Configuration<OWLAxiom> configuration = new Configuration<OWLAxiom>(checkerFactory);
-		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<OWLAxiom>(configuration);
+		Configuration<OWLAxiom> configuration = new Configuration<>(checkerFactory);
+		ExplanationGeneratorFactory<OWLAxiom> explanationGeneratorFactory = new BlackBoxExplanationGeneratorFactory<>(
+				configuration);
 		if(type == ExplanationType.LACONIC){
-			return new LaconicExplanationGeneratorFactory<OWLAxiom>(explanationGeneratorFactory);
+			return new LaconicExplanationGeneratorFactory<>(explanationGeneratorFactory);
 		}
 		return explanationGeneratorFactory;
 	}
@@ -115,7 +119,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	}
 	
 	public Set<OWLClass> getUnsatisfiableClasses(){
-		Set<OWLClass> unsatClasses = new TreeSet<OWLClass>();
+		Set<OWLClass> unsatClasses = new TreeSet<>();
 		unsatClasses.addAll(getDerivedUnsatisfiableClasses());
 		unsatClasses.addAll(getRootUnsatisfiableClasses());
 		return unsatClasses;
@@ -313,7 +317,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 	}
 	
 	public boolean isAxiomPart(OWLAxiom axiom){
-		return !ontology.containsAxiom(axiom, true);
+		return !ontology.containsAxiom(axiom, Imports.INCLUDED, AxiomAnnotations.IGNORE_AXIOM_ANNOTATIONS);
 	}
 	
 	public Set<OWLAxiom> getAxiomUsage(OWLAxiom axiom){
@@ -404,7 +408,7 @@ public class ExplanationManager implements ExplanationProgressMonitor<OWLAxiom>{
 			for (OWLAxiom axiom : explanation.getAxioms()) {
 				System.out.println(axiom);
 				for(OWLOntology importedOntology : ontology.getImports()){
-					if(importedOntology.containsAxiom(axiom, true)){
+					if(importedOntology.containsAxiom(axiom, Imports.INCLUDED, AxiomAnnotations.IGNORE_AXIOM_ANNOTATIONS)){
 						System.out.println(importedOntology);
 					} 
 				}

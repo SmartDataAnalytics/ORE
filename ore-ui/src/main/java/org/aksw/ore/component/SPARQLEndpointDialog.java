@@ -55,7 +55,7 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 		setModal(true);
 		setWidth("400px");
 		setHeight(null);
-		setCloseShortcut(KeyCode.ESCAPE);
+		addCloseShortcut(KeyCode.ESCAPE);
 		
 		initUI();
 		
@@ -177,11 +177,11 @@ public class SPARQLEndpointDialog extends Window implements Action.Handler{
 			@Override
 			public void buttonClick(ClickEvent event) {
 				try {
-					List<String> defaultGraphURIs = new ArrayList<String>();
+					List<String> defaultGraphURIs = new ArrayList<>();
 					if(defaultGraphURIField.getValue() != null){
 						defaultGraphURIs.add((String)defaultGraphURIField.getValue());
 					}
-					SparqlEndpoint endpoint = new SparqlEndpoint(new URL((String)endpointURLField.getValue()), defaultGraphURIs, Collections.<String>emptyList());
+					SparqlEndpoint endpoint = new SparqlEndpoint(new URL((String)endpointURLField.getValue()), defaultGraphURIs, Collections.emptyList());
 					
 					boolean isOnline = ORESession.getKnowledgebaseManager().isOnline(endpoint);
 					if(isOnline){

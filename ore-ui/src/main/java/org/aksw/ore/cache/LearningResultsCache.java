@@ -16,7 +16,7 @@ import org.dllearner.learningproblems.EvaluatedDescriptionClass;
  */
 public class LearningResultsCache {
 	
-	Map<LearningSetting, List<EvaluatedDescriptionClass>> cache = new HashMap<LearningSetting, List<EvaluatedDescriptionClass>>(30);
+	Map<LearningSetting, List<EvaluatedDescriptionClass>> cache = new HashMap<>(30);
 	
 	public List<EvaluatedDescriptionClass> getEvaluatedDescriptions(LearningSetting learningSetting){
 		return cache.get(learningSetting);

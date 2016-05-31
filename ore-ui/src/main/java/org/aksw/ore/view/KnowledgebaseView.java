@@ -31,6 +31,7 @@ import org.dllearner.utilities.owl.OWL2SPARULConverter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.profiles.OWL2Profile;
 import org.semanticweb.owlapi.profiles.OWLProfile;
 import org.semanticweb.owlapi.profiles.OWLProfileReport;
@@ -302,9 +303,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 							bais = new ByteArrayInputStream(baos.toByteArray());
 							baos.close();
 							return bais;
-						} catch (OWLOntologyStorageException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
+						} catch (OWLOntologyStorageException | IOException e) {
 							e.printStackTrace();
 						}
 					}
@@ -395,7 +394,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 			Set<OWLOntologyChange> changes = ORESession.getKnowledgebaseManager().getChanges();
 			if(!changes.isEmpty()){
 				VerticalLayout content = new VerticalLayout();
-				String sparulString = translator.convert(new ArrayList<OWLOntologyChange>(changes));
+				String sparulString = translator.convert(new ArrayList<>(changes));
 				content.addComponent(new Label(sparulString, ContentMode.PREFORMATTED));
 				final Window window = new Window("SPARQL 1.1 Update statements", content);
 				window.setWidth("1000px");
@@ -453,10 +452,10 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	
 	private void visualizeOntology(OWLOntologyKnowledgebase kb){
 		OWLOntology ontology = kb.getOntology();
-		int nrOfClasses = ontology.getClassesInSignature(true).size();
-		int nrOfObjectProperties = ontology.getObjectPropertiesInSignature(true).size();
-		int nrOfDataProperties = ontology.getDataPropertiesInSignature(true).size();
-		int nrOfIndividuals = ontology.getIndividualsInSignature(true).size();
+		int nrOfClasses = ontology.getClassesInSignature(Imports.INCLUDED).size();
+		int nrOfObjectProperties = ontology.getObjectPropertiesInSignature(Imports.INCLUDED).size();
+		int nrOfDataProperties = ontology.getDataPropertiesInSignature(Imports.INCLUDED).size();
+		int nrOfIndividuals = ontology.getIndividualsInSignature(Imports.INCLUDED).size();
 		OWLProfileReport report = new OWL2Profile().checkOntology(ontology);
 		OWLProfile profile = report.getProfile();
 		
@@ -494,7 +493,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 	}
 	
 	private void handleURLRequestParameters(){
-		Map<String, String[]> parameterMap = new TreeMap<String, String[]>(String.CASE_INSENSITIVE_ORDER);
+		Map<String, String[]> parameterMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		parameterMap.putAll(VaadinService.getCurrentRequest().getParameterMap());
 		
 		String endpointURL = parameterMap.containsKey(URLParameters.ENDPOINT_URL) ? parameterMap.get(URLParameters.ENDPOINT_URL)[0] : null;
@@ -527,7 +526,7 @@ public class KnowledgebaseView extends VerticalLayout implements View, Knowledge
 				ORESession.getKnowledgebaseManager().analyzeKnowledgebase();
 				ORESession.getKnowledgebaseManager().removeListener(dialog);
 				UI.getCurrent().access(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						dialog.close();

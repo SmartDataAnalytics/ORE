@@ -43,7 +43,7 @@ public class EvaluatedAxiomsGrid extends Grid{
 	
 	private static final DecimalFormat df = new DecimalFormat("0.00%");
 	
-	private Set<Object> selectedObjects = new HashSet<Object>();
+	private Set<Object> selectedObjects = new HashSet<>();
 	
 	private AxiomType<? extends OWLAxiom> axiomType;
 	private Collection<EvaluatedAxiom<OWLAxiom>> axioms;

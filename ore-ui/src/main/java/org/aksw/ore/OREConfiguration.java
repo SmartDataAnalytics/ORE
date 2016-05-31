@@ -44,8 +44,6 @@ public class OREConfiguration {
 				cacheDirectory = servletContext.getRealPath("cache");
 			}
 			
-		} catch (InvalidFileFormatException e2) {
-			e2.printStackTrace();
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}

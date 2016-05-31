@@ -48,7 +48,7 @@ public class ClassHierarchyContainer extends HierarchicalContainer{
 	
 	private OWLReasoner reasoner;
 	private Renderer renderer = ORESession.getRenderer();
-	private Map<OWLClass, OWLClass> cls2OriginalCls = new HashMap<OWLClass, OWLClass>();
+	private Map<OWLClass, OWLClass> cls2OriginalCls = new HashMap<>();
 	
 	private Set<OWLClass> unsatisfiableClasses;
 	private boolean inferred;

@@ -204,7 +204,7 @@ public class LearningView extends HorizontalSplitPanel implements View, Refresha
 				Window w = new Window("Settings");
 				w.setContent(content);
 				w.center();
-				w.setCloseShortcut(KeyCode.ESCAPE);
+				w.addCloseShortcut(KeyCode.ESCAPE);
 				
 				UI.getCurrent().addWindow(w);
 				
