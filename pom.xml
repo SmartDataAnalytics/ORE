@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.aksw.mole</groupId>
 	<artifactId>ore</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>ORE - Parent</name>
@@ -50,7 +50,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<owlapi.version>4.2.4</owlapi.version>
 		 <jena.sparql.api.version>2.13.0-1</jena.sparql.api.version>
-		 <dllearner.version>1.2</dllearner.version>
+		 <dllearner.version>1.3-SNAPSHOT</dllearner.version>
 	</properties>
 
 	<repositories>
@@ -214,16 +214,16 @@
 				<artifactId>explanation-api</artifactId>
 				<version>3.3.0</version>
 			</dependency>
-	<dependency>
-		<groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-core</artifactId>
-		<version>${jena.sparql.api.version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-cache-h2</artifactId>
-		<version>${jena.sparql.api.version}</version>
-	</dependency>
+			<dependency>
+				<groupId>org.aksw.jena-sparql-api</groupId>
+				<artifactId>jena-sparql-api-core</artifactId>
+				<version>${jena.sparql.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jena-sparql-api</groupId>
+				<artifactId>jena-sparql-api-cache-h2</artifactId>
+				<version>${jena.sparql.api.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>

@@ -5,12 +5,11 @@
 	<parent>
 		<artifactId>ore</artifactId>
 		<groupId>org.aksw.mole</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 	</parent>
 	<groupId>org.aksw.ore</groupId>
 	<artifactId>ore-ui</artifactId>
 	<packaging>war</packaging>
-	<version>0.6.6</version>
 	<name>ORE Web Application</name>
 
 	<properties>
@@ -145,7 +144,7 @@
 		<dependency>
 			<groupId>org.aksw.mole</groupId>
 			<artifactId>ore-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.dllearner</groupId>

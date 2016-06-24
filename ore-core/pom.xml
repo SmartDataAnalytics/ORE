@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>ore</artifactId>
 		<groupId>org.aksw.mole</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 	</parent>
 	<artifactId>ore-core</artifactId>
 	<dependencies>
